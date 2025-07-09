@@ -1,0 +1,7 @@
+This is a test document that contains multiple paragraphs of text.
+
+The content processing pipeline should be able to extract this text, clean it, chunk it appropriately, and generate keywords and fingerprints.
+
+This demonstrates how the system can handle various file types including plain text files, PDFs, Word documents, and even images with OCR capabilities.
+
+The system is designed to be extensible and can be enhanced with additional file type support as needed.

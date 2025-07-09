@@ -1,0 +1,840 @@
+
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const ContentProcessor = require('./contentProcessor');
+const SimpleVectorEngine = require('./simpleVectorEngine');
+const RAGProcessor = require('./ragProcessor');
+const NewsletterGenerator = require('./newsletterGenerator');
+const ContentSources = require('./contentSources');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+const contentProcessor = new ContentProcessor();
+
+// Initialize Vector and RAG engines
+const useOpenAI = process.env.USE_OPENAI === 'true' && process.env.OPENAI_API_KEY;
+
+const vectorEngine = new SimpleVectorEngine({
+  useOpenAI: useOpenAI,
+  openaiApiKey: process.env.OPENAI_API_KEY
+});
+
+const ragProcessor = new RAGProcessor(vectorEngine, {
+  useOpenAI: useOpenAI,
+  openaiApiKey: process.env.OPENAI_API_KEY
+});
+
+const newsletterGenerator = new NewsletterGenerator(vectorEngine, ragProcessor, {
+  useOpenAI: useOpenAI,
+  openaiApiKey: process.env.OPENAI_API_KEY
+});
+
+const contentSources = new ContentSources();
+
+console.log(`Using ${useOpenAI ? 'OpenAI' : 'local'} models for embeddings and responses`);
+
+// Configure CORS for production
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL || true 
+    : 'http://localhost:5173',
+  credentials: true
+};
+
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '50mb' }));
+
+// Serve static files from client build in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+  
+  // Handle React routing, return all requests to React app
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+    }
+  });
+}
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+});
+
+const dbPath = path.join(__dirname, 'db.json');
+
+function readDB() {
+  try {
+    const data = fs.readFileSync(dbPath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    return { notes: [], content: [] };
+  }
+}
+
+function writeDB(data) {
+  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+}
+
+// Extract metadata from URL
+async function extractUrlMetadata(url) {
+  try {
+    const response = await axios.get(url, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; PersonalDataPWA/1.0)'
+      }
+    });
+    
+    const $ = cheerio.load(response.data);
+    
+    return {
+      title: $('title').text().trim() || $('meta[property="og:title"]').attr('content') || 'No title',
+      description: $('meta[name="description"]').attr('content') || $('meta[property="og:description"]').attr('content') || '',
+      content: $('body').text().trim().substring(0, 1000), // First 1000 chars
+      url: url,
+      domain: new URL(url).hostname,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error extracting URL metadata:', error.message);
+    return {
+      title: 'Failed to extract',
+      description: 'Could not fetch URL content',
+      content: '',
+      url: url,
+      domain: new URL(url).hostname,
+      timestamp: new Date().toISOString(),
+      error: error.message
+    };
+  }
+}
+
+// Process different content types with enhanced deduplication
+async function processContentItem(item, existingContent = []) {
+  const baseItem = {
+    id: Date.now() + Math.random(),
+    type: item.type,
+    timestamp: new Date().toISOString(),
+    processed: true
+  };
+
+  let processedContent;
+  let fingerprint;
+
+  switch (item.type) {
+    case 'text':
+      const cleanedText = contentProcessor.cleanContent(item.content);
+      const chunks = contentProcessor.chunkContent(cleanedText);
+      const keywords = contentProcessor.extractKeywords(cleanedText);
+      fingerprint = contentProcessor.generateFingerprint(cleanedText);
+      
+      processedContent = {
+        ...baseItem,
+        content: item.content,
+        cleanedContent: cleanedText,
+        chunks: chunks,
+        keywords: keywords,
+        fingerprint: fingerprint,
+        metadata: {
+          wordCount: cleanedText.split(/\s+/).filter(w => w.length > 0).length,
+          charCount: cleanedText.length,
+          chunkCount: chunks.length
+        }
+      };
+      break;
+
+    case 'url':
+      const urlMetadata = await extractUrlMetadata(item.content);
+      const urlCleanedContent = contentProcessor.cleanContent(urlMetadata.content);
+      const urlChunks = contentProcessor.chunkContent(urlCleanedContent);
+      const urlKeywords = contentProcessor.extractKeywords(urlCleanedContent);
+      fingerprint = contentProcessor.generateFingerprint(urlCleanedContent);
+      
+      processedContent = {
+        ...baseItem,
+        content: item.content,
+        extractedContent: urlMetadata.content,
+        cleanedContent: urlCleanedContent,
+        chunks: urlChunks,
+        keywords: urlKeywords,
+        fingerprint: fingerprint,
+        metadata: {
+          ...item.metadata,
+          ...urlMetadata,
+          chunkCount: urlChunks.length
+        }
+      };
+      break;
+
+    case 'file':
+      processedContent = {
+        ...baseItem,
+        content: item.content,
+        fingerprint: contentProcessor.generateFingerprint(item.content),
+        metadata: {
+          ...item.metadata,
+          status: 'pending_file_processing',
+          note: 'File needs to be uploaded via /api/upload endpoint for text extraction'
+        }
+      };
+      fingerprint = processedContent.fingerprint;
+      break;
+
+    default:
+      processedContent = {
+        ...baseItem,
+        content: item.content,
+        fingerprint: contentProcessor.generateFingerprint(item.content || ''),
+        metadata: item.metadata || {}
+      };
+      fingerprint = processedContent.fingerprint;
+  }
+
+  // Check for existing content with same fingerprint
+  const existingItem = contentProcessor.findExistingContent(existingContent, fingerprint);
+  
+  if (existingItem) {
+    // Merge with existing content (boost importance)
+    console.log(`Found duplicate content (fingerprint: ${fingerprint}), merging submissions...`);
+    return {
+      ...contentProcessor.mergeSubmissions(existingItem, {
+        source: 'content_api',
+        type: item.type,
+        metadata: item.metadata
+      }),
+      isDuplicate: true,
+      originalId: existingItem.id
+    };
+  } else {
+    // Create new content with importance tracking
+    return contentProcessor.createContentWithImportance(processedContent, {
+      source: 'content_api',
+      type: item.type,
+      metadata: item.metadata
+    });
+  }
+}
+
+// Legacy notes endpoint
+app.post('/api/notes', (req, res) => {
+  try {
+    const { content } = req.body;
+    const db = readDB();
+    const newNote = {
+      id: Date.now(),
+      content,
+      timestamp: new Date().toISOString()
+    };
+    db.notes.push(newNote);
+    writeDB(db);
+    res.json({ success: true, note: newNote });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to save note' });
+  }
+});
+
+// New content processing endpoint with enhanced deduplication
+app.post('/api/content', async (req, res) => {
+  try {
+    const { items } = req.body;
+    const db = readDB();
+    db.content = db.content || [];
+    
+    const processedItems = [];
+    const duplicateItems = [];
+    const newItems = [];
+    
+    for (const item of items) {
+      try {
+        const processed = await processContentItem(item, db.content);
+        
+        if (processed.isDuplicate) {
+          // Update existing item in database
+          const existingIndex = db.content.findIndex(existing => existing.id === processed.originalId);
+          if (existingIndex !== -1) {
+            db.content[existingIndex] = processed;
+            duplicateItems.push(processed);
+          }
+        } else {
+          // Add new item
+          db.content.push(processed);
+          newItems.push(processed);
+        }
+        
+        processedItems.push(processed);
+      } catch (error) {
+        console.error('Error processing item:', error);
+        const errorItem = {
+          ...item,
+          id: Date.now() + Math.random(),
+          timestamp: new Date().toISOString(),
+          processed: false,
+          error: error.message
+        };
+        processedItems.push(errorItem);
+        newItems.push(errorItem);
+      }
+    }
+    
+    writeDB(db);
+    
+    // Add processed items to vector database
+    const vectorResults = [];
+    for (const item of processedItems) {
+      if (item.processed && !item.error) {
+        try {
+          const vectorResult = await vectorEngine.addContent(item);
+          vectorResults.push(vectorResult);
+        } catch (error) {
+          console.error('Error adding to vector DB:', error);
+          vectorResults.push({ success: false, error: error.message, id: item.id });
+        }
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      processed: processedItems.length,
+      new: newItems.length,
+      duplicates: duplicateItems.length,
+      items: processedItems,
+      vectorResults: vectorResults,
+      summary: {
+        newContent: newItems.length,
+        boostedContent: duplicateItems.length,
+        totalImportanceBoosts: duplicateItems.reduce((sum, item) => sum + (item.submissionCount - 1), 0),
+        vectorized: vectorResults.filter(r => r.success).length
+      }
+    });
+  } catch (error) {
+    console.error('Content processing error:', error);
+    res.status(500).json({ error: 'Failed to process content' });
+  }
+});
+
+// File upload endpoint with content processing
+app.post('/api/upload', upload.array('files'), async (req, res) => {
+  try {
+    const processedFiles = [];
+    
+    for (const file of req.files) {
+      console.log(`Processing uploaded file: ${file.originalname}`);
+      
+      // Extract text content from file
+      const extractionResult = await contentProcessor.processFile(
+        file.path, 
+        file.mimetype, 
+        file.originalname
+      );
+      
+      let processedFile = {
+        id: Date.now() + Math.random(),
+        type: 'file',
+        filename: file.filename,
+        originalName: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+        path: file.path,
+        timestamp: new Date().toISOString(),
+        extractedText: extractionResult.extractedText,
+        processingSuccess: extractionResult.success,
+        processingError: extractionResult.error,
+        metadata: {
+          ...extractionResult.metadata,
+          uploadPath: file.path
+        }
+      };
+
+      // If text extraction was successful, process the content further
+      if (extractionResult.success && extractionResult.extractedText) {
+        const cleanedText = contentProcessor.cleanContent(extractionResult.extractedText);
+        const chunks = contentProcessor.chunkContent(cleanedText);
+        const keywords = contentProcessor.extractKeywords(cleanedText);
+        const fingerprint = contentProcessor.generateFingerprint(cleanedText);
+        
+        processedFile = {
+          ...processedFile,
+          cleanedContent: cleanedText,
+          chunks: chunks,
+          keywords: keywords,
+          fingerprint: fingerprint,
+          metadata: {
+            ...processedFile.metadata,
+            chunkCount: chunks.length,
+            keywordCount: keywords.length
+          }
+        };
+      }
+      
+      processedFiles.push(processedFile);
+    }
+    
+    const db = readDB();
+    db.content = db.content || [];
+    db.content.push(...processedFiles);
+    writeDB(db);
+    
+    // Add processed files to vector database
+    const vectorResults = [];
+    for (const file of processedFiles) {
+      if (file.processingSuccess && file.extractedText) {
+        try {
+          const vectorResult = await vectorEngine.addContent(file);
+          vectorResults.push(vectorResult);
+        } catch (error) {
+          console.error('Error adding file to vector DB:', error);
+          vectorResults.push({ success: false, error: error.message, id: file.id });
+        }
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      files: processedFiles,
+      processed: processedFiles.filter(f => f.processingSuccess).length,
+      failed: processedFiles.filter(f => !f.processingSuccess).length,
+      vectorResults: vectorResults,
+      summary: {
+        vectorized: vectorResults.filter(r => r.success).length
+      }
+    });
+  } catch (error) {
+    console.error('File upload error:', error);
+    res.status(500).json({ error: 'Failed to upload and process files' });
+  }
+});
+
+// Query endpoint (updated to search both notes and content)
+app.get('/api/query', (req, res) => {
+  try {
+    const { q } = req.query;
+    const db = readDB();
+    
+    // Search legacy notes
+    const filteredNotes = (db.notes || []).filter(note => 
+      note.content.toLowerCase().includes(q.toLowerCase())
+    );
+    
+    // Search new content
+    const filteredContent = (db.content || []).filter(item => {
+      const searchText = [
+        item.content,
+        item.extractedContent,
+        item.metadata?.title,
+        item.metadata?.description
+      ].filter(Boolean).join(' ').toLowerCase();
+      
+      return searchText.includes(q.toLowerCase());
+    });
+    
+    res.json({ 
+      notes: filteredNotes,
+      content: filteredContent,
+      total: filteredNotes.length + filteredContent.length
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to query content' });
+  }
+});
+
+// Get all content endpoint
+app.get('/api/content', (req, res) => {
+  try {
+    const db = readDB();
+    res.json({ 
+      content: db.content || [],
+      notes: db.notes || []
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve content' });
+  }
+});
+
+// RAG Query endpoint - the main intelligent search
+app.post('/api/rag/query', async (req, res) => {
+  try {
+    const { query, options = {} } = req.body;
+    
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ 
+        error: 'Query is required and must be a string' 
+      });
+    }
+    
+    console.log(`Processing RAG query: "${query}"`);
+    
+    const result = await ragProcessor.processQuery(query, options);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('RAG query error:', error);
+    res.status(500).json({ 
+      error: 'Failed to process RAG query',
+      details: error.message 
+    });
+  }
+});
+
+// Semantic search endpoint (lower-level access)
+app.post('/api/vector/search', async (req, res) => {
+  try {
+    const { query, options = {} } = req.body;
+    
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ 
+        error: 'Query is required and must be a string' 
+      });
+    }
+    
+    const result = await vectorEngine.semanticSearch(query, options);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Vector search error:', error);
+    res.status(500).json({ 
+      error: 'Failed to perform vector search',
+      details: error.message 
+    });
+  }
+});
+
+// Vector database stats
+app.get('/api/vector/stats', async (req, res) => {
+  try {
+    const stats = await vectorEngine.getCollectionStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('Vector stats error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get vector database stats',
+      details: error.message 
+    });
+  }
+});
+
+// Sync existing content to vector database
+app.post('/api/vector/sync', async (req, res) => {
+  try {
+    const db = readDB();
+    const allContent = [...(db.content || []), ...(db.notes || [])];
+    
+    const results = [];
+    let synced = 0;
+    let failed = 0;
+    
+    for (const item of allContent) {
+      try {
+        // Convert legacy notes to new format if needed
+        const contentItem = item.content ? item : {
+          ...item,
+          id: item.id || Date.now() + Math.random(),
+          type: 'text',
+          cleanedContent: item.content,
+          importanceScore: 1.0,
+          submissionCount: 1,
+          contextualTags: []
+        };
+        
+        const result = await vectorEngine.addContent(contentItem);
+        results.push(result);
+        
+        if (result.success) synced++;
+        else failed++;
+      } catch (error) {
+        console.error('Error syncing item:', error);
+        results.push({ success: false, error: error.message, id: item.id });
+        failed++;
+      }
+    }
+    
+    res.json({
+      success: true,
+      totalItems: allContent.length,
+      synced,
+      failed,
+      results
+    });
+  } catch (error) {
+    console.error('Sync error:', error);
+    res.status(500).json({ 
+      error: 'Failed to sync content to vector database',
+      details: error.message 
+    });
+  }
+});
+
+// Newsletter generation endpoints
+app.post('/api/newsletter/generate', async (req, res) => {
+  try {
+    const { 
+      timeframe = 'week',
+      format = 'html',
+      includeAnalytics = true,
+      includeTrends = true,
+      includeRecommendations = true
+    } = req.body;
+    
+    console.log(`Generating ${timeframe} newsletter in ${format} format...`);
+    
+    const newsletter = await newsletterGenerator.generateWeeklyNewsletter({
+      timeframe,
+      format,
+      includeAnalytics,
+      includeTrends,
+      includeRecommendations
+    });
+    
+    res.json(newsletter);
+  } catch (error) {
+    console.error('Newsletter generation error:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate newsletter',
+      details: error.message 
+    });
+  }
+});
+
+// Quick newsletter preview
+app.get('/api/newsletter/preview', async (req, res) => {
+  try {
+    const newsletter = await newsletterGenerator.generateWeeklyNewsletter({
+      timeframe: 'week',
+      format: 'html'
+    });
+    
+    if (newsletter.success) {
+      res.setHeader('Content-Type', 'text/html');
+      res.send(newsletter.content);
+    } else {
+      res.status(500).json(newsletter);
+    }
+  } catch (error) {
+    console.error('Newsletter preview error:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate newsletter preview',
+      details: error.message 
+    });
+  }
+});
+
+// Content Sources endpoints
+app.get('/api/sources/available', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      sources: [
+        {
+          id: 'chrome_history',
+          name: 'Chrome Browser History',
+          description: 'Import browsing history from Google Chrome',
+          requiresSetup: true
+        },
+        {
+          id: 'safari_history',
+          name: 'Safari Browser History',
+          description: 'Import browsing history from Safari',
+          requiresSetup: true
+        },
+        {
+          id: 'firefox_history',
+          name: 'Firefox Browser History',
+          description: 'Import browsing history from Firefox',
+          requiresSetup: true
+        },
+        {
+          id: 'browser_bookmarks',
+          name: 'Browser Bookmarks',
+          description: 'Import bookmarks from various browsers',
+          requiresSetup: false
+        },
+        {
+          id: 'text_files',
+          name: 'Text Files',
+          description: 'Import content from text files in a directory',
+          requiresSetup: true
+        },
+        {
+          id: 'email_export',
+          name: 'Email Export',
+          description: 'Import emails from MBOX or other export formats',
+          requiresSetup: true
+        }
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to get available sources',
+      details: error.message 
+    });
+  }
+});
+
+app.get('/api/sources/:sourceType/instructions', (req, res) => {
+  try {
+    const { sourceType } = req.params;
+    
+    let instructions;
+    if (sourceType.includes('browser') || ['chrome_history', 'safari_history', 'firefox_history'].includes(sourceType)) {
+      instructions = contentSources.getBrowserImportInstructions();
+    } else if (sourceType === 'email_export') {
+      instructions = contentSources.getEmailImportInstructions();
+    } else {
+      instructions = {
+        [sourceType]: {
+          steps: ['Instructions not available for this source type'],
+          note: 'Please refer to documentation'
+        }
+      };
+    }
+    
+    res.json({
+      success: true,
+      sourceType,
+      instructions
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to get instructions',
+      details: error.message 
+    });
+  }
+});
+
+app.post('/api/sources/:sourceType/import', async (req, res) => {
+  try {
+    const { sourceType } = req.params;
+    const options = req.body;
+    
+    console.log(`Importing from ${sourceType} with options:`, options);
+    
+    const result = await contentSources.importFromSource(sourceType, options);
+    
+    if (result.success && result.items.length > 0) {
+      // Process and add imported items to the main content system
+      const db = readDB();
+      const processedItems = [];
+      
+      for (const item of result.items) {
+        try {
+          // Convert imported item to our content format
+          const contentItem = {
+            id: Date.now() + Math.random(),
+            type: item.type,
+            content: item.content,
+            extractedText: item.extractedText,
+            timestamp: new Date().toISOString(),
+            metadata: {
+              ...item.metadata,
+              importedFrom: sourceType,
+              importedAt: new Date().toISOString()
+            },
+            importanceScore: 1.0,
+            submissionCount: 1,
+            contextualTags: ['imported', sourceType.replace('_', '-')]
+          };
+          
+          // Add to database
+          db.content = db.content || [];
+          db.content.push(contentItem);
+          
+          // Add to vector store
+          try {
+            const vectorResult = await vectorEngine.addContent(contentItem);
+            contentItem.vectorized = vectorResult.success;
+          } catch (vectorError) {
+            console.warn('Failed to vectorize imported item:', vectorError);
+            contentItem.vectorized = false;
+          }
+          
+          processedItems.push(contentItem);
+        } catch (itemError) {
+          console.error('Error processing imported item:', itemError);
+        }
+      }
+      
+      writeDB(db);
+      
+      res.json({
+        success: true,
+        sourceType,
+        imported: processedItems.length,
+        vectorized: processedItems.filter(item => item.vectorized).length,
+        items: processedItems.slice(0, 10), // Return first 10 for preview
+        totalItems: processedItems.length
+      });
+    } else {
+      res.json(result);
+    }
+  } catch (error) {
+    console.error('Import error:', error);
+    res.status(500).json({ 
+      error: 'Failed to import from source',
+      details: error.message,
+      sourceType: req.params.sourceType
+    });
+  }
+});
+
+// Auto-load existing content on startup
+async function initializeVectorDatabase() {
+  try {
+    console.log('Initializing vector database with existing content...');
+    const db = readDB();
+    const allContent = [...(db.content || []), ...(db.notes || [])];
+    
+    if (allContent.length > 0) {
+      console.log(`Found ${allContent.length} items to vectorize`);
+      
+      // Process a few key items to get started
+      const keyItems = allContent.slice(0, 5); // Just first 5 items to avoid crashes
+      
+      for (const item of keyItems) {
+        try {
+          const contentItem = item.content && !item.type ? {
+            ...item,
+            id: item.id || Date.now() + Math.random(),
+            type: 'text',
+            cleanedContent: item.content,
+            importanceScore: 1.0,
+            submissionCount: 1,
+            contextualTags: []
+          } : item;
+          
+          await vectorEngine.addContent(contentItem);
+          console.log(`✓ Vectorized: ${contentItem.id}`);
+        } catch (error) {
+          console.log(`✗ Failed to vectorize: ${item.id}`);
+        }
+      }
+      
+      console.log('Vector database initialized with sample content');
+    }
+  } catch (error) {
+    console.log('Could not initialize vector database:', error.message);
+  }
+}
+
+app.listen(PORT, async () => {
+  console.log(`Server running at http://localhost:${PORT}/`);
+  
+  // Wait for embedding model to load, then initialize vector DB
+  setTimeout(initializeVectorDatabase, 5000);
+});
