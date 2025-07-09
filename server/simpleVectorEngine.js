@@ -17,13 +17,21 @@ class SimpleVectorEngine {
         this.openai = new OpenAI({ apiKey: this.openaiApiKey });
       } else {
         console.log('Loading local embedding model (this may take a moment)...');
-        const { pipeline } = await import('@xenova/transformers');
-        this.embeddingModel = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-        console.log('Local embedding model loaded successfully!');
+        try {
+          const { pipeline } = await import('@xenova/transformers');
+          this.embeddingModel = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+          console.log('Local embedding model loaded successfully!');
+        } catch (transformerError) {
+          console.warn('Failed to load local embedding model (likely sharp issue):', transformerError.message);
+          console.log('Falling back to basic text matching without embeddings...');
+          this.embeddingModel = null;
+          this.fallbackMode = true;
+        }
       }
     } catch (error) {
       console.error('Error initializing embedding model:', error);
-      throw error;
+      console.log('Continuing without embeddings - using basic text search...');
+      this.fallbackMode = true;
     }
   }
 
@@ -36,16 +44,42 @@ class SimpleVectorEngine {
         });
         return response.data[0].embedding;
       } else {
+        if (this.fallbackMode) {
+          // Return a simple hash-based "embedding" for basic functionality
+          return this.generateSimpleHash(text);
+        }
         if (!this.embeddingModel) {
           await this.initializeEmbedding();
+        }
+        if (this.fallbackMode) {
+          return this.generateSimpleHash(text);
         }
         const output = await this.embeddingModel(text, { pooling: 'mean', normalize: true });
         return Array.from(output.data);
       }
     } catch (error) {
       console.error('Error generating embedding:', error);
-      throw error;
+      console.log('Falling back to simple hash...');
+      return this.generateSimpleHash(text);
     }
+  }
+
+  generateSimpleHash(text) {
+    // Simple hash-based "embedding" for fallback
+    const words = text.toLowerCase().split(/\s+/).slice(0, 50); // First 50 words
+    const hash = new Array(384).fill(0); // Similar size to real embeddings
+    
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      for (let j = 0; j < word.length; j++) {
+        const charCode = word.charCodeAt(j);
+        hash[(i * 7 + j * 13 + charCode) % 384] += 1;
+      }
+    }
+    
+    // Normalize
+    const magnitude = Math.sqrt(hash.reduce((sum, val) => sum + val * val, 0));
+    return magnitude > 0 ? hash.map(val => val / magnitude) : hash;
   }
 
   async addContent(contentItem) {
