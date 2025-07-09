@@ -4,7 +4,7 @@
   "description": "Personal Data PWA - Universal Content Dropzone",
   "scripts": {
     "install:all": "npm install && cd client && npm install && cd ../server && npm install",
-    "build": "cd client && npm run build",
+    "build": "npm run install:all && cd client && npm run build",
     "start:production": "cd server && npm start",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm start",
