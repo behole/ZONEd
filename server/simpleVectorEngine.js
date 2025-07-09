@@ -16,17 +16,10 @@ class SimpleVectorEngine {
         const { OpenAI } = require('openai');
         this.openai = new OpenAI({ apiKey: this.openaiApiKey });
       } else {
-        console.log('Loading local embedding model (this may take a moment)...');
-        try {
-          const { pipeline } = await import('@xenova/transformers');
-          this.embeddingModel = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-          console.log('Local embedding model loaded successfully!');
-        } catch (transformerError) {
-          console.warn('Failed to load local embedding model (likely sharp issue):', transformerError.message);
-          console.log('Falling back to basic text matching without embeddings...');
-          this.embeddingModel = null;
-          this.fallbackMode = true;
-        }
+        console.log('Local embedding model disabled - using basic text matching...');
+        console.log('To enable advanced embeddings, set USE_OPENAI=true and provide OPENAI_API_KEY');
+        this.embeddingModel = null;
+        this.fallbackMode = true;
       }
     } catch (error) {
       console.error('Error initializing embedding model:', error);
