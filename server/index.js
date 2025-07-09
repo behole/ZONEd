@@ -257,8 +257,10 @@ app.post('/api/notes', (req, res) => {
 // New content processing endpoint with enhanced deduplication
 app.post('/api/content', async (req, res) => {
   try {
+    console.log('Processing content request:', req.body);
     const { items } = req.body;
     const db = readDB();
+    console.log('Current DB state - content items:', db.content?.length || 0);
     db.content = db.content || [];
     
     const processedItems = [];
@@ -267,7 +269,9 @@ app.post('/api/content', async (req, res) => {
     
     for (const item of items) {
       try {
+        console.log('Processing item:', item);
         const processed = await processContentItem(item, db.content);
+        console.log('Processed result:', processed);
         
         if (processed.isDuplicate) {
           // Update existing item in database
@@ -280,6 +284,7 @@ app.post('/api/content', async (req, res) => {
           // Add new item
           db.content.push(processed);
           newItems.push(processed);
+          console.log('Added new item to DB, total count now:', db.content.length);
         }
         
         processedItems.push(processed);
@@ -298,6 +303,7 @@ app.post('/api/content', async (req, res) => {
     }
     
     writeDB(db);
+    console.log('Database written, final count:', db.content.length);
     
     // Add processed items to vector database
     const vectorResults = [];
