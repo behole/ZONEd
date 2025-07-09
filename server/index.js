@@ -75,39 +75,24 @@ const dbPath = path.join(__dirname, 'db.json');
 
 function readDB() {
   try {
-    console.log('Reading DB from:', dbPath);
     if (!fs.existsSync(dbPath)) {
-      console.log('DB file does not exist, creating default');
       const defaultDB = { notes: [], content: [] };
-      writeDB(defaultDB);
+      fs.writeFileSync(dbPath, JSON.stringify(defaultDB, null, 2));
       return defaultDB;
     }
     const data = fs.readFileSync(dbPath, 'utf8');
-    console.log('DB file content length:', data.length);
-    const parsed = JSON.parse(data);
-    console.log('Parsed DB - notes:', parsed.notes?.length || 0, 'content:', parsed.content?.length || 0);
-    return parsed;
+    return JSON.parse(data);
   } catch (error) {
-    console.error('Error reading DB:', error);
-    const defaultDB = { notes: [], content: [] };
-    try {
-      writeDB(defaultDB);
-    } catch (writeError) {
-      console.error('Error writing default DB:', writeError);
-    }
-    return defaultDB;
+    console.error('Error reading DB:', error.message);
+    return { notes: [], content: [] };
   }
 }
 
 function writeDB(data) {
   try {
-    console.log('Writing DB to:', dbPath);
-    console.log('Data to write - notes:', data.notes?.length || 0, 'content:', data.content?.length || 0);
     fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
-    console.log('DB write successful');
   } catch (error) {
-    console.error('Error writing DB:', error);
-    throw error;
+    console.error('Error writing DB:', error.message);
   }
 }
 
@@ -814,56 +799,30 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
 // Debug endpoint to check what's in the database
 app.get('/api/debug/content', (req, res) => {
   try {
-    console.log('Debug endpoint called');
-    console.log('DB path:', dbPath);
-    console.log('DB file exists:', fs.existsSync(dbPath));
-    
     const db = readDB();
-    console.log('DB read result:', db);
-    
-    const response = {
-      dbPath: dbPath,
-      dbExists: fs.existsSync(dbPath),
+    res.json({
       totalContent: db.content?.length || 0,
       totalNotes: db.notes?.length || 0,
-      recentContent: (db.content || []).slice(-5).map(item => ({
+      recentContent: (db.content || []).slice(-3).map(item => ({
         id: item.id,
         type: item.type,
-        content: item.content?.substring(0, 100),
-        timestamp: item.timestamp,
-        metadata: item.metadata
-      })),
-      rawDB: db
-    };
-    
-    console.log('Sending response:', response);
-    res.json(response);
-  } catch (error) {
-    console.error('Debug endpoint error:', error);
-    res.status(500).json({ 
-      error: error.message,
-      stack: error.stack,
-      dbPath: dbPath,
-      dbExists: fs.existsSync(dbPath)
+        content: item.content?.substring(0, 50),
+        timestamp: item.timestamp
+      }))
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Simple GET share handler for URL sharing
 app.get('/share', async (req, res) => {
   try {
-    console.log('=== SHARE REQUEST START ===');
-    console.log('Received GET share request:', req.query);
-    console.log('Request headers:', req.headers);
     const { text, url, title } = req.query;
     
     if (text || url || title) {
-      console.log('Content found - text:', text, 'url:', url, 'title:', title);
       const contentText = [title, text, url].filter(Boolean).join('\n');
-      console.log('Combined content text:', contentText);
-      
       const db = readDB();
-      console.log('Current DB content count:', db.content?.length || 0);
       db.content = db.content || [];
       
       // Create content item in the same format as the main content processor
@@ -878,47 +837,35 @@ app.get('/share', async (req, res) => {
         }
       };
       
-      console.log('Processing shared content item:', JSON.stringify(contentItem, null, 2));
-      
       // Use the same processing logic as the main content endpoint
       const processed = await processContentItem(contentItem, db.content);
-      console.log('Processed result:', JSON.stringify(processed, null, 2));
       
       if (processed.isDuplicate) {
-        console.log('Content is duplicate, updating existing item');
         // Update existing item in database
         const existingIndex = db.content.findIndex(existing => existing.id === processed.originalId);
         if (existingIndex !== -1) {
           db.content[existingIndex] = processed;
-          console.log('Updated existing item at index:', existingIndex);
         }
       } else {
-        console.log('Content is new, adding to database');
         // Add new item
         db.content.push(processed);
-        console.log('Added new item, total count now:', db.content.length);
       }
       
       writeDB(db);
-      console.log('Database written to disk');
       
       // Add to vector database
       try {
-        const vectorResult = await vectorEngine.addContent(processed);
-        console.log('Vector result:', vectorResult);
+        await vectorEngine.addContent(processed);
       } catch (vectorError) {
-        console.warn('Failed to vectorize shared content:', vectorError);
+        console.warn('Failed to vectorize shared content:', vectorError.message);
       }
       
-      console.log('=== SHARE REQUEST SUCCESS ===');
       res.redirect('/share-success?items=1');
     } else {
-      console.log('No content provided in query params');
-      console.log('=== SHARE REQUEST EMPTY ===');
       res.redirect('/');
     }
   } catch (error) {
-    console.error('Share processing error:', error);
+    console.error('Share processing error:', error.message);
     res.redirect('/share-error');
   }
 });
@@ -1074,6 +1021,17 @@ if (process.env.NODE_ENV === 'production') {
     }
   });
 }
+
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully');
+  process.exit(0);
+});
 
 app.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}/`);
