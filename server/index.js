@@ -786,15 +786,40 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
   }
 });
 
+// Debug endpoint to check what's in the database
+app.get('/api/debug/content', (req, res) => {
+  try {
+    const db = readDB();
+    res.json({
+      totalContent: db.content?.length || 0,
+      recentContent: (db.content || []).slice(-5).map(item => ({
+        id: item.id,
+        type: item.type,
+        content: item.content?.substring(0, 100),
+        timestamp: item.timestamp,
+        metadata: item.metadata
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Simple GET share handler for URL sharing
 app.get('/share', async (req, res) => {
   try {
+    console.log('=== SHARE REQUEST START ===');
     console.log('Received GET share request:', req.query);
+    console.log('Request headers:', req.headers);
     const { text, url, title } = req.query;
     
     if (text || url || title) {
+      console.log('Content found - text:', text, 'url:', url, 'title:', title);
       const contentText = [title, text, url].filter(Boolean).join('\n');
+      console.log('Combined content text:', contentText);
+      
       const db = readDB();
+      console.log('Current DB content count:', db.content?.length || 0);
       db.content = db.content || [];
       
       // Create content item in the same format as the main content processor
@@ -809,23 +834,29 @@ app.get('/share', async (req, res) => {
         }
       };
       
-      console.log('Processing shared content item:', contentItem);
+      console.log('Processing shared content item:', JSON.stringify(contentItem, null, 2));
       
       // Use the same processing logic as the main content endpoint
       const processed = await processContentItem(contentItem, db.content);
+      console.log('Processed result:', JSON.stringify(processed, null, 2));
       
       if (processed.isDuplicate) {
+        console.log('Content is duplicate, updating existing item');
         // Update existing item in database
         const existingIndex = db.content.findIndex(existing => existing.id === processed.originalId);
         if (existingIndex !== -1) {
           db.content[existingIndex] = processed;
+          console.log('Updated existing item at index:', existingIndex);
         }
       } else {
+        console.log('Content is new, adding to database');
         // Add new item
         db.content.push(processed);
+        console.log('Added new item, total count now:', db.content.length);
       }
       
       writeDB(db);
+      console.log('Database written to disk');
       
       // Add to vector database
       try {
@@ -835,10 +866,11 @@ app.get('/share', async (req, res) => {
         console.warn('Failed to vectorize shared content:', vectorError);
       }
       
-      console.log('Successfully processed shared content, redirecting to success page');
+      console.log('=== SHARE REQUEST SUCCESS ===');
       res.redirect('/share-success?items=1');
     } else {
-      console.log('No content provided, redirecting to home');
+      console.log('No content provided in query params');
+      console.log('=== SHARE REQUEST EMPTY ===');
       res.redirect('/');
     }
   } catch (error) {
