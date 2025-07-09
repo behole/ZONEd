@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "postinstall": "npm install --platform=linux --arch=x64 sharp"
+    "postinstall": "npm rebuild sharp --platform=linux --arch=x64 || npm install --platform=linux --arch=x64 sharp"
   },
   "keywords": [],
   "author": "",
@@ -26,5 +26,8 @@
     "pdf-parse": "^1.1.1",
     "sharp": "^0.34.2",
     "tesseract.js": "^6.0.1"
+  },
+  "overrides": {
+    "sharp": "^0.34.2"
   }
 }
