@@ -75,15 +75,40 @@ const dbPath = path.join(__dirname, 'db.json');
 
 function readDB() {
   try {
+    console.log('Reading DB from:', dbPath);
+    if (!fs.existsSync(dbPath)) {
+      console.log('DB file does not exist, creating default');
+      const defaultDB = { notes: [], content: [] };
+      writeDB(defaultDB);
+      return defaultDB;
+    }
     const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
+    console.log('DB file content length:', data.length);
+    const parsed = JSON.parse(data);
+    console.log('Parsed DB - notes:', parsed.notes?.length || 0, 'content:', parsed.content?.length || 0);
+    return parsed;
   } catch (error) {
-    return { notes: [], content: [] };
+    console.error('Error reading DB:', error);
+    const defaultDB = { notes: [], content: [] };
+    try {
+      writeDB(defaultDB);
+    } catch (writeError) {
+      console.error('Error writing default DB:', writeError);
+    }
+    return defaultDB;
   }
 }
 
 function writeDB(data) {
-  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+  try {
+    console.log('Writing DB to:', dbPath);
+    console.log('Data to write - notes:', data.notes?.length || 0, 'content:', data.content?.length || 0);
+    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+    console.log('DB write successful');
+  } catch (error) {
+    console.error('Error writing DB:', error);
+    throw error;
+  }
 }
 
 // Extract metadata from URL
@@ -789,19 +814,38 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
 // Debug endpoint to check what's in the database
 app.get('/api/debug/content', (req, res) => {
   try {
+    console.log('Debug endpoint called');
+    console.log('DB path:', dbPath);
+    console.log('DB file exists:', fs.existsSync(dbPath));
+    
     const db = readDB();
-    res.json({
+    console.log('DB read result:', db);
+    
+    const response = {
+      dbPath: dbPath,
+      dbExists: fs.existsSync(dbPath),
       totalContent: db.content?.length || 0,
+      totalNotes: db.notes?.length || 0,
       recentContent: (db.content || []).slice(-5).map(item => ({
         id: item.id,
         type: item.type,
         content: item.content?.substring(0, 100),
         timestamp: item.timestamp,
         metadata: item.metadata
-      }))
-    });
+      })),
+      rawDB: db
+    };
+    
+    console.log('Sending response:', response);
+    res.json(response);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Debug endpoint error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: error.stack,
+      dbPath: dbPath,
+      dbExists: fs.existsSync(dbPath)
+    });
   }
 });
 
