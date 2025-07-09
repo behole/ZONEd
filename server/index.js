@@ -789,6 +789,7 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
 // Simple GET share handler for URL sharing
 app.get('/share', async (req, res) => {
   try {
+    console.log('Received GET share request:', req.query);
     const { text, url, title } = req.query;
     
     if (text || url || title) {
@@ -796,35 +797,48 @@ app.get('/share', async (req, res) => {
       const db = readDB();
       db.content = db.content || [];
       
+      // Create content item in the same format as the main content processor
       const contentItem = {
-        id: Date.now() + Math.random(),
         type: url ? 'url' : 'text',
         content: url || contentText,
-        timestamp: new Date().toISOString(),
         metadata: {
-          title: title || 'Shared content',
-          sharedVia: 'url_share',
+          title: title || 'Shared via iOS Shortcut',
+          sharedVia: 'ios_shortcut',
           originalText: text,
           originalUrl: url
-        },
-        processed: true,
-        importanceScore: 1.0,
-        submissionCount: 1,
-        contextualTags: ['shared', 'url']
+        }
       };
       
-      db.content.push(contentItem);
+      console.log('Processing shared content item:', contentItem);
+      
+      // Use the same processing logic as the main content endpoint
+      const processed = await processContentItem(contentItem, db.content);
+      
+      if (processed.isDuplicate) {
+        // Update existing item in database
+        const existingIndex = db.content.findIndex(existing => existing.id === processed.originalId);
+        if (existingIndex !== -1) {
+          db.content[existingIndex] = processed;
+        }
+      } else {
+        // Add new item
+        db.content.push(processed);
+      }
+      
       writeDB(db);
       
       // Add to vector database
       try {
-        await vectorEngine.addContent(contentItem);
+        const vectorResult = await vectorEngine.addContent(processed);
+        console.log('Vector result:', vectorResult);
       } catch (vectorError) {
         console.warn('Failed to vectorize shared content:', vectorError);
       }
       
+      console.log('Successfully processed shared content, redirecting to success page');
       res.redirect('/share-success?items=1');
     } else {
+      console.log('No content provided, redirecting to home');
       res.redirect('/');
     }
   } catch (error) {
