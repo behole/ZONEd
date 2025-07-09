@@ -786,6 +786,53 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
   }
 });
 
+// Simple GET share handler for URL sharing
+app.get('/share', async (req, res) => {
+  try {
+    const { text, url, title } = req.query;
+    
+    if (text || url || title) {
+      const contentText = [title, text, url].filter(Boolean).join('\n');
+      const db = readDB();
+      db.content = db.content || [];
+      
+      const contentItem = {
+        id: Date.now() + Math.random(),
+        type: url ? 'url' : 'text',
+        content: url || contentText,
+        timestamp: new Date().toISOString(),
+        metadata: {
+          title: title || 'Shared content',
+          sharedVia: 'url_share',
+          originalText: text,
+          originalUrl: url
+        },
+        processed: true,
+        importanceScore: 1.0,
+        submissionCount: 1,
+        contextualTags: ['shared', 'url']
+      };
+      
+      db.content.push(contentItem);
+      writeDB(db);
+      
+      // Add to vector database
+      try {
+        await vectorEngine.addContent(contentItem);
+      } catch (vectorError) {
+        console.warn('Failed to vectorize shared content:', vectorError);
+      }
+      
+      res.redirect('/share-success?items=1');
+    } else {
+      res.redirect('/');
+    }
+  } catch (error) {
+    console.error('Share processing error:', error);
+    res.redirect('/share-error');
+  }
+});
+
 // Share handler endpoint for PWA Web Share Target API
 app.post('/share', upload.array('files'), async (req, res) => {
   try {

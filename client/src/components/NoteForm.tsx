@@ -1,6 +1,7 @@
 
 import { useState, useRef } from 'react';
 import { Form, Button, Card, Alert, Badge } from 'react-bootstrap';
+import ShareInstructions from './ShareInstructions';
 
 interface ContentItem {
   type: 'text' | 'file' | 'url';
@@ -126,6 +127,8 @@ function NoteForm() {
   return (
     <div>
       <h2>Universal Content Dropzone</h2>
+      
+      <ShareInstructions />
       
       {/* Drag and Drop Zone */}
       <Card 
