@@ -14,6 +14,8 @@ export default defineConfig({
         short_name: 'PersonalPWA',
         description: 'A PWA to manage your personal data',
         theme_color: '#ffffff',
+        start_url: '/',
+        display: 'standalone',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -26,6 +28,20 @@ export default defineConfig({
             type: 'image/png',
           },
         ],
+        share_target: {
+          action: '/share',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: {
+            title: 'title',
+            text: 'text',
+            url: 'url',
+            files: [{
+              name: 'files',
+              accept: ['image/*', 'text/*', 'application/pdf', '.pdf', '.txt', '.md']
+            }]
+          }
+        }
       },
     }),
   ],

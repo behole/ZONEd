@@ -1,47 +1,45 @@
 
-import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import NoteForm from './components/NoteForm';
 import QueryPage from './components/QueryPage';
 import SourcesPage from './components/SourcesPage';
+import ShareSuccess from './components/ShareSuccess';
+import ShareError from './components/ShareError';
 
-function App() {
-  const [hash, setHash] = useState(window.location.hash);
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setHash(window.location.hash);
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, []);
+function AppContent() {
+  const location = useLocation();
 
   return (
     <>
       <Navbar bg="dark" variant="dark">
         <Container>
-          <Navbar.Brand href="#home">Personal Data PWA</Navbar.Brand>
+          <Navbar.Brand as={Link} to="/">Personal Data PWA</Navbar.Brand>
           <Nav className="me-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#query">Query</Nav.Link>
-            <Nav.Link href="#sources">Sources</Nav.Link>
+            <Nav.Link as={Link} to="/" active={location.pathname === '/'}>Home</Nav.Link>
+            <Nav.Link as={Link} to="/query" active={location.pathname === '/query'}>Query</Nav.Link>
+            <Nav.Link as={Link} to="/sources" active={location.pathname === '/sources'}>Sources</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
       <Container className="mt-4">
-        {hash === '#query' ? (
-          <QueryPage />
-        ) : hash === '#sources' ? (
-          <SourcesPage />
-        ) : (
-          <NoteForm />
-        )}
+        <Routes>
+          <Route path="/" element={<NoteForm />} />
+          <Route path="/query" element={<QueryPage />} />
+          <Route path="/sources" element={<SourcesPage />} />
+          <Route path="/share-success" element={<ShareSuccess />} />
+          <Route path="/share-error" element={<ShareError />} />
+        </Routes>
       </Container>
     </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 

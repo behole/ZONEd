@@ -53,13 +53,6 @@ app.use(express.json({ limit: '50mb' }));
 // Serve static files from client build in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
-  
-  // Handle React routing, return all requests to React app
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
-    }
-  });
 }
 
 // Configure multer for file uploads
@@ -793,6 +786,110 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
   }
 });
 
+// Share handler endpoint for PWA Web Share Target API
+app.post('/share', upload.array('files'), async (req, res) => {
+  try {
+    console.log('Received share request:', req.body);
+    console.log('Shared files:', req.files);
+    
+    const { title, text, url } = req.body;
+    const sharedFiles = req.files || [];
+    
+    const db = readDB();
+    db.content = db.content || [];
+    
+    const processedItems = [];
+    
+    // Process shared text/URL content
+    if (text || url || title) {
+      const contentText = [title, text, url].filter(Boolean).join('\n');
+      const contentItem = {
+        id: Date.now() + Math.random(),
+        type: url ? 'url' : 'text',
+        content: url || contentText,
+        timestamp: new Date().toISOString(),
+        metadata: {
+          title: title || 'Shared content',
+          sharedVia: 'ios_share_sheet',
+          originalText: text,
+          originalUrl: url
+        },
+        processed: true,
+        importanceScore: 1.0,
+        submissionCount: 1,
+        contextualTags: ['shared', 'ios']
+      };
+      
+      // Process the content item
+      const processed = await processContentItem(contentItem, db.content);
+      db.content.push(processed);
+      processedItems.push(processed);
+      
+      // Add to vector database
+      try {
+        await vectorEngine.addContent(processed);
+      } catch (vectorError) {
+        console.warn('Failed to vectorize shared content:', vectorError);
+      }
+    }
+    
+    // Process shared files
+    for (const file of sharedFiles) {
+      console.log(`Processing shared file: ${file.originalname}`);
+      
+      const extractionResult = await contentProcessor.processFile(
+        file.path, 
+        file.mimetype, 
+        file.originalname
+      );
+      
+      const fileItem = {
+        id: Date.now() + Math.random(),
+        type: 'file',
+        filename: file.filename,
+        originalName: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+        path: file.path,
+        timestamp: new Date().toISOString(),
+        extractedText: extractionResult.extractedText,
+        processingSuccess: extractionResult.success,
+        processingError: extractionResult.error,
+        metadata: {
+          ...extractionResult.metadata,
+          sharedVia: 'ios_share_sheet',
+          uploadPath: file.path
+        },
+        processed: true,
+        importanceScore: 1.0,
+        submissionCount: 1,
+        contextualTags: ['shared', 'ios', 'file']
+      };
+      
+      db.content.push(fileItem);
+      processedItems.push(fileItem);
+      
+      // Add to vector database if text extraction succeeded
+      if (extractionResult.success && extractionResult.extractedText) {
+        try {
+          await vectorEngine.addContent(fileItem);
+        } catch (vectorError) {
+          console.warn('Failed to vectorize shared file:', vectorError);
+        }
+      }
+    }
+    
+    writeDB(db);
+    
+    // Redirect to share success page
+    res.redirect(`/share-success?items=${processedItems.length}`);
+    
+  } catch (error) {
+    console.error('Share processing error:', error);
+    res.redirect('/share-error');
+  }
+});
+
 // Auto-load existing content on startup
 async function initializeVectorDatabase() {
   try {
@@ -830,6 +927,15 @@ async function initializeVectorDatabase() {
   } catch (error) {
     console.log('Could not initialize vector database:', error.message);
   }
+}
+
+// Handle React routing, return all requests to React app (must be last)
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/share')) {
+      res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+    }
+  });
 }
 
 app.listen(PORT, async () => {
