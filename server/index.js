@@ -12,10 +12,14 @@ const SimpleVectorEngine = require('./simpleVectorEngine');
 const RAGProcessor = require('./ragProcessor');
 const NewsletterGenerator = require('./newsletterGenerator');
 const ContentSources = require('./contentSources');
+const Database = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const contentProcessor = new ContentProcessor();
+
+// Initialize database
+const database = new Database();
 
 // Initialize Vector and RAG engines
 const useOpenAI = process.env.USE_OPENAI === 'true' && process.env.OPENAI_API_KEY;
@@ -73,29 +77,17 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
-const dbPath = path.join(__dirname, 'db.json');
-
-function readDB() {
-  try {
-    if (!fs.existsSync(dbPath)) {
-      const defaultDB = { notes: [], content: [] };
-      fs.writeFileSync(dbPath, JSON.stringify(defaultDB, null, 2));
-      return defaultDB;
-    }
-    const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error reading DB:', error.message);
-    return { notes: [], content: [] };
-  }
+// Legacy functions for backward compatibility during transition
+async function readDB() {
+  const content = await database.getAllContent();
+  const notes = await database.getAllNotes();
+  return { content, notes };
 }
 
-function writeDB(data) {
-  try {
-    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
-  } catch (error) {
-    console.error('Error writing DB:', error.message);
-  }
+async function writeDB(data) {
+  // This function is now handled by individual database operations
+  // Keeping for compatibility but operations should use database.insertContent() directly
+  console.log('writeDB called - operations should use database.insertContent() directly');
 }
 
 // Extract metadata from URL
@@ -261,9 +253,8 @@ app.post('/api/content', async (req, res) => {
   try {
     console.log('Processing content request:', req.body);
     const { items } = req.body;
-    const db = readDB();
-    console.log('Current DB state - content items:', db.content?.length || 0);
-    db.content = db.content || [];
+    const existingContent = await database.getAllContent();
+    console.log('Current DB state - content items:', existingContent.length);
     
     const processedItems = [];
     const duplicateItems = [];
@@ -272,21 +263,17 @@ app.post('/api/content', async (req, res) => {
     for (const item of items) {
       try {
         console.log('Processing item:', item);
-        const processed = await processContentItem(item, db.content);
+        const processed = await processContentItem(item, existingContent);
         console.log('Processed result:', processed);
         
+        // Save to database
+        await database.insertContent(processed);
+        
         if (processed.isDuplicate) {
-          // Update existing item in database
-          const existingIndex = db.content.findIndex(existing => existing.id === processed.originalId);
-          if (existingIndex !== -1) {
-            db.content[existingIndex] = processed;
-            duplicateItems.push(processed);
-          }
+          duplicateItems.push(processed);
         } else {
-          // Add new item
-          db.content.push(processed);
           newItems.push(processed);
-          console.log('Added new item to DB, total count now:', db.content.length);
+          console.log('Added new item to DB');
         }
         
         processedItems.push(processed);
@@ -299,13 +286,15 @@ app.post('/api/content', async (req, res) => {
           processed: false,
           error: error.message
         };
+        
+        // Save error item to database too
+        await database.insertContent(errorItem);
         processedItems.push(errorItem);
         newItems.push(errorItem);
       }
     }
     
-    writeDB(db);
-    console.log('Database written, final count:', db.content.length);
+    console.log('Database operations completed');
     
     // Add processed items to vector database
     const vectorResults = [];
@@ -467,14 +456,16 @@ app.get('/api/query', (req, res) => {
 });
 
 // Get all content endpoint
-app.get('/api/content', (req, res) => {
+app.get('/api/content', async (req, res) => {
   try {
-    const db = readDB();
+    const content = await database.getAllContent();
+    const notes = await database.getAllNotes();
     res.json({ 
-      content: db.content || [],
-      notes: db.notes || []
+      content: content || [],
+      notes: notes || []
     });
   } catch (error) {
+    console.error('Error retrieving content:', error);
     res.status(500).json({ error: 'Failed to retrieve content' });
   }
 });
@@ -843,9 +834,8 @@ app.get('/share', async (req, res) => {
     if (text || url || title) {
       console.log('Share content found:', { text, url, title });
       const contentText = [title, text, url].filter(Boolean).join('\n');
-      const db = readDB();
-      console.log('Current DB content count before share:', db.content?.length || 0);
-      db.content = db.content || [];
+      const existingContent = await database.getAllContent();
+      console.log('Current DB content count before share:', existingContent.length);
       
       // Create content item in the same format as the main content processor
       const contentItem = {
@@ -862,24 +852,12 @@ app.get('/share', async (req, res) => {
       console.log('Processing shared item:', contentItem);
       
       // Use the same processing logic as the main content endpoint
-      const processed = await processContentItem(contentItem, db.content);
+      const processed = await processContentItem(contentItem, existingContent);
       console.log('Processed shared item:', processed);
       
-      if (processed.isDuplicate) {
-        // Update existing item in database
-        const existingIndex = db.content.findIndex(existing => existing.id === processed.originalId);
-        if (existingIndex !== -1) {
-          db.content[existingIndex] = processed;
-          console.log('Updated duplicate item');
-        }
-      } else {
-        // Add new item
-        db.content.push(processed);
-        console.log('Added new shared item, total count now:', db.content.length);
-      }
-      
-      writeDB(db);
-      console.log('Database written after share');
+      // Save to database
+      await database.insertContent(processed);
+      console.log('Shared item saved to database');
       
       // Add to vector database
       try {
@@ -911,34 +889,26 @@ app.post('/share', upload.array('files'), async (req, res) => {
     const { title, text, url } = req.body;
     const sharedFiles = req.files || [];
     
-    const db = readDB();
-    db.content = db.content || [];
-    
+    const existingContent = await database.getAllContent();
     const processedItems = [];
     
     // Process shared text/URL content
     if (text || url || title) {
       const contentText = [title, text, url].filter(Boolean).join('\n');
       const contentItem = {
-        id: Math.floor(Date.now() + Math.random() * 1000),
         type: url ? 'url' : 'text',
         content: url || contentText,
-        timestamp: new Date().toISOString(),
         metadata: {
           title: title || 'Shared content',
           sharedVia: 'ios_share_sheet',
           originalText: text,
           originalUrl: url
-        },
-        processed: true,
-        importanceScore: 1.0,
-        submissionCount: 1,
-        contextualTags: ['shared', 'ios']
+        }
       };
       
       // Process the content item
-      const processed = await processContentItem(contentItem, db.content);
-      db.content.push(processed);
+      const processed = await processContentItem(contentItem, existingContent);
+      await database.insertContent(processed);
       processedItems.push(processed);
       
       // Add to vector database
@@ -1011,8 +981,9 @@ app.post('/share', upload.array('files'), async (req, res) => {
 async function initializeVectorDatabase() {
   try {
     console.log('Initializing vector database with existing content...');
-    const db = readDB();
-    const allContent = [...(db.content || []), ...(db.notes || [])];
+    const content = await database.getAllContent();
+    const notes = await database.getAllNotes();
+    const allContent = [...content, ...notes];
     
     if (allContent.length > 0) {
       console.log(`Found ${allContent.length} items to vectorize`);
@@ -1070,13 +1041,15 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Graceful shutdown handling
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('Received SIGTERM, shutting down gracefully');
+  await database.close();
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   console.log('Received SIGINT, shutting down gracefully');
+  await database.close();
   process.exit(0);
 });
 
