@@ -133,7 +133,7 @@ async function extractUrlMetadata(url) {
 // Process different content types with enhanced deduplication
 async function processContentItem(item, existingContent = []) {
   const baseItem = {
-    id: Date.now() + Math.random(),
+    id: Math.floor(Date.now() + Math.random() * 1000),
     type: item.type,
     timestamp: new Date().toISOString(),
     processed: true
@@ -292,7 +292,7 @@ app.post('/api/content', async (req, res) => {
         console.error('Error processing item:', error);
         const errorItem = {
           ...item,
-          id: Date.now() + Math.random(),
+          id: Math.floor(Date.now() + Math.random() * 1000),
           timestamp: new Date().toISOString(),
           processed: false,
           error: error.message
@@ -355,7 +355,7 @@ app.post('/api/upload', upload.array('files'), async (req, res) => {
       );
       
       let processedFile = {
-        id: Date.now() + Math.random(),
+        id: Math.floor(Date.now() + Math.random() * 1000),
         type: 'file',
         filename: file.filename,
         originalName: file.originalname,
@@ -554,7 +554,7 @@ app.post('/api/vector/sync', async (req, res) => {
         // Convert legacy notes to new format if needed
         const contentItem = item.content ? item : {
           ...item,
-          id: item.id || Date.now() + Math.random(),
+          id: item.id || Math.floor(Date.now() + Math.random() * 1000),
           type: 'text',
           cleanedContent: item.content,
           importanceScore: 1.0,
@@ -745,7 +745,7 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
         try {
           // Convert imported item to our content format
           const contentItem = {
-            id: Date.now() + Math.random(),
+            id: Math.floor(Date.now() + Math.random() * 1000),
             type: item.type,
             content: item.content,
             extractedText: item.extractedText,
@@ -917,7 +917,7 @@ app.post('/share', upload.array('files'), async (req, res) => {
     if (text || url || title) {
       const contentText = [title, text, url].filter(Boolean).join('\n');
       const contentItem = {
-        id: Date.now() + Math.random(),
+        id: Math.floor(Date.now() + Math.random() * 1000),
         type: url ? 'url' : 'text',
         content: url || contentText,
         timestamp: new Date().toISOString(),
@@ -957,7 +957,7 @@ app.post('/share', upload.array('files'), async (req, res) => {
       );
       
       const fileItem = {
-        id: Date.now() + Math.random(),
+        id: Math.floor(Date.now() + Math.random() * 1000),
         type: 'file',
         filename: file.filename,
         originalName: file.originalname,
@@ -1020,7 +1020,7 @@ async function initializeVectorDatabase() {
         try {
           const contentItem = item.content && !item.type ? {
             ...item,
-            id: item.id || Date.now() + Math.random(),
+            id: item.id || Math.floor(Date.now() + Math.random() * 1000),
             type: 'text',
             cleanedContent: item.content,
             importanceScore: 1.0,
