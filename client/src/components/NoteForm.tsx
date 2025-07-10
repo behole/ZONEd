@@ -13,6 +13,7 @@ interface ContentItem {
     url?: string;
     title?: string;
   };
+  file?: File; // Store actual file object for upload
 }
 
 function NoteForm() {
@@ -54,7 +55,8 @@ function NoteForm() {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-      }
+      },
+      file: file // Store the actual file object
     };
     setContentItems(prev => [...prev, newItem]);
   };
@@ -94,23 +96,49 @@ function NoteForm() {
     
     setIsProcessing(true);
     try {
-      const response = await fetch('/api/content', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ items: contentItems }),
-      });
+      // Separate files from other content types
+      const fileItems = contentItems.filter(item => item.type === 'file');
+      const nonFileItems = contentItems.filter(item => item.type !== 'file');
       
-      if (response.ok) {
-        setContentItems([]);
-        alert('Content saved successfully!');
-      } else {
-        alert('Failed to save content.');
+      // Upload files first if any
+      if (fileItems.length > 0) {
+        const formData = new FormData();
+        fileItems.forEach(item => {
+          if (item.file) {
+            formData.append('files', item.file);
+          }
+        });
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload files');
+        }
       }
+      
+      // Process non-file items if any
+      if (nonFileItems.length > 0) {
+        const contentResponse = await fetch('/api/content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ items: nonFileItems }),
+        });
+        
+        if (!contentResponse.ok) {
+          throw new Error('Failed to save content');
+        }
+      }
+      
+      setContentItems([]);
+      alert('Content processed successfully!');
     } catch (error) {
-      console.error('Error saving content:', error);
-      alert('An error occurred while saving content.');
+      console.error('Error processing content:', error);
+      alert('An error occurred while processing content.');
     } finally {
       setIsProcessing(false);
     }

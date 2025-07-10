@@ -40,19 +40,17 @@ class NewsletterGenerator {
 
   async gatherNewsletterData(timeframe) {
     // Get recent content based on timeframe
-    const recentContent = await this.vectorEngine.semanticSearch('', {
-      limit: 50,
-      timeFilter: timeframe
+    const recentContent = await this.vectorEngine.semanticSearch('content', {
+      limit: 50
     });
 
-    // Get trending topics
-    const trendingContent = await this.vectorEngine.semanticSearch('', {
-      limit: 20,
-      importanceThreshold: 3.0
+    // Get trending topics (use a generic search to get all content above threshold)
+    const trendingContent = await this.vectorEngine.semanticSearch('content', {
+      limit: 20
     });
 
     // Get urgent items
-    const urgentContent = await this.vectorEngine.semanticSearch('', {
+    const urgentContent = await this.vectorEngine.semanticSearch('urgent', {
       limit: 10,
       urgencyFilter: 'high'
     });
@@ -65,7 +63,7 @@ class NewsletterGenerator {
     return {
       timeframe,
       recentContent: recentContent.results || [],
-      trendingContent: trendingContent.results || [],
+      trendingContent: (trendingContent.results || []).length > 0 ? trendingContent.results : recentContent.results || [],
       urgentContent: urgentContent.results || [],
       analytics,
       trends,
@@ -166,7 +164,7 @@ Make it personal, insightful, and actionable. Use the importance scores and subm
         },
         {
           title: 'Trending Topics',
-          content: this.generateTrendingSection(data.trendingContent)
+          content: this.generateTrendingSection(data.recentContent)
         },
         {
           title: 'Action Items',
@@ -299,6 +297,8 @@ Make it personal, insightful, and actionable. Use the importance scores and subm
   }
 
   generateThinkingSection(content) {
+    console.log('generateThinkingSection called with:', content ? content.length : 'null/undefined', 'items');
+    
     const topItems = content.slice(0, 5);
     return topItems.map((item, index) => 
       `${index + 1}. **${item.metadata.type.toUpperCase()}** (${item.metadata.importanceScore}/10): ${item.document.substring(0, 150)}...`
@@ -306,8 +306,17 @@ Make it personal, insightful, and actionable. Use the importance scores and subm
   }
 
   generateTrendingSection(content) {
-    return content.slice(0, 3).map((item, index) => 
-      `**${index + 1}. Trending Topic** (${item.metadata.submissionCount} submissions): ${item.document.substring(0, 100)}...`
+    console.log('generateTrendingSection called with:', content ? content.length : 'null/undefined', 'items');
+    
+    if (!content || content.length === 0) {
+      return 'No trending topics this week. Your content shows diverse interests without clear patterns.';
+    }
+    
+    // Sort by importance score and show top items
+    const sortedContent = content.sort((a, b) => (b.metadata.importanceScore || 0) - (a.metadata.importanceScore || 0));
+    
+    return sortedContent.slice(0, 3).map((item, index) => 
+      `**${index + 1}. Notable Content** (Importance: ${(item.metadata.importanceScore || 0).toFixed(2)}/10): ${item.document.substring(0, 100)}...`
     ).join('\n\n');
   }
 

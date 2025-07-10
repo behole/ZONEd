@@ -1018,18 +1018,32 @@ async function initializeVectorDatabase() {
       
       for (const item of keyItems) {
         try {
-          const contentItem = item.content && !item.type ? {
-            ...item,
-            id: item.id || Math.floor(Date.now() + Math.random() * 1000),
-            type: 'text',
-            cleanedContent: item.content,
-            importanceScore: 1.0,
-            submissionCount: 1,
-            contextualTags: []
-          } : item;
+          let contentItem;
+          if (item.content && !item.type) {
+            // Legacy content from notes array
+            contentItem = {
+              ...item,
+              id: item.id || Math.floor(Date.now() + Math.random() * 1000),
+              type: 'text',
+              cleanedContent: item.content,
+              submissionCount: 1,
+              contextualTags: []
+            };
+          } else {
+            // Modern content with proper structure
+            contentItem = item;
+          }
+          
+          // Calculate proper importance score if not already set
+          if (!contentItem.importanceScore) {
+            const submissions = [{ timestamp: contentItem.timestamp }];
+            const ImportanceEngine = require('./importanceEngine');
+            const importanceEngine = new ImportanceEngine();
+            contentItem.importanceScore = importanceEngine.calculateImportanceScore(submissions);
+          }
           
           await vectorEngine.addContent(contentItem);
-          console.log(`✓ Vectorized: ${contentItem.id}`);
+          console.log(`✓ Vectorized: ${contentItem.id} (importance: ${contentItem.importanceScore})`);
         } catch (error) {
           console.log(`✗ Failed to vectorize: ${item.id}`);
         }
