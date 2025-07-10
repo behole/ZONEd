@@ -39,12 +39,14 @@ const contentSources = new ContentSources();
 
 console.log(`Using ${useOpenAI ? 'OpenAI' : 'local'} models for embeddings and responses`);
 
-// Configure CORS for production
+// Configure CORS for production and iOS sharing
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? process.env.FRONTEND_URL || true 
     : 'http://localhost:5173',
-  credentials: true
+  credentials: true,
+  // Allow iOS share requests
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -894,7 +896,8 @@ app.get('/share', async (req, res) => {
       res.redirect('/');
     }
   } catch (error) {
-    console.error('Share processing error:', error.message);
+    console.error('Share processing error:', error);
+    console.error('Error stack:', error.stack);
     res.redirect('/share-error');
   }
 });
@@ -998,7 +1001,8 @@ app.post('/share', upload.array('files'), async (req, res) => {
     res.redirect(`/share-success?items=${processedItems.length}`);
     
   } catch (error) {
-    console.error('Share processing error:', error);
+    console.error('POST Share processing error:', error);
+    console.error('Error stack:', error.stack);
     res.redirect('/share-error');
   }
 });

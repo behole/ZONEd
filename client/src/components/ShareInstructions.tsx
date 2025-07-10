@@ -55,11 +55,17 @@ const ShareInstructions: React.FC = () => {
             <li><strong>Open iOS Shortcuts app</strong></li>
             <li><strong>Tap "+" to create new shortcut</strong></li>
             <li><strong>Add "Get Contents of URL" action</strong></li>
-            <li><strong>Configure:</strong>
+            <li><strong>Configure URL action:</strong>
               <ul>
                 <li>URL: <code>{currentUrl}/share</code></li>
                 <li>Method: GET</li>
-                <li>Add parameter: <code>text</code> = "Shortcut Input"</li>
+                <li>Request Body: Leave empty</li>
+                <li>Parameters: Add these parameters:</li>
+                <ul>
+                  <li><code>text</code> = "Shortcut Input" (from Share Sheet)</li>
+                  <li><code>title</code> = "Shortcut Input" (optional)</li>
+                  <li><code>url</code> = "Shortcut Input" (for URLs)</li>
+                </ul>
               </ul>
             </li>
             <li><strong>Tap settings (⚙️) → Enable "Use with Share Sheet"</strong></li>
@@ -70,6 +76,14 @@ const ShareInstructions: React.FC = () => {
           <Alert variant="warning">
             <strong>Now you can share from any app:</strong><br/>
             Share button → "Save to Personal Data" → Done!
+          </Alert>
+          
+          <Alert variant="info">
+            <strong>Alternative Method (if above doesn't work):</strong><br/>
+            1. Copy text/URL you want to save<br/>
+            2. Open Safari and go to: <code>{currentUrl}</code><br/>
+            3. Use the "Quick Text Share" button above<br/>
+            4. Paste your content
           </Alert>
         </Modal.Body>
         <Modal.Footer>
