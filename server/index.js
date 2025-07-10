@@ -806,17 +806,25 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
 app.get('/api/debug/content', (req, res) => {
   try {
     const db = readDB();
-    res.json({
+    console.log('Debug endpoint - DB content length:', db.content?.length);
+    
+    const response = {
       totalContent: db.content?.length || 0,
       totalNotes: db.notes?.length || 0,
-      recentContent: (db.content || []).slice(-3).map(item => ({
+      recentContent: (db.content || []).slice(-5).map(item => ({
         id: item.id,
         type: item.type,
-        content: item.content?.substring(0, 50),
-        timestamp: item.timestamp
-      }))
-    });
+        content: item.content?.substring(0, 100) || 'No content',
+        timestamp: item.timestamp,
+        metadata: item.metadata
+      })),
+      allContentIds: (db.content || []).map(item => item.id)
+    };
+    
+    console.log('Debug response:', JSON.stringify(response, null, 2));
+    res.json(response);
   } catch (error) {
+    console.error('Debug endpoint error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -824,11 +832,17 @@ app.get('/api/debug/content', (req, res) => {
 // Simple GET share handler for URL sharing
 app.get('/share', async (req, res) => {
   try {
+    console.log('=== iOS SHARE REQUEST ===');
+    console.log('Query params:', req.query);
+    console.log('Headers:', req.headers);
+    
     const { text, url, title } = req.query;
     
     if (text || url || title) {
+      console.log('Share content found:', { text, url, title });
       const contentText = [title, text, url].filter(Boolean).join('\n');
       const db = readDB();
+      console.log('Current DB content count before share:', db.content?.length || 0);
       db.content = db.content || [];
       
       // Create content item in the same format as the main content processor
@@ -843,31 +857,40 @@ app.get('/share', async (req, res) => {
         }
       };
       
+      console.log('Processing shared item:', contentItem);
+      
       // Use the same processing logic as the main content endpoint
       const processed = await processContentItem(contentItem, db.content);
+      console.log('Processed shared item:', processed);
       
       if (processed.isDuplicate) {
         // Update existing item in database
         const existingIndex = db.content.findIndex(existing => existing.id === processed.originalId);
         if (existingIndex !== -1) {
           db.content[existingIndex] = processed;
+          console.log('Updated duplicate item');
         }
       } else {
         // Add new item
         db.content.push(processed);
+        console.log('Added new shared item, total count now:', db.content.length);
       }
       
       writeDB(db);
+      console.log('Database written after share');
       
       // Add to vector database
       try {
         await vectorEngine.addContent(processed);
+        console.log('Shared content vectorized successfully');
       } catch (vectorError) {
         console.warn('Failed to vectorize shared content:', vectorError.message);
       }
       
+      console.log('=== SHARE SUCCESS ===');
       res.redirect('/share-success?items=1');
     } else {
+      console.log('No share content provided, redirecting to home');
       res.redirect('/');
     }
   } catch (error) {
