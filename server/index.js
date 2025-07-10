@@ -1049,7 +1049,7 @@ async function initializeVectorDatabase() {
         }
       }
       
-      console.log('Vector database initialized with sample content');
+      console.log('Vector database initialized with existing content');
     }
   } catch (error) {
     console.log('Could not initialize vector database:', error.message);

@@ -64,17 +64,8 @@ class ContentSources {
     // 3. Handle the fact that Chrome locks the file when running
     
     return [
-      {
-        type: 'url',
-        content: 'https://example.com/article',
-        metadata: {
-          title: 'Example Article',
-          visitTime: new Date().toISOString(),
-          source: 'chrome_history',
-          visitCount: 1
-        }
-      }
       // This would contain actual browser history in a real implementation
+      // Currently returning empty array until browser history integration is implemented
     ];
   }
 
@@ -89,16 +80,8 @@ class ContentSources {
 
     // Similar to Chrome, this would require SQLite querying
     return [
-      {
-        type: 'url',
-        content: 'https://safari-example.com',
-        metadata: {
-          title: 'Safari Example',
-          visitTime: new Date().toISOString(),
-          source: 'safari_history',
-          visitCount: 1
-        }
-      }
+      // This would contain actual Safari history in a real implementation
+      // Currently returning empty array until Safari history integration is implemented
     ];
   }
 

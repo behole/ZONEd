@@ -297,8 +297,6 @@ Make it personal, insightful, and actionable. Use the importance scores and subm
   }
 
   generateThinkingSection(content) {
-    console.log('generateThinkingSection called with:', content ? content.length : 'null/undefined', 'items');
-    
     const topItems = content.slice(0, 5);
     return topItems.map((item, index) => 
       `${index + 1}. **${item.metadata.type.toUpperCase()}** (${item.metadata.importanceScore}/10): ${item.document.substring(0, 150)}...`
@@ -306,8 +304,6 @@ Make it personal, insightful, and actionable. Use the importance scores and subm
   }
 
   generateTrendingSection(content) {
-    console.log('generateTrendingSection called with:', content ? content.length : 'null/undefined', 'items');
-    
     if (!content || content.length === 0) {
       return 'No trending topics this week. Your content shows diverse interests without clear patterns.';
     }
