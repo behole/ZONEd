@@ -75,7 +75,7 @@ async function saveToZoned(data, config) {
       'Content-Type': 'application/json',
       ...(config.token && { 'Authorization': `Bearer ${config.token}` })
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify({ items: [data] })
   });
   
   if (!response.ok) {
