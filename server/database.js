@@ -88,47 +88,106 @@ class Database {
   async createTables() {
     if (!this.isPostgres) return;
 
-    const createContentTable = `
-      CREATE TABLE IF NOT EXISTS content (
-        id BIGINT PRIMARY KEY,
-        type VARCHAR(50) NOT NULL,
-        timestamp TIMESTAMPTZ NOT NULL,
-        processed BOOLEAN DEFAULT false,
-        content TEXT,
-        extracted_content TEXT,
-        cleaned_content TEXT,
-        chunks JSONB,
-        keywords JSONB,
-        fingerprint VARCHAR(50),
-        metadata JSONB,
-        submissions JSONB,
-        importance_score DECIMAL,
-        submission_patterns JSONB,
-        urgency_assessment JSONB,
-        contextual_tags JSONB,
-        last_submission TIMESTAMPTZ,
-        submission_count INTEGER DEFAULT 1,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `;
-
-    const createNotesTable = `
-      CREATE TABLE IF NOT EXISTS notes (
-        id BIGINT PRIMARY KEY,
-        content TEXT NOT NULL,
-        timestamp TIMESTAMPTZ NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      );
-    `;
-
     try {
+      // First check if content table exists and what columns it has
+      const tableExists = await this.pool.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = 'content'
+        );
+      `);
+      
+      console.log('📋 Content table exists:', tableExists.rows[0].exists);
+      
+      // Create the content table
+      const createContentTable = `
+        CREATE TABLE IF NOT EXISTS content (
+          id BIGINT PRIMARY KEY,
+          type VARCHAR(50) NOT NULL,
+          timestamp TIMESTAMPTZ NOT NULL,
+          processed BOOLEAN DEFAULT false,
+          content TEXT,
+          extracted_content TEXT,
+          cleaned_content TEXT,
+          chunks JSONB,
+          keywords JSONB,
+          fingerprint VARCHAR(50),
+          metadata JSONB,
+          submissions JSONB,
+          importance_score DECIMAL,
+          submission_patterns JSONB,
+          urgency_assessment JSONB,
+          contextual_tags JSONB,
+          last_submission TIMESTAMPTZ,
+          submission_count INTEGER DEFAULT 1,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `;
+      
       await this.pool.query(createContentTable);
-      await this.pool.query(createNotesTable);
-      console.log('✅ Database tables created/verified');
+      console.log('✅ Content table created/verified');
+      
+      // Check current columns and add missing ones
+      const columnsResult = await this.pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'content' 
+        AND table_schema = 'public'
+        ORDER BY column_name;
+      `);
+      
+      const existingColumns = columnsResult.rows.map(row => row.column_name);
+      console.log('📋 Existing columns:', existingColumns);
+      
+      // Define required columns
+      const requiredColumns = {
+        'extracted_content': 'TEXT',
+        'cleaned_content': 'TEXT', 
+        'chunks': 'JSONB',
+        'keywords': 'JSONB',
+        'fingerprint': 'VARCHAR(50)',
+        'metadata': 'JSONB',
+        'submissions': 'JSONB',
+        'importance_score': 'DECIMAL',
+        'submission_patterns': 'JSONB',
+        'urgency_assessment': 'JSONB',
+        'contextual_tags': 'JSONB',
+        'last_submission': 'TIMESTAMPTZ',
+        'submission_count': 'INTEGER DEFAULT 1',
+        'created_at': 'TIMESTAMPTZ DEFAULT NOW()',
+        'updated_at': 'TIMESTAMPTZ DEFAULT NOW()'
+      };
+      
+      // Add missing columns
+      for (const [columnName, columnType] of Object.entries(requiredColumns)) {
+        if (!existingColumns.includes(columnName)) {
+          console.log(`📝 Adding missing column: ${columnName}`);
+          await this.pool.query(`ALTER TABLE content ADD COLUMN ${columnName} ${columnType};`);
+        }
+      }
+      
     } catch (error) {
-      console.error('❌ Error creating tables:', error.message);
-      throw error;
+      console.error('❌ Error creating/updating content table:', error.message);
+    }
+
+    // Create notes table
+    try {
+      const createNotesTable = `
+        CREATE TABLE IF NOT EXISTS notes (
+          id BIGINT PRIMARY KEY,
+          content TEXT NOT NULL,
+          timestamp TIMESTAMPTZ NOT NULL,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `;
+      
+      await this.pool.query(createNotesTable);
+      console.log('✅ Notes table created/verified');
+      
+    } catch (error) {
+      console.error('❌ Error creating notes table:', error.message);
     }
   }
 
@@ -273,30 +332,44 @@ class Database {
 
   async getAllContent() {
     if (this.isPostgres) {
-      const { rows } = await this.pool.query(`
-        SELECT 
-          id, type, timestamp, processed, content, extracted_content as "extractedContent",
-          cleaned_content as "cleanedContent", chunks, keywords, fingerprint, metadata,
-          submissions, importance_score as "importanceScore", 
-          submission_patterns as "submissionPatterns",
-          urgency_assessment as "urgencyAssessment",
-          contextual_tags as "contextualTags",
-          last_submission as "lastSubmission",
-          submission_count as "submissionCount"
-        FROM content 
-        ORDER BY timestamp DESC
-      `);
+      try {
+        const { rows } = await this.pool.query(`
+          SELECT 
+            id, type, timestamp, processed, content, 
+            COALESCE(extracted_content, content) as "extractedContent",
+            COALESCE(cleaned_content, content) as "cleanedContent", 
+            COALESCE(chunks, '[]'::jsonb) as chunks, 
+            COALESCE(keywords, '[]'::jsonb) as keywords, 
+            fingerprint, 
+            COALESCE(metadata, '{}'::jsonb) as metadata,
+            COALESCE(submissions, '[]'::jsonb) as submissions, 
+            COALESCE(importance_score, 1) as "importanceScore", 
+            COALESCE(submission_patterns, '{}'::jsonb) as "submissionPatterns",
+            COALESCE(urgency_assessment, '{}'::jsonb) as "urgencyAssessment",
+            COALESCE(contextual_tags, '[]'::jsonb) as "contextualTags",
+            last_submission as "lastSubmission",
+            COALESCE(submission_count, 1) as "submissionCount"
+          FROM content 
+          ORDER BY timestamp DESC
+        `);
 
-      return rows.map(row => ({
-        ...row,
-        chunks: typeof row.chunks === 'string' ? JSON.parse(row.chunks) : row.chunks,
-        keywords: typeof row.keywords === 'string' ? JSON.parse(row.keywords) : row.keywords,
-        metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
-        submissions: typeof row.submissions === 'string' ? JSON.parse(row.submissions) : row.submissions,
-        submissionPatterns: typeof row.submissionPatterns === 'string' ? JSON.parse(row.submissionPatterns) : row.submissionPatterns,
-        urgencyAssessment: typeof row.urgencyAssessment === 'string' ? JSON.parse(row.urgencyAssessment) : row.urgencyAssessment,
-        contextualTags: typeof row.contextualTags === 'string' ? JSON.parse(row.contextualTags) : row.contextualTags
-      }));
+        return rows.map(row => ({
+          ...row,
+          chunks: typeof row.chunks === 'string' ? JSON.parse(row.chunks) : row.chunks,
+          keywords: typeof row.keywords === 'string' ? JSON.parse(row.keywords) : row.keywords,
+          metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+          submissions: typeof row.submissions === 'string' ? JSON.parse(row.submissions) : row.submissions,
+          submissionPatterns: typeof row.submissionPatterns === 'string' ? JSON.parse(row.submissionPatterns) : row.submissionPatterns,
+          urgencyAssessment: typeof row.urgencyAssessment === 'string' ? JSON.parse(row.urgencyAssessment) : row.urgencyAssessment,
+          contextualTags: typeof row.contextualTags === 'string' ? JSON.parse(row.contextualTags) : row.contextualTags
+        }));
+      } catch (error) {
+        console.error('❌ Error querying content:', error.message);
+        console.log('Attempting to fix database schema...');
+        // Try to create/update tables again
+        await this.createTables();
+        return [];
+      }
     } else {
       const db = this.readJSONDB();
       return db.content || [];
