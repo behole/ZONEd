@@ -141,7 +141,7 @@ class Database {
       const existingColumns = columnsResult.rows.map(row => row.column_name);
       console.log('📋 Existing columns:', existingColumns);
       
-      // Define required columns
+      // Define required columns with proper types
       const requiredColumns = {
         'extracted_content': 'TEXT',
         'cleaned_content': 'TEXT', 
@@ -159,6 +159,34 @@ class Database {
         'created_at': 'TIMESTAMPTZ DEFAULT NOW()',
         'updated_at': 'TIMESTAMPTZ DEFAULT NOW()'
       };
+
+      // Check for columns that might be the wrong type and need fixing
+      const typeCheckQuery = `
+        SELECT column_name, data_type 
+        FROM information_schema.columns 
+        WHERE table_name = 'content' 
+        AND table_schema = 'public'
+        AND column_name IN ('chunks', 'keywords', 'metadata', 'submissions', 'submission_patterns', 'urgency_assessment', 'contextual_tags');
+      `;
+      
+      const typeCheckResult = await this.pool.query(typeCheckQuery);
+      const wrongTypeColumns = typeCheckResult.rows.filter(row => 
+        row.data_type === 'ARRAY' || row.data_type === 'text[]'
+      );
+      
+      if (wrongTypeColumns.length > 0) {
+        console.log('🔄 Found columns with wrong types, fixing:', wrongTypeColumns.map(c => c.column_name));
+        for (const col of wrongTypeColumns) {
+          try {
+            console.log(`📝 Converting ${col.column_name} from ${col.data_type} to JSONB`);
+            await this.pool.query(`ALTER TABLE content ALTER COLUMN ${col.column_name} TYPE JSONB USING ${col.column_name}::text::jsonb;`);
+          } catch (error) {
+            console.log(`⚠️ Could not convert ${col.column_name}, dropping and recreating:`, error.message);
+            await this.pool.query(`ALTER TABLE content DROP COLUMN IF EXISTS ${col.column_name};`);
+            await this.pool.query(`ALTER TABLE content ADD COLUMN ${col.column_name} JSONB;`);
+          }
+        }
+      }
       
       // Add missing columns
       for (const [columnName, columnType] of Object.entries(requiredColumns)) {
@@ -287,7 +315,19 @@ class Database {
         item.submissionCount || 1
       ];
 
-      await this.pool.query(query, values);
+      try {
+        await this.pool.query(query, values);
+      } catch (error) {
+        console.error('❌ Error inserting content:', error.message);
+        if (error.message.includes('malformed array literal') || error.code === '22P02') {
+          console.log('🔄 Schema type mismatch detected, attempting to fix database schema...');
+          await this.createTables();
+          // Retry the insert after schema fix
+          await this.pool.query(query, values);
+        } else {
+          throw error;
+        }
+      }
     } else {
       // JSON file fallback
       const db = this.readJSONDB();
