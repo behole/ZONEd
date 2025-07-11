@@ -11,7 +11,7 @@
 ## Architecture & Database
 - **Monorepo**: Separate client/server directories with shared build scripts
 - **Database**: PostgreSQL (production) or JSON file fallback (development)
-- **Vector DB**: OpenAI embeddings for semantic search (1536-dimensional)
+- **Vector DB**: ChromaDB for vector storage + OpenAI embeddings (1536-dimensional)
 - **AI Integration**: OpenAI API for embeddings, chat completion, and RAG
 - **File Processing**: PDF-parse, Mammoth (DOCX), Tesseract.js (OCR)
 - **Core APIs**: `/api/content`, `/api/upload`, `/api/vector/search`, `/api/rag/query`

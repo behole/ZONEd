@@ -54,13 +54,13 @@ const contentSources = new ContentSources();
 
 console.log(`Using ${useOpenAI ? 'OpenAI' : 'local'} models for embeddings and responses`);
 
-// Configure CORS for production and iOS sharing
+// Configure CORS for production, iOS sharing, and browser extensions
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL || true 
-    : 'http://localhost:5173',
+    ? [process.env.FRONTEND_URL, 'chrome-extension://*', 'moz-extension://*'].filter(Boolean) 
+    : ['http://localhost:5173', 'chrome-extension://*', 'moz-extension://*'],
   credentials: true,
-  // Allow iOS share requests
+  // Allow iOS share requests and browser extensions
   optionsSuccessStatus: 200
 };
 
