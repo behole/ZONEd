@@ -31,6 +31,7 @@ setTimeout(() => {
   }
 }, 2000);
 
+
 // Initialize Vector and RAG engines
 const useOpenAI = process.env.USE_OPENAI === 'true' && process.env.OPENAI_API_KEY;
 
@@ -989,6 +990,10 @@ app.post('/share', upload.array('files'), async (req, res) => {
 async function initializeVectorDatabase() {
   try {
     console.log('Initializing vector database with existing content...');
+    
+    // Add delay to ensure tables are fully created
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     const content = await database.getAllContent();
     const notes = await database.getAllNotes();
     const allContent = [...content, ...notes];
@@ -1036,6 +1041,7 @@ async function initializeVectorDatabase() {
     }
   } catch (error) {
     console.log('Could not initialize vector database:', error.message);
+    console.log('This is normal for a fresh database - vector content will be added as new items are submitted');
   }
 }
 
