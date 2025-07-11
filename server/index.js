@@ -21,6 +21,16 @@ const contentProcessor = new ContentProcessor();
 // Initialize database
 const database = new Database();
 
+// Log database status after a brief delay to allow initialization
+setTimeout(() => {
+  console.log('📊 Final Database Status:');
+  console.log('- Using PostgreSQL:', database.isPostgres);
+  console.log('- Pool connected:', !!database.pool);
+  if (!database.isPostgres) {
+    console.log('⚠️ WARNING: Using JSON file storage - data will not persist between deployments!');
+  }
+}, 2000);
+
 // Initialize Vector and RAG engines
 const useOpenAI = process.env.USE_OPENAI === 'true' && process.env.OPENAI_API_KEY;
 
@@ -55,6 +65,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from client build in production
 if (process.env.NODE_ENV === 'production') {
@@ -897,17 +908,21 @@ app.post('/share', upload.array('files'), async (req, res) => {
       const contentText = [title, text, url].filter(Boolean).join('\n');
       const contentItem = {
         type: url ? 'url' : 'text',
-        content: url || contentText,
-        metadata: {
-          title: title || 'Shared content',
-          sharedVia: 'ios_share_sheet',
-          originalText: text,
-          originalUrl: url
-        }
+        content: url || contentText
       };
       
       // Process the content item
       const processed = await processContentItem(contentItem, existingContent);
+      
+      // Add share-specific metadata after processing
+      processed.metadata = {
+        ...processed.metadata,
+        title: title || 'Shared content',
+        sharedVia: 'ios_share_sheet',
+        originalText: text,
+        originalUrl: url
+      };
+      
       await database.insertContent(processed);
       processedItems.push(processed);
       
@@ -930,42 +945,35 @@ app.post('/share', upload.array('files'), async (req, res) => {
       );
       
       const fileItem = {
-        id: Math.floor(Date.now() + Math.random() * 1000),
         type: 'file',
-        filename: file.filename,
-        originalName: file.originalname,
-        size: file.size,
-        mimetype: file.mimetype,
-        path: file.path,
-        timestamp: new Date().toISOString(),
-        extractedText: extractionResult.extractedText,
-        processingSuccess: extractionResult.success,
-        processingError: extractionResult.error,
+        content: extractionResult.extractedText || file.originalname,
         metadata: {
           ...extractionResult.metadata,
           sharedVia: 'ios_share_sheet',
-          uploadPath: file.path
-        },
-        processed: true,
-        importanceScore: 1.0,
-        submissionCount: 1,
-        contextualTags: ['shared', 'ios', 'file']
+          uploadPath: file.path,
+          filename: file.filename,
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: file.mimetype,
+          processingSuccess: extractionResult.success,
+          processingError: extractionResult.error
+        }
       };
       
-      db.content.push(fileItem);
-      processedItems.push(fileItem);
+      // Process the file item using the same function as other content
+      const processed = await processContentItem(fileItem, existingContent);
+      await database.insertContent(processed);
+      processedItems.push(processed);
       
       // Add to vector database if text extraction succeeded
       if (extractionResult.success && extractionResult.extractedText) {
         try {
-          await vectorEngine.addContent(fileItem);
+          await vectorEngine.addContent(processed);
         } catch (vectorError) {
           console.warn('Failed to vectorize shared file:', vectorError);
         }
       }
     }
-    
-    writeDB(db);
     
     // Redirect to share success page
     res.redirect(`/share-success?items=${processedItems.length}`);

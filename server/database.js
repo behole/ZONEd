@@ -11,39 +11,78 @@ class Database {
   }
 
   async initializeDatabase() {
+    // Debug environment variables
+    console.log('🔍 Environment check:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    console.log('- DATABASE_URL preview:', process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'not set');
+    
     // Check if we have a DATABASE_URL (PostgreSQL)
     if (process.env.DATABASE_URL) {
       try {
-        console.log('Initializing PostgreSQL connection...');
-        this.pool = new Pool({
+        console.log('🚀 Initializing PostgreSQL connection...');
+        
+        const poolConfig = {
           connectionString: process.env.DATABASE_URL,
-          ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+          ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+          // Add connection pool settings for Railway
+          max: 20,
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 10000,
+        };
+        
+        console.log('📊 Pool config:', { 
+          ssl: poolConfig.ssl, 
+          max: poolConfig.max, 
+          connectionTimeoutMillis: poolConfig.connectionTimeoutMillis 
         });
+        
+        this.pool = new Pool(poolConfig);
 
-        // Test the connection
-        const client = await this.pool.connect();
-        await client.query('SELECT NOW()');
+        // Test the connection with timeout
+        console.log('🔗 Testing database connection...');
+        const client = await Promise.race([
+          this.pool.connect(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Connection timeout after 10s')), 10000)
+          )
+        ]);
+        
+        const result = await client.query('SELECT NOW() as current_time, version() as postgres_version');
+        console.log('📅 Database time:', result.rows[0].current_time);
+        console.log('🗄️ PostgreSQL version:', result.rows[0].postgres_version.split(' ')[0]);
         client.release();
         
         this.isPostgres = true;
         console.log('✅ PostgreSQL connected successfully');
         
         // Create tables if they don't exist
+        console.log('🏗️ Creating tables...');
         await this.createTables();
+        console.log('✅ Tables created/verified');
         
         // Migrate existing JSON data if needed
+        console.log('📦 Checking for JSON migration...');
         await this.migrateFromJSON();
+        console.log('✅ Migration check complete');
         
       } catch (error) {
-        console.error('❌ PostgreSQL connection failed:', error.message);
-        console.log('Falling back to JSON file storage...');
+        console.error('❌ PostgreSQL connection failed:');
+        console.error('Error type:', error.constructor.name);
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        console.error('Full error:', error);
+        console.log('⚠️ Falling back to JSON file storage...');
         this.isPostgres = false;
         this.pool = null;
       }
     } else {
-      console.log('No DATABASE_URL found, using JSON file storage');
+      console.log('⚠️ No DATABASE_URL found, using JSON file storage');
+      console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('DATA')));
       this.isPostgres = false;
     }
+    
+    console.log('🏁 Database initialization complete. Using:', this.isPostgres ? 'PostgreSQL' : 'JSON file');
   }
 
   async createTables() {
