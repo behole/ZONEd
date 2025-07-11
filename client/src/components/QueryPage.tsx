@@ -95,6 +95,29 @@ function QueryPage() {
     }
   };
 
+  const getContentTypeEmoji = (type: string) => {
+    switch (type) {
+      case 'file': return '📄';
+      case 'url': return '🔗';
+      case 'text': return '📝';
+      default: return '📋';
+    }
+  };
+
+  const formatRelativeTime = (timestamp: string) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <div>
       <h2>Intelligent Query Interface</h2>
@@ -189,51 +212,59 @@ function QueryPage() {
         <div className="mt-4">
           {results.success ? (
             <>
-              {/* Query Analysis */}
+              {/* Query Understanding */}
               {results.queryAnalysis && (
-                <Card className="mb-3">
-                  <Card.Header>
-                    <strong>Query Analysis</strong>
+                <Card className="mb-3 border-info">
+                  <Card.Header className="bg-light">
+                    <strong>🔍 What I Found</strong>
                   </Card.Header>
                   <Card.Body>
-                    <div className="d-flex flex-wrap gap-2 mb-2">
-                      <Badge bg="info">Intent: {results.queryAnalysis.primaryIntent}</Badge>
+                    <p className="mb-2">
+                      {results.queryAnalysis.isQuestion ? 
+                        `I searched for answers about: "${results.query}"` : 
+                        `I looked through your content for: "${results.query}"`
+                      }
+                    </p>
+                    <div className="d-flex flex-wrap gap-2">
                       {results.queryAnalysis.timeContext && (
-                        <Badge bg="secondary">Time: {results.queryAnalysis.timeContext}</Badge>
+                        <Badge bg="primary">📅 {results.queryAnalysis.timeContext}</Badge>
                       )}
                       {results.queryAnalysis.contentTypes.map((type: string) => (
-                        <Badge key={type} bg="success">Type: {type}</Badge>
+                        <Badge key={type} bg="secondary">📂 {type}</Badge>
                       ))}
                     </div>
-                    <small className="text-muted">
-                      {results.queryAnalysis.isQuestion ? 'Question detected' : 'Statement detected'}
-                      {results.queryAnalysis.needsAggregation && ' • Aggregation needed'}
-                      {results.queryAnalysis.needsSummary && ' • Summary requested'}
-                    </small>
                   </Card.Body>
                 </Card>
               )}
 
               {/* Response */}
               {results.response && (
-                <Card className="mb-3">
-                  <Card.Header>
-                    <strong>Response</strong>
+                <Card className="mb-3 border-success">
+                  <Card.Header className="bg-success text-white">
+                    <strong>💡 Here's What I Discovered</strong>
                   </Card.Header>
                   <Card.Body>
-                    <p>{results.response.message}</p>
+                    <div className="mb-3">
+                      <p className="lead">{results.response.message}</p>
+                    </div>
                     
                     {/* Insights */}
                     {results.response.insights && (
                       <div className="mt-3">
-                        <h6>Insights:</h6>
+                        <h6 className="text-success">🔍 Key Insights:</h6>
                         <div className="row">
                           {Object.entries(results.response.insights).map(([key, value]) => (
                             <div key={key} className="col-md-6 mb-2">
-                              <small>
-                                <strong>{key.replace(/([A-Z])/g, ' $1').toLowerCase()}:</strong>{' '}
-                                {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                              </small>
+                              <div className="d-flex align-items-center">
+                                <span className="badge bg-light text-dark me-2">
+                                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                </span>
+                                <span>{typeof value === 'object' ? 
+                                  Array.isArray(value) ? value.join(', ') : 
+                                  Object.keys(value).length + ' items' : 
+                                  String(value)
+                                }</span>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -246,49 +277,53 @@ function QueryPage() {
               {/* Search Results */}
               {results.searchResults && results.searchResults.length > 0 && (
                 <div>
-                  <h5>Found {results.searchResults.length} relevant items:</h5>
+                  <h5 className="mb-3">📚 Found {results.searchResults.length} relevant items:</h5>
                   {results.searchResults.map((result: any, index: number) => (
-                    <Card key={index} className="mb-3">
+                    <Card key={index} className="mb-3 shadow-sm">
                       <Card.Body>
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <div className="d-flex gap-2">
-                            <Badge bg="primary">{result.metadata.type}</Badge>
-                            <Badge bg={getUrgencyColor(result.metadata.urgencyLevel)}>
-                              {result.metadata.urgencyLevel}
-                            </Badge>
-                            <Badge bg="info">
-                              Score: {formatScore(result.scores.composite)}%
+                            <Badge bg="primary">{getContentTypeEmoji(result.metadata.type)} {result.metadata.type}</Badge>
+                            {result.metadata.urgencyLevel !== 'low' && (
+                              <Badge bg={getUrgencyColor(result.metadata.urgencyLevel)}>
+                                {result.metadata.urgencyLevel === 'high' ? '🔴 Urgent' : '🟡 Important'}
+                              </Badge>
+                            )}
+                            <Badge bg="success">
+                              {formatScore(result.scores.composite) >= 80 ? '⭐ Highly Relevant' : 
+                               formatScore(result.scores.composite) >= 60 ? '✨ Relevant' : '📌 Related'}
                             </Badge>
                           </div>
                           <small className="text-muted">
-                            {new Date(result.metadata.timestamp).toLocaleDateString()}
+                            {formatRelativeTime(result.metadata.timestamp)}
                           </small>
                         </div>
                         
                         <p className="mb-2">{result.document.substring(0, 300)}...</p>
                         
                         <div className="row">
-                          <div className="col-md-6">
-                            <small>
-                              <strong>Importance:</strong> {result.metadata.importanceScore}/10<br/>
-                              <strong>Submissions:</strong> {result.metadata.submissionCount}<br/>
-                              <strong>Velocity:</strong> {result.metadata.velocity}
+                          <div className="col-md-8">
+                            <small className="text-muted">
+                              <strong>Why this is relevant:</strong> {result.relevanceReason || 'Matches your query context'}
                             </small>
                           </div>
-                          <div className="col-md-6">
-                            <small>
-                              <strong>Relevance:</strong> {result.relevanceReason}<br/>
-                              <strong>Semantic:</strong> {formatScore(result.scores.semantic)}%<br/>
-                              <strong>Recency:</strong> {formatScore(result.scores.recency)}%
+                          <div className="col-md-4 text-end">
+                            <small className="text-muted">
+                              {result.metadata.importanceScore > 7 ? '⭐⭐⭐ High Priority' : 
+                               result.metadata.importanceScore > 4 ? '⭐⭐ Medium Priority' : 
+                               '⭐ Standard'}
+                              {result.metadata.submissionCount > 1 && (
+                                <span className="ms-2">🔄 Revisited {result.metadata.submissionCount}x</span>
+                              )}
                             </small>
                           </div>
                         </div>
                         
                         {result.metadata.contextualTags && (
                           <div className="mt-2">
-                            {JSON.parse(result.metadata.contextualTags).map((tag: string) => (
+                            {JSON.parse(result.metadata.contextualTags).slice(0, 5).map((tag: string) => (
                               <Badge key={tag} bg="light" text="dark" className="me-1">
-                                {tag}
+                                #{tag}
                               </Badge>
                             ))}
                           </div>

@@ -74,17 +74,18 @@ class NewsletterGenerator {
 
   async generateOpenAINewsletter(data, options) {
     try {
-      const systemPrompt = `You are a personal AI assistant creating a personalized newsletter/digest for someone based on their captured content (notes, URLs, files, thoughts).
+      const systemPrompt = `You are a personal AI assistant creating a friendly, insightful weekly summary for someone based on their captured content (notes, URLs, files, thoughts).
 
-Your goal is to create an engaging, insightful weekly summary that helps them:
-1. Understand what they've been thinking about and working on
-2. Identify important patterns and trends in their interests
-3. Get actionable recommendations for follow-up
-4. Feel informed and organized about their digital life
+Your goal is to create a warm, engaging digest that:
+1. Makes them feel accomplished about their work and interests
+2. Helps them see patterns and connections in their thinking
+3. Provides gentle insights and actionable next steps
+4. Feels like a conversation with a thoughtful friend
 
-Style: Professional but personal, insightful, actionable
-Format: Well-structured with clear sections
-Tone: Supportive and encouraging, like a thoughtful assistant`;
+Style: Warm, personal, conversational, encouraging
+Format: Easy-to-read with clear sections and friendly headings
+Tone: Supportive friend who pays attention to details and celebrates progress
+Use emojis and friendly language. Avoid technical jargon or complex scores.`;
 
       const userPrompt = `Create a personalized weekly newsletter based on this data:
 
@@ -117,7 +118,13 @@ Please create a comprehensive newsletter with these sections:
 5. **Insights & Patterns** - Interesting observations about your digital behavior
 6. **Recommendations** - Suggested next steps or areas to explore
 
-Make it personal, insightful, and actionable. Use the importance scores and submission patterns to prioritize what matters most.`;
+Create a warm, encouraging weekly summary that:
+- Celebrates what they accomplished this week
+- Points out interesting patterns in their interests
+- Suggests 2-3 gentle next steps
+- Uses friendly language and emojis
+- Avoids technical terms or numerical scores
+- Feels like a supportive friend checking in`;
 
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o',
@@ -293,37 +300,85 @@ Make it personal, insightful, and actionable. Use the importance scores and subm
   }
 
   generateExecutiveSummary(data) {
-    return `This week you captured ${data.recentContent.length} items with an average importance of ${data.analytics.averageImportance}/10. ${data.urgentContent.length > 0 ? `${data.urgentContent.length} items need urgent attention.` : 'No urgent items this week.'} Your focus areas show ${data.trends.length > 0 ? 'clear trending patterns' : 'diverse interests'}.`;
+    const itemCount = data.recentContent.length;
+    const urgentCount = data.urgentContent.length;
+    const highPriority = data.recentContent.filter(item => item.metadata.importanceScore > 6).length;
+    
+    let summary = `🎯 **This week you captured ${itemCount} ${itemCount === 1 ? 'item' : 'items'}**. `;
+    
+    if (highPriority > 0) {
+      summary += `${highPriority} ${highPriority === 1 ? 'looks' : 'look'} particularly important. `;
+    }
+    
+    if (urgentCount > 0) {
+      summary += `📌 ${urgentCount} ${urgentCount === 1 ? 'item needs' : 'items need'} your attention soon. `;
+    } else {
+      summary += `✨ Nothing urgent this week - nice and steady! `;
+    }
+    
+    summary += data.trends.length > 0 ? 
+      `I noticed some interesting patterns in what you're exploring.` : 
+      `You're exploring a nice variety of topics.`;
+    
+    return summary;
   }
 
   generateThinkingSection(content) {
     const topItems = content.slice(0, 5);
-    return topItems.map((item, index) => 
-      `${index + 1}. **${item.metadata.type.toUpperCase()}** (${item.metadata.importanceScore}/10): ${item.document.substring(0, 150)}...`
-    ).join('\n\n');
+    if (topItems.length === 0) {
+      return 'A quiet week for captures - sometimes that\'s exactly what we need! 😌';
+    }
+    
+    return topItems.map((item, index) => {
+      const typeEmoji = item.metadata.type === 'file' ? '📄' : item.metadata.type === 'url' ? '🔗' : '📝';
+      const priority = item.metadata.importanceScore > 7 ? '⭐⭐⭐' : item.metadata.importanceScore > 4 ? '⭐⭐' : '⭐';
+      const preview = item.document.substring(0, 120);
+      
+      return `${index + 1}. ${typeEmoji} **${preview}...**\n   ${priority} Priority • ${this.formatRelativeTime(item.metadata.timestamp)}`;
+    }).join('\n\n');
+  }
+  
+  formatRelativeTime(timestamp) {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   }
 
   generateTrendingSection(content) {
     if (!content || content.length === 0) {
-      return 'No trending topics this week. Your content shows diverse interests without clear patterns.';
+      return 'You\'re exploring a nice variety of topics this week! 🌟';
     }
     
     // Sort by importance score and show top items
     const sortedContent = content.sort((a, b) => (b.metadata.importanceScore || 0) - (a.metadata.importanceScore || 0));
     
-    return sortedContent.slice(0, 3).map((item, index) => 
-      `**${index + 1}. Notable Content** (Importance: ${(item.metadata.importanceScore || 0).toFixed(2)}/10): ${item.document.substring(0, 100)}...`
-    ).join('\n\n');
+    return sortedContent.slice(0, 3).map((item, index) => {
+      const typeEmoji = item.metadata.type === 'file' ? '📄' : item.metadata.type === 'url' ? '🔗' : '📝';
+      const priority = item.metadata.importanceScore > 7 ? '🔥 Hot topic' : item.metadata.importanceScore > 4 ? '📈 Rising interest' : '💡 Worth noting';
+      const preview = item.document.substring(0, 100);
+      
+      return `**${index + 1}. ${typeEmoji} ${priority}**\n   ${preview}...`;
+    }).join('\n\n');
   }
 
   generateActionItems(urgentContent) {
     if (urgentContent.length === 0) {
-      return 'No urgent action items this week. Great job staying on top of things!';
+      return '✅ No urgent action items this week. Great job staying on top of things!';
     }
     
-    return urgentContent.map((item, index) => 
-      `${index + 1}. **URGENT**: ${item.document.substring(0, 100)}...`
-    ).join('\n\n');
+    return urgentContent.map((item, index) => {
+      const typeEmoji = item.metadata.type === 'file' ? '📄' : item.metadata.type === 'url' ? '🔗' : '📝';
+      const urgencyEmoji = item.metadata.urgencyLevel === 'high' ? '🔴' : '🟡';
+      const preview = item.document.substring(0, 100);
+      
+      return `${index + 1}. ${urgencyEmoji} ${typeEmoji} **${preview}...**\n   Needs attention soon`;
+    }).join('\n\n');
   }
 
   generateAnalyticsSection(analytics) {
