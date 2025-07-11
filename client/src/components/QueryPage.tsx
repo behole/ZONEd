@@ -259,7 +259,7 @@ function QueryPage() {
                                 <span className="badge bg-light text-dark me-2">
                                   {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                 </span>
-                                <span>{typeof value === 'object' ? 
+                                <span>{typeof value === 'object' && value !== null ? 
                                   Array.isArray(value) ? value.join(', ') : 
                                   Object.keys(value).length + ' items' : 
                                   String(value)
