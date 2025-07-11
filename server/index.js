@@ -114,10 +114,66 @@ async function extractUrlMetadata(url) {
     
     const $ = cheerio.load(response.data);
     
+    // Smart content extraction - try multiple selectors for main article content
+    let mainContent = '';
+    
+    // Try article-specific selectors first (most likely to contain main content)
+    const contentSelectors = [
+      'article',
+      'main',
+      '.article-content',
+      '.post-content', 
+      '.entry-content',
+      '.content-body',
+      '.article-body',
+      '.story-body',
+      '.post-body',
+      '[role="main"]',
+      '.main-content',
+      '#content',
+      '.content',
+      // Blog platforms
+      '.notion-page-content',
+      '.medium-content',
+      '.wp-content',
+      // Documentation sites
+      '.markdown-body',
+      '.rst-content',
+      '.doc-content'
+    ];
+    
+    // Try each selector until we find substantial content
+    for (const selector of contentSelectors) {
+      const element = $(selector);
+      if (element.length > 0) {
+        const text = element.text().trim();
+        if (text.length > 200) { // Only use if substantial content
+          mainContent = text;
+          console.log(`📄 Extracted content using selector: ${selector}`);
+          break;
+        }
+      }
+    }
+    
+    // Fallback: if no good selector found, use body but clean it better
+    if (!mainContent) {
+      console.log('📄 Using fallback body extraction with cleaning');
+      // Remove common non-content elements
+      $('script, style, nav, header, footer, aside, .nav, .navigation, .menu, .sidebar, .ad, .advertisement, .banner, iframe').remove();
+      mainContent = $('body').text().trim();
+    }
+    
+    // Clean up the content: remove excessive whitespace and limit length
+    mainContent = mainContent
+      .replace(/\s+/g, ' ')  // Replace multiple whitespace with single space
+      .replace(/\n\s*\n/g, '\n')  // Remove empty lines
+      .trim()
+      .substring(0, 2000); // Increase to 2000 chars for better content
+    
     return {
       title: $('title').text().trim() || $('meta[property="og:title"]').attr('content') || 'No title',
       description: $('meta[name="description"]').attr('content') || $('meta[property="og:description"]').attr('content') || '',
-      content: $('body').text().trim().substring(0, 1000), // First 1000 chars
+      content: mainContent,
       url: url,
       domain: new URL(url).hostname,
       timestamp: new Date().toISOString()
