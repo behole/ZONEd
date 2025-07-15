@@ -47,14 +47,14 @@ function AppContent() {
         </Container>
       </Navbar>
       <Container className="mt-4">
-        <Routes>
-          <Route path="/dashboard" element={<ContentDashboard />} />
-          <Route path="/" element={<NoteForm />} />
-          <Route path="/browse" element={<ContentBrowser />} />
-          <Route path="/query" element={<QueryPage />} />
-          <Route path="/sources" element={<SourcesPage />} />
-          <Route path="/share-success" element={<ShareSuccess />} />
-          <Route path="/share-error" element={<ShareError />} />
+        <Routes key={location.pathname}>
+          <Route path="/dashboard" element={<ContentDashboard key="dashboard" />} />
+          <Route path="/" element={<NoteForm key="home" />} />
+          <Route path="/browse" element={<ContentBrowser key="browse" />} />
+          <Route path="/query" element={<QueryPage key="query" />} />
+          <Route path="/sources" element={<SourcesPage key="sources" />} />
+          <Route path="/share-success" element={<ShareSuccess key="share-success" />} />
+          <Route path="/share-error" element={<ShareError key="share-error" />} />
         </Routes>
       </Container>
     </>

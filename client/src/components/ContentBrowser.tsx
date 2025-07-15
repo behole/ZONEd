@@ -58,15 +58,22 @@ function ContentBrowser() {
   const loadContent = async () => {
     try {
       setIsLoading(true);
+      console.log('🔄 Loading content browser data...');
+      
       const response = await fetch('/api/content');
+      console.log('📡 Content Browser API Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to load content');
+        throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('📊 Content Browser API Data received:', data);
+      console.log('📋 Content items found:', data.content?.length || 0);
+      
       setContent(data.content || []);
     } catch (err) {
+      console.error('❌ Content Browser loading error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
@@ -385,9 +392,27 @@ function ContentBrowser() {
               ☰ List
             </Button>
           </ButtonGroup>
-          <Button variant="outline-secondary" size="sm" onClick={loadContent}>
-            🔄 Refresh
-          </Button>
+          <div className="d-flex gap-2">
+            <Button variant="outline-secondary" size="sm" onClick={loadContent}>
+              🔄 Refresh
+            </Button>
+            <Button 
+              variant="outline-info" 
+              size="sm" 
+              onClick={() => {
+                console.log('🔍 Content Browser Debug Info:');
+                console.log('- Total content items:', content.length);
+                console.log('- Filtered content items:', filteredContent.length);
+                console.log('- Current filters:', filters);
+                console.log('- Search query:', searchQuery);
+                console.log('- Loading state:', isLoading);
+                console.log('- Error state:', error);
+                alert('Check browser console (F12) for debug info');
+              }}
+            >
+              🐛 Debug
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -528,12 +553,26 @@ function ContentBrowser() {
         )
       ) : (
         <Alert variant="info">
-          <Alert.Heading>No Content Found</Alert.Heading>
+          <Alert.Heading>
+            {content.length === 0 ? '📚 Your Content Library Awaits!' : 'No Content Found'}
+          </Alert.Heading>
           <p>
-            {searchQuery || Object.values(filters).some(f => f !== 'all' && f !== 'timestamp' && f !== 'desc') 
-              ? 'Try adjusting your search or filters.' 
-              : 'Start adding content to build your knowledge base.'}
+            {content.length === 0 
+              ? 'Your content library is empty. Start adding content to build your personal knowledge base!'
+              : searchQuery || Object.values(filters).some(f => f !== 'all' && f !== 'timestamp' && f !== 'desc') 
+                ? 'Try adjusting your search or filters to find what you\'re looking for.' 
+                : 'No content matches your current criteria.'}
           </p>
+          {content.length === 0 && (
+            <div className="d-flex gap-2">
+              <Button variant="primary" href="/">
+                ➕ Add Your First Content
+              </Button>
+              <Button variant="outline-secondary" onClick={loadContent}>
+                🔄 Refresh
+              </Button>
+            </div>
+          )}
         </Alert>
       )}
 

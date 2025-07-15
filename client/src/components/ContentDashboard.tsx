@@ -44,26 +44,35 @@ function ContentDashboard() {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
+      console.log('🔄 Loading dashboard data...');
+      
       const response = await fetch('/api/content');
+      console.log('📡 API Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error('Failed to load content');
+        throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('📊 API Data received:', data);
+      
       const allContent = data.content || [];
+      console.log('📋 Content items found:', allContent.length);
       
       // Calculate dashboard statistics
       const dashboardStats = calculateStats(allContent);
+      console.log('📈 Dashboard stats:', dashboardStats);
       setStats(dashboardStats);
       
       // Get recent content (last 10 items)
       const recent = allContent
         .sort((a: ContentItem, b: ContentItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 10);
+      console.log('⏰ Recent content:', recent.length);
       setRecentContent(recent);
       
     } catch (err) {
+      console.error('❌ Dashboard loading error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
@@ -170,10 +179,40 @@ function ContentDashboard() {
 
   if (!stats) {
     return (
-      <Alert variant="info">
-        <Alert.Heading>No Content Yet</Alert.Heading>
-        <p>Start adding content to see your personal intelligence dashboard.</p>
-      </Alert>
+      <div>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2>🧠 Intelligence Dashboard</h2>
+          <div className="d-flex gap-2">
+            <Button variant="outline-primary" size="sm" onClick={loadDashboardData}>
+              🔄 Refresh
+            </Button>
+            <Button 
+              variant="outline-secondary" 
+              size="sm" 
+              onClick={() => {
+                console.log('🔍 Debug: Opening browser console...');
+                console.log('Current stats:', stats);
+                console.log('Current content:', recentContent);
+                alert('Check browser console (F12) for debug info');
+              }}
+            >
+              🐛 Debug
+            </Button>
+          </div>
+        </div>
+        <Alert variant="info">
+          <Alert.Heading>🚀 Welcome to Your Intelligence Dashboard!</Alert.Heading>
+          <p>Your dashboard will show insights once you add some content.</p>
+          <div className="d-flex gap-2">
+            <Button variant="primary" href="/">
+              ➕ Add Your First Content
+            </Button>
+            <Button variant="outline-secondary" onClick={loadDashboardData}>
+              🔄 Check Again
+            </Button>
+          </div>
+        </Alert>
+      </div>
     );
   }
 
