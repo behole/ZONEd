@@ -39,9 +39,9 @@ function AppContent() {
               </Nav.Link>
             </Nav>
             <Nav>
-              <Nav.Text className="text-light small">
+              <span className="navbar-text text-light small">
                 Personal Intelligence System
-              </Nav.Text>
+              </span>
             </Nav>
           </Navbar.Collapse>
         </Container>
