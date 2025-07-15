@@ -116,38 +116,211 @@ class ContentProcessor {
     };
   }
 
-  async extractFromImage(filePath) {
+  async extractFromImage(filePath, originalName) {
     try {
-      // First, optimize image for OCR
+      console.log(`🎨 Processing image: ${originalName}`);
+      
+      // Get image metadata first
+      const imageMetadata = await sharp(filePath).metadata();
+      console.log(`📐 Image dimensions: ${imageMetadata.width}x${imageMetadata.height}, format: ${imageMetadata.format}`);
+      
+      // Optimize image for OCR
       const optimizedBuffer = await sharp(filePath)
         .resize(null, 1000, { withoutEnlargement: true })
         .greyscale()
         .normalize()
         .toBuffer();
 
-      // Perform OCR
+      // Perform OCR for any text in the image
       const { data: { text, confidence } } = await Tesseract.recognize(optimizedBuffer, 'eng', {
-        logger: m => console.log(`OCR Progress: ${m.status} ${m.progress || ''}`)
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            console.log(`🔍 OCR Progress: ${Math.round(m.progress * 100)}%`);
+          }
+        }
       });
 
+      // Enhanced visual analysis
+      const visualAnalysis = await this.analyzeImageVisually(filePath, imageMetadata);
+      
+      // AI-powered image description (if OpenAI is available)
+      const aiDescription = await this.generateImageDescription(filePath);
+      
+      // Combine all text sources
+      const combinedText = [
+        text.trim(),
+        aiDescription,
+        visualAnalysis.description,
+        `Visual elements: ${visualAnalysis.elements.join(', ')}`,
+        `Color palette: ${visualAnalysis.colors.join(', ')}`,
+        `Style characteristics: ${visualAnalysis.style.join(', ')}`
+      ].filter(Boolean).join('\n\n');
+
       return {
-        text: text.trim(),
+        text: combinedText,
         metadata: {
+          originalName,
+          imageType: 'visual_content',
+          dimensions: `${imageMetadata.width}x${imageMetadata.height}`,
+          format: imageMetadata.format,
+          fileSize: imageMetadata.size,
+          
+          // OCR results
+          ocrText: text.trim(),
           ocrConfidence: confidence,
-          method: 'tesseract',
-          note: confidence < 50 ? 'Low confidence OCR - text may be inaccurate' : 'OCR completed'
+          hasText: text.trim().length > 10,
+          
+          // Visual analysis
+          visualElements: visualAnalysis.elements,
+          colorPalette: visualAnalysis.colors,
+          styleCharacteristics: visualAnalysis.style,
+          composition: visualAnalysis.composition,
+          
+          // AI description
+          aiDescription: aiDescription,
+          
+          // Designer-specific insights
+          designInsights: this.generateDesignInsights(visualAnalysis, aiDescription),
+          
+          processingNote: confidence < 50 ? 'Low OCR confidence - focusing on visual analysis' : 'Complete visual and text analysis'
         }
       };
     } catch (error) {
-      console.error('OCR Error:', error);
+      console.error('🚨 Image processing error:', error);
       return {
-        text: '',
+        text: `Image file: ${originalName}`,
         metadata: {
-          error: 'OCR failed',
-          note: 'Could not extract text from image'
+          originalName,
+          imageType: 'visual_content',
+          error: 'Image processing failed',
+          note: 'Could not extract visual or text content from image'
         }
       };
     }
+  }
+
+  async analyzeImageVisually(filePath, metadata) {
+    try {
+      // Basic visual analysis using Sharp
+      const image = sharp(filePath);
+      
+      // Get dominant colors (simplified approach)
+      const { dominant } = await image.stats();
+      
+      // Analyze composition based on dimensions
+      const aspectRatio = metadata.width / metadata.height;
+      let composition = [];
+      
+      if (aspectRatio > 1.5) composition.push('landscape', 'wide');
+      else if (aspectRatio < 0.7) composition.push('portrait', 'tall');
+      else composition.push('square', 'balanced');
+      
+      if (metadata.width > 2000 || metadata.height > 2000) composition.push('high-resolution');
+      
+      // Infer visual elements based on file characteristics
+      const elements = [];
+      const colors = [];
+      const style = [];
+      
+      // Basic color analysis
+      if (dominant.r > 200 && dominant.g > 200 && dominant.b > 200) {
+        colors.push('light', 'bright');
+      } else if (dominant.r < 50 && dominant.g < 50 && dominant.b < 50) {
+        colors.push('dark', 'moody');
+      }
+      
+      // Style inference based on filename patterns
+      const filename = path.basename(filePath).toLowerCase();
+      if (filename.includes('sketch') || filename.includes('draft')) {
+        style.push('sketch', 'conceptual');
+      }
+      if (filename.includes('final') || filename.includes('render')) {
+        style.push('polished', 'finished');
+      }
+      if (filename.includes('logo') || filename.includes('brand')) {
+        elements.push('branding', 'identity');
+      }
+      if (filename.includes('ui') || filename.includes('interface')) {
+        elements.push('interface', 'digital');
+      }
+      
+      return {
+        elements: elements.length > 0 ? elements : ['visual-content'],
+        colors: colors.length > 0 ? colors : ['mixed-palette'],
+        style: style.length > 0 ? style : ['contemporary'],
+        composition,
+        description: `${composition.join(' ')} image with ${colors.join(' ')} tones`
+      };
+    } catch (error) {
+      console.error('Visual analysis error:', error);
+      return {
+        elements: ['visual-content'],
+        colors: ['unknown-palette'],
+        style: ['unanalyzed'],
+        composition: ['standard'],
+        description: 'Visual content requiring manual analysis'
+      };
+    }
+  }
+
+  async generateImageDescription(filePath) {
+    // This would integrate with OpenAI Vision API when available
+    // For now, return a placeholder that can be enhanced
+    try {
+      if (process.env.OPENAI_API_KEY && process.env.USE_OPENAI === 'true') {
+        // TODO: Implement OpenAI Vision API integration
+        // const { OpenAI } = require('openai');
+        // const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        // ... vision API call
+        console.log('🔮 AI image description would be generated here with OpenAI Vision API');
+      }
+      
+      return ''; // Placeholder for now
+    } catch (error) {
+      console.error('AI image description error:', error);
+      return '';
+    }
+  }
+
+  generateDesignInsights(visualAnalysis, aiDescription) {
+    const insights = [];
+    
+    // Composition insights
+    if (visualAnalysis.composition.includes('landscape')) {
+      insights.push('Wide format suitable for headers, banners, or panoramic displays');
+    }
+    if (visualAnalysis.composition.includes('portrait')) {
+      insights.push('Vertical format ideal for mobile interfaces or poster designs');
+    }
+    if (visualAnalysis.composition.includes('square')) {
+      insights.push('Square format perfect for social media or balanced layouts');
+    }
+    
+    // Color insights
+    if (visualAnalysis.colors.includes('light')) {
+      insights.push('Light palette suggests minimalist or clean aesthetic');
+    }
+    if (visualAnalysis.colors.includes('dark')) {
+      insights.push('Dark palette indicates dramatic or sophisticated mood');
+    }
+    
+    // Style insights
+    if (visualAnalysis.style.includes('sketch')) {
+      insights.push('Conceptual stage - good for ideation and iteration');
+    }
+    if (visualAnalysis.style.includes('polished')) {
+      insights.push('Finished work - ready for presentation or implementation');
+    }
+    
+    // Element insights
+    if (visualAnalysis.elements.includes('branding')) {
+      insights.push('Brand-related content - consider consistency with brand guidelines');
+    }
+    if (visualAnalysis.elements.includes('interface')) {
+      insights.push('UI/UX content - analyze for usability and user experience patterns');
+    }
+    
+    return insights.length > 0 ? insights : ['Visual content ready for creative analysis'];
   }
 
   // Content chunking for vector storage

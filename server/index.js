@@ -102,80 +102,176 @@ async function writeDB(data) {
   console.log('writeDB called - operations should use database.insertContent() directly');
 }
 
-// Extract metadata from URL
+// Extract metadata from URL with enhanced content filtering
 async function extractUrlMetadata(url) {
   try {
     const response = await axios.get(url, {
-      timeout: 10000,
+      timeout: 15000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; PersonalDataPWA/1.0)'
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     });
     
     const $ = cheerio.load(response.data);
     
-    // Smart content extraction - try multiple selectors for main article content
-    let mainContent = '';
+    // Remove unwanted elements FIRST before any content extraction
+    $('script, style, noscript, iframe, embed, object, applet').remove();
+    $('nav, header, footer, aside, .nav, .navigation, .navbar, .header, .footer, .sidebar').remove();
+    $('[class*="ad"], [id*="ad"], [class*="advertisement"], [id*="advertisement"]').remove();
+    $('[class*="banner"], [id*="banner"], [class*="popup"], [id*="popup"]').remove();
+    $('[class*="cookie"], [id*="cookie"], [class*="gdpr"], [id*="gdpr"]').remove();
+    $('[class*="social"], [id*="social"], [class*="share"], [id*="share"]').remove();
+    $('[class*="comment"], [id*="comment"], [class*="disqus"], [id*="disqus"]').remove();
+    $('[class*="related"], [id*="related"], [class*="recommend"], [id*="recommend"]').remove();
+    $('[class*="tag-manager"], [id*="tag-manager"], [data-gtm]').remove();
+    $('.gtm, #gtm, [class*="gtm"], [id*="gtm"]').remove();
     
-    // Try article-specific selectors first (most likely to contain main content)
+    // Smart content extraction - prioritize semantic HTML and common content patterns
+    let mainContent = '';
+    let contentSource = '';
+    
+    // Enhanced content selectors with priority order
     const contentSelectors = [
+      // Semantic HTML first
+      'article[role="main"]',
+      'main article',
       'article',
       'main',
-      '.article-content',
-      '.post-content', 
-      '.entry-content',
-      '.content-body',
-      '.article-body',
-      '.story-body',
-      '.post-body',
       '[role="main"]',
-      '.main-content',
-      '#content',
-      '.content',
-      // Blog platforms
+      
+      // Common content containers
+      '.post-content, .entry-content, .article-content',
+      '.content-body, .article-body, .post-body',
+      '.story-body, .story-content',
+      '.text-content, .main-content',
+      
+      // Platform-specific selectors
       '.notion-page-content',
-      '.medium-content',
-      '.wp-content',
-      // Documentation sites
+      '.medium-content, .postArticle-content',
+      '.wp-content, .entry',
       '.markdown-body',
       '.rst-content',
-      '.doc-content'
+      '.doc-content',
+      
+      // Generic fallbacks
+      '#content, .content',
+      '#main, .main',
+      '.container .row .col',
+      '.page-content'
     ];
     
-    // Try each selector until we find substantial content
+    // Try each selector group
     for (const selector of contentSelectors) {
-      const element = $(selector);
-      if (element.length > 0) {
-        const text = element.text().trim();
-        if (text.length > 200) { // Only use if substantial content
-          mainContent = text;
-          console.log(`📄 Extracted content using selector: ${selector}`);
+      const elements = $(selector);
+      if (elements.length > 0) {
+        // Get text from all matching elements
+        let candidateText = '';
+        elements.each((i, el) => {
+          const text = $(el).text().trim();
+          if (text.length > candidateText.length) {
+            candidateText = text;
+          }
+        });
+        
+        if (candidateText.length > 300) { // Require substantial content
+          mainContent = candidateText;
+          contentSource = selector;
+          console.log(`📄 Extracted content using selector: ${selector} (${candidateText.length} chars)`);
           break;
         }
       }
     }
     
-    // Fallback: if no good selector found, use body but clean it better
-    if (!mainContent) {
-      console.log('📄 Using fallback body extraction with cleaning');
-      // Remove common non-content elements
-      $('script, style, nav, header, footer, aside, .nav, .navigation, .menu, .sidebar, .ad, .advertisement, .banner, iframe').remove();
-      mainContent = $('body').text().trim();
+    // Enhanced fallback with better cleaning
+    if (!mainContent || mainContent.length < 200) {
+      console.log('📄 Using enhanced fallback extraction');
+      
+      // Remove more unwanted elements for fallback
+      $('button, input, select, textarea, form').remove();
+      $('.btn, .button, .link, .menu-item').remove();
+      $('[class*="meta"], [class*="date"], [class*="author"], [class*="byline"]').remove();
+      
+      // Try to get meaningful paragraphs
+      const paragraphs = $('p').map((i, el) => $(el).text().trim()).get();
+      const meaningfulParagraphs = paragraphs.filter(p => p.length > 50 && !p.match(/^(click|subscribe|follow|share|like)/i));
+      
+      if (meaningfulParagraphs.length > 0) {
+        mainContent = meaningfulParagraphs.join('\n\n');
+        contentSource = 'paragraph extraction';
+      } else {
+        // Last resort - clean body text
+        mainContent = $('body').text().trim();
+        contentSource = 'body fallback';
+      }
     }
     
-    // Clean up the content: remove excessive whitespace and limit length
+    // Enhanced content cleaning
     mainContent = mainContent
-      .replace(/\s+/g, ' ')  // Replace multiple whitespace with single space
+      .replace(/\s+/g, ' ')  // Normalize whitespace
       .replace(/\n\s*\n/g, '\n')  // Remove empty lines
-      .trim()
-      .substring(0, 2000); // Increase to 2000 chars for better content
+      .replace(/^[\s\n]+|[\s\n]+$/g, '')  // Trim
+      .replace(/(\w)\s+(\w)/g, '$1 $2')  // Fix word spacing
+      .replace(/[^\w\s\.\,\!\?\;\:\-\(\)\[\]\"\']/g, ' ')  // Remove special chars but keep punctuation
+      .replace(/\s{2,}/g, ' ')  // Final whitespace cleanup
+      .substring(0, 3000); // Increase limit for better content
+    
+    // Filter out common junk patterns
+    const junkPatterns = [
+      /^(accept|allow|enable|disable|click|tap|subscribe|follow|share|like|comment)/i,
+      /google tag manager/i,
+      /this website uses cookies/i,
+      /privacy policy|terms of service/i,
+      /advertisement|sponsored content/i
+    ];
+    
+    const contentLines = mainContent.split('\n').filter(line => {
+      const trimmed = line.trim();
+      return trimmed.length > 20 && !junkPatterns.some(pattern => pattern.test(trimmed));
+    });
+    
+    mainContent = contentLines.join('\n').trim();
+    
+    // Extract enhanced metadata
+    const title = $('title').text().trim() || 
+                 $('meta[property="og:title"]').attr('content') || 
+                 $('h1').first().text().trim() || 
+                 'No title';
+                 
+    const description = $('meta[name="description"]').attr('content') || 
+                       $('meta[property="og:description"]').attr('content') || 
+                       $('meta[name="twitter:description"]').attr('content') || 
+                       '';
+    
+    const author = $('meta[name="author"]').attr('content') || 
+                  $('[rel="author"]').text().trim() || 
+                  $('.author').first().text().trim() || 
+                  '';
+    
+    const publishDate = $('meta[property="article:published_time"]').attr('content') || 
+                       $('time[datetime]').attr('datetime') || 
+                       $('.date').first().text().trim() || 
+                       '';
+    
+    const keywords = $('meta[name="keywords"]').attr('content') || '';
+    
+    console.log(`📊 Content extraction summary:
+    - Source: ${contentSource}
+    - Title: ${title.substring(0, 50)}...
+    - Content length: ${mainContent.length} chars
+    - Author: ${author}
+    - Domain: ${new URL(url).hostname}`);
     
     return {
-      title: $('title').text().trim() || $('meta[property="og:title"]').attr('content') || 'No title',
-      description: $('meta[name="description"]').attr('content') || $('meta[property="og:description"]').attr('content') || '',
+      title: title.substring(0, 200),
+      description: description.substring(0, 500),
       content: mainContent,
       url: url,
       domain: new URL(url).hostname,
+      author: author,
+      publishDate: publishDate,
+      keywords: keywords,
+      contentSource: contentSource,
+      extractionQuality: mainContent.length > 500 ? 'high' : mainContent.length > 200 ? 'medium' : 'low',
       timestamp: new Date().toISOString()
     };
   } catch (error) {
@@ -187,7 +283,8 @@ async function extractUrlMetadata(url) {
       url: url,
       domain: new URL(url).hostname,
       timestamp: new Date().toISOString(),
-      error: error.message
+      error: error.message,
+      extractionQuality: 'failed'
     };
   }
 }
@@ -890,61 +987,163 @@ app.get('/api/debug/content', (req, res) => {
   }
 });
 
-// Simple GET share handler for URL sharing
+// Enhanced iOS share handler with better error handling and success rates
 app.get('/share', async (req, res) => {
   try {
-    console.log('=== iOS SHARE REQUEST ===');
+    console.log('=== iOS SHARE REQUEST (GET) ===');
     console.log('Query params:', req.query);
-    console.log('Headers:', req.headers);
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('User-Agent:', req.headers['user-agent']);
     
-    const { text, url, title } = req.query;
+    const { text, url, title, source } = req.query;
     
-    if (text || url || title) {
-      console.log('Share content found:', { text, url, title });
-      const contentText = [title, text, url].filter(Boolean).join('\n');
-      const existingContent = await database.getAllContent();
-      console.log('Current DB content count before share:', existingContent.length);
+    // Enhanced parameter extraction - handle various iOS shortcut formats
+    const extractedData = {
+      text: text || req.query.t || req.query.content,
+      url: url || req.query.u || req.query.link,
+      title: title || req.query.title || req.query.name,
+      source: source || 'ios_shortcut'
+    };
+    
+    console.log('Extracted share data:', extractedData);
+    
+    if (extractedData.text || extractedData.url || extractedData.title) {
+      console.log('✅ Valid share content found');
       
-      // Create content item in the same format as the main content processor
+      // Determine content type more intelligently
+      let contentType = 'text';
+      let primaryContent = extractedData.text || extractedData.title || '';
+      
+      if (extractedData.url) {
+        contentType = 'url';
+        primaryContent = extractedData.url;
+        
+        // Validate URL format
+        try {
+          new URL(extractedData.url);
+          console.log('✅ Valid URL format detected');
+        } catch (urlError) {
+          console.log('⚠️ Invalid URL format, treating as text');
+          contentType = 'text';
+          primaryContent = [extractedData.title, extractedData.text, extractedData.url].filter(Boolean).join('\n');
+        }
+      }
+      
+      const existingContent = await database.getAllContent();
+      console.log('📊 Current DB content count:', existingContent.length);
+      
+      // Create content item with enhanced metadata
       const contentItem = {
-        type: url ? 'url' : 'text',
-        content: url || contentText,
+        type: contentType,
+        content: primaryContent,
         metadata: {
-          title: title || 'Shared via iOS Shortcut',
-          sharedVia: 'ios_shortcut',
-          originalText: text,
-          originalUrl: url
+          title: extractedData.title || (contentType === 'url' ? 'Shared URL' : 'Shared Text'),
+          sharedVia: extractedData.source,
+          shareMethod: 'ios_get_request',
+          originalText: extractedData.text,
+          originalUrl: extractedData.url,
+          shareTimestamp: new Date().toISOString(),
+          userAgent: req.headers['user-agent'],
+          // Enhanced context for better processing
+          shareContext: {
+            hasText: !!extractedData.text,
+            hasUrl: !!extractedData.url,
+            hasTitle: !!extractedData.title,
+            contentLength: primaryContent.length
+          }
         }
       };
       
-      console.log('Processing shared item:', contentItem);
+      console.log('🔄 Processing shared item...');
       
-      // Use the same processing logic as the main content endpoint
-      const processed = await processContentItem(contentItem, existingContent);
-      console.log('Processed shared item:', processed);
+      // Use enhanced processing with timeout protection
+      const processed = await Promise.race([
+        processContentItem(contentItem, existingContent),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Processing timeout')), 15000)
+        )
+      ]);
       
-      // Save to database
-      await database.insertContent(processed);
-      console.log('Shared item saved to database');
+      console.log('✅ Content processed successfully');
       
-      // Add to vector database
-      try {
-        await vectorEngine.addContent(processed);
-        console.log('Shared content vectorized successfully');
-      } catch (vectorError) {
-        console.warn('Failed to vectorize shared content:', vectorError.message);
+      // Save to database with retry logic
+      let saveAttempts = 0;
+      const maxSaveAttempts = 3;
+      
+      while (saveAttempts < maxSaveAttempts) {
+        try {
+          await database.insertContent(processed);
+          console.log('✅ Shared item saved to database');
+          break;
+        } catch (saveError) {
+          saveAttempts++;
+          console.warn(`⚠️ Database save attempt ${saveAttempts} failed:`, saveError.message);
+          if (saveAttempts >= maxSaveAttempts) {
+            throw saveError;
+          }
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
       
+      // Add to vector database (non-blocking)
+      vectorEngine.addContent(processed)
+        .then(() => console.log('✅ Shared content vectorized successfully'))
+        .catch(vectorError => console.warn('⚠️ Vector processing failed (non-critical):', vectorError.message));
+      
       console.log('=== SHARE SUCCESS ===');
-      res.redirect('/share-success?items=1');
+      
+      // Enhanced success response with better iOS compatibility
+      const successUrl = `/share-success?items=1&type=${contentType}&source=${extractedData.source}`;
+      
+      // For iOS shortcuts, provide both redirect and JSON response
+      if (req.headers['user-agent']?.includes('Shortcuts') || req.query.format === 'json') {
+        res.json({
+          success: true,
+          message: 'Content shared successfully',
+          contentType: contentType,
+          itemsProcessed: 1,
+          redirectUrl: successUrl
+        });
+      } else {
+        res.redirect(successUrl);
+      }
+      
     } else {
-      console.log('No share content provided, redirecting to home');
-      res.redirect('/');
+      console.log('❌ No valid share content provided');
+      console.log('Available query params:', Object.keys(req.query));
+      
+      // Provide helpful error information
+      const errorUrl = `/share-error?reason=no_content&params=${encodeURIComponent(JSON.stringify(Object.keys(req.query)))}`;
+      
+      if (req.headers['user-agent']?.includes('Shortcuts') || req.query.format === 'json') {
+        res.status(400).json({
+          success: false,
+          error: 'No valid content provided',
+          availableParams: Object.keys(req.query),
+          expectedParams: ['text', 'url', 'title', 't', 'u', 'content', 'link'],
+          redirectUrl: errorUrl
+        });
+      } else {
+        res.redirect(errorUrl);
+      }
     }
   } catch (error) {
-    console.error('Share processing error:', error);
+    console.error('❌ Share processing error:', error);
     console.error('Error stack:', error.stack);
-    res.redirect('/share-error');
+    
+    const errorUrl = `/share-error?reason=processing_error&message=${encodeURIComponent(error.message)}`;
+    
+    if (req.headers['user-agent']?.includes('Shortcuts') || req.query.format === 'json') {
+      res.status(500).json({
+        success: false,
+        error: 'Processing failed',
+        details: error.message,
+        redirectUrl: errorUrl
+      });
+    } else {
+      res.redirect(errorUrl);
+    }
   }
 });
 

@@ -1,7 +1,8 @@
 
 import { useState, useRef } from 'react';
-import { Form, Button, Card, Alert, Badge } from 'react-bootstrap';
+import { Form, Button, Card, Alert, Badge, Collapse } from 'react-bootstrap';
 import ShareInstructions from './ShareInstructions';
+import IOSSetupGuide from './IOSSetupGuide';
 
 interface ContentItem {
   type: 'text' | 'file' | 'url';
@@ -22,6 +23,7 @@ function NoteForm() {
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -157,6 +159,23 @@ function NoteForm() {
       <h2>Universal Content Dropzone</h2>
       
       <ShareInstructions />
+      
+      {/* iOS Setup Guide Toggle */}
+      <div className="mb-4">
+        <Button 
+          variant="outline-success" 
+          onClick={() => setShowIOSGuide(!showIOSGuide)}
+          className="mb-2"
+        >
+          📱 {showIOSGuide ? 'Hide' : 'Show'} iOS Share Sheet Setup
+        </Button>
+        
+        <Collapse in={showIOSGuide}>
+          <div>
+            <IOSSetupGuide />
+          </div>
+        </Collapse>
+      </div>
       
       {/* Drag and Drop Zone */}
       <Card 
