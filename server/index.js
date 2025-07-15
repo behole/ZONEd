@@ -275,17 +275,77 @@ async function extractUrlMetadata(url) {
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    console.error('Error extracting URL metadata:', error.message);
-    return {
-      title: 'Failed to extract',
-      description: 'Could not fetch URL content',
-      content: '',
+    console.error('❌ Error extracting URL metadata:', error.message);
+    console.log('🔄 Attempting graceful fallback for URL:', url);
+    
+    // Determine error type for better handling
+    let errorType = 'unknown';
+    let fallbackContent = '';
+    let fallbackTitle = 'Shared URL';
+    
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      errorType = 'network';
+      fallbackContent = `Unable to access this URL due to network restrictions. The link has been saved for future reference.`;
+    } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      errorType = 'timeout';
+      fallbackContent = `This website took too long to respond, but the URL has been saved. You can try accessing it directly later.`;
+    } else if (error.response?.status === 403 || error.response?.status === 401) {
+      errorType = 'access_denied';
+      fallbackContent = `This website blocks automated access, but the URL has been saved for your reference.`;
+    } else if (error.response?.status === 404) {
+      errorType = 'not_found';
+      fallbackContent = `This page was not found (404), but the URL has been saved in case it becomes available later.`;
+    } else if (error.response?.status >= 500) {
+      errorType = 'server_error';
+      fallbackContent = `The website is experiencing issues, but the URL has been saved for later access.`;
+    } else {
+      fallbackContent = `Unable to extract content from this URL, but it has been saved for your reference.`;
+    }
+    
+    // Try to extract domain and create a meaningful title
+    try {
+      const urlObj = new URL(url);
+      const domain = urlObj.hostname.replace('www.', '');
+      fallbackTitle = `Content from ${domain}`;
+      
+      // Add path info if meaningful
+      if (urlObj.pathname && urlObj.pathname !== '/') {
+        const pathParts = urlObj.pathname.split('/').filter(Boolean);
+        if (pathParts.length > 0) {
+          const lastPart = pathParts[pathParts.length - 1];
+          if (lastPart && !lastPart.includes('.')) {
+            fallbackTitle += ` - ${lastPart.replace(/-/g, ' ').replace(/_/g, ' ')}`;
+          }
+        }
+      }
+    } catch (urlError) {
+      console.warn('Could not parse URL for fallback title:', urlError.message);
+    }
+    
+    // Create a meaningful fallback response
+    const fallbackResponse = {
+      title: fallbackTitle,
+      description: `Saved URL with ${errorType} error - content extraction failed but link preserved`,
+      content: `${fallbackContent}\n\nOriginal URL: ${url}\nSaved on: ${new Date().toLocaleString()}`,
       url: url,
-      domain: new URL(url).hostname,
+      domain: new URL(url).hostname.replace('www.', ''),
       timestamp: new Date().toISOString(),
       error: error.message,
-      extractionQuality: 'failed'
+      errorType: errorType,
+      extractionQuality: 'failed_with_fallback',
+      
+      // Add helpful metadata for failed extractions
+      fallbackData: {
+        canRetry: ['timeout', 'server_error', 'network'].includes(errorType),
+        userAction: errorType === 'access_denied' ? 'Visit URL directly in browser' : 
+                   errorType === 'not_found' ? 'Check if URL is correct' :
+                   'Try again later',
+        preservedForLater: true
+      }
     };
+    
+    console.log(`✅ Created fallback content for ${errorType} error:`, fallbackResponse.title);
+    return fallbackResponse;
   }
 }
 

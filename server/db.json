@@ -1,4 +1,1397 @@
 {
   "notes": [],
-  "content": []
+  "content": [
+    {
+      "id": 1752603545322,
+      "type": "url",
+      "timestamp": "2025-07-15T18:19:04.620Z",
+      "processed": true,
+      "content": "https://www.nytimes.com/2025/07/08/magazine/fda-collapse-rfk-kennedy.html",
+      "extractedContent": "",
+      "cleanedContent": "",
+      "chunks": [
+        {
+          "text": "",
+          "index": 0
+        }
+      ],
+      "keywords": [],
+      "fingerprint": "",
+      "metadata": {
+        "url": "https://www.nytimes.com/2025/07/08/magazine/fda-collapse-rfk-kennedy.html",
+        "title": "Failed to extract",
+        "description": "Could not fetch URL content",
+        "content": "",
+        "domain": "www.nytimes.com",
+        "timestamp": "2025-07-15T18:19:04.875Z",
+        "error": "Request failed with status code 403",
+        "extractionQuality": "failed",
+        "chunkCount": 1
+      },
+      "submissions": [
+        {
+          "timestamp": "2025-07-15T18:19:04.876Z",
+          "source": "content_api",
+          "type": "url",
+          "metadata": {
+            "url": "https://www.nytimes.com/2025/07/08/magazine/fda-collapse-rfk-kennedy.html"
+          }
+        }
+      ],
+      "importanceScore": 1,
+      "submissionPatterns": {
+        "velocity": "low",
+        "trend": "stable",
+        "submissionSources": {
+          "content_api": 1
+        },
+        "totalSubmissions": 1,
+        "timeSpan": {
+          "hours": 0,
+          "days": 0,
+          "earliest": "2025-07-15T18:19:04.876Z",
+          "latest": "2025-07-15T18:19:04.876Z"
+        }
+      },
+      "urgencyAssessment": {
+        "level": "normal",
+        "reasons": [],
+        "shouldPrioritize": false
+      },
+      "contextualTags": [
+        "single_source",
+        "rapid_fire"
+      ],
+      "lastSubmission": "2025-07-15T18:19:04.876Z",
+      "submissionCount": 1
+    },
+    {
+      "id": 1752603669041,
+      "type": "url",
+      "timestamp": "2025-07-15T18:21:08.165Z",
+      "processed": true,
+      "content": "https://www.cnbc.com/2025/07/14/anthropic-google-openai-xai-granted-up-to-200-million-from-dod.html",
+      "extractedContent": "The U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million to several AI companies.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of AI solutions.The recipients of the contract awards include Anthropic, Google, OpenAI and xAI.A view of the Pentagon on December 13, 2024, in Washington, DC. Home to the US Defense Department, the Pentagon is one of the world's largest office buildings.Daniel Slim Afp Getty ImagesThe U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million for artificial intelligence development at Anthropic, Google, OpenAI and xAI.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of \"advanced AI capabilities to address critical national security challenges.\" The companies will work to develop AI agents across several mission areas at the agency.\"The adoption of AI is transforming the Department's ability to support our warfighters and maintain strategic advantage over our adversaries,\" Doug Matty, the DoD's chief digital and AI officer, said in a release.Elon Musk's xAI also announced Grok for Government on Monday, which is a suite of products that make the company's models available to U.S. government customers. The products are available through the General Services Administration (GSA) schedule, which allows federal government departments, agencies, or offices to purchase them, according to a post on X.Musk's AI startup has launched a new version of Grok and Grok for Government services after the chatbot generated and spread anti-semitic posts and other offensive content, sparking a backlash. OpenAI was previously awarded a year-long 200 million contract from the DoD in 2024, shortly after it said it would collaborate with defense technology startup Anduril to deploy advanced AI systems for \"national security missions.\"In June, the company launched OpenAI for Government for U.S. federal, state, and local government workers.WATCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+      "cleanedContent": "The U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million to several AI companies.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of AI solutions.The recipients of the contract awards include Anthropic, Google, OpenAI and xAI.A view of the Pentagon on December 13, 2024, in Washington, DC. Home to the US Defense Department, the Pentagon is one of the world's largest office buildings.Daniel Slim Afp Getty ImagesThe U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million for artificial intelligence development at Anthropic, Google, OpenAI and xAI.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of \"advanced AI capabilities to address critical national security challenges.\" The companies will work to develop AI agents across several mission areas at the agency.\"The adoption of AI is transforming the Department's ability to support our warfighters and maintain strategic advantage over our adversaries,\" Doug Matty, the DoD's chief digital and AI officer, said in a release.Elon Musk's xAI also announced Grok for Government on Monday, which is a suite of products that make the company's models available to U.S. government customers. The products are available through the General Services Administration (GSA) schedule, which allows federal government departments, agencies, or offices to purchase them, according to a post on X.Musk's AI startup has launched a new version of Grok and Grok for Government services after the chatbot generated and spread anti-semitic posts and other offensive content, sparking a backlash. OpenAI was previously awarded a year-long 200 million contract from the DoD in 2024, shortly after it said it would collaborate with defense technology startup Anduril to deploy advanced AI systems for \"national security missions.\"In June, the company launched OpenAI for Government for U.S. federal, state, and local government workers.WATCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+      "chunks": [
+        {
+          "text": "The U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million to several AI companies.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of AI solutions.The recipients of the contract awards include Anthropic, Google, OpenAI and xAI.A view of the Pentagon on December 13, 2024, in Washington, DC. Home to the US Defense Department, the Pentagon is one of the world's largest office buildings.Daniel Slim Afp Getty ImagesThe U.S.",
+          "index": 0,
+          "startPos": 0,
+          "endPos": 533
+        },
+        {
+          "text": "xAI.A view of the Pentagon on December 13, 2024, in Washington, DC. Home to the US Defense Department, the Pentagon is one of the world's largest office buildings.Daniel Slim Afp Getty ImagesThe U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million for artificial intelligence development at Anthropic, Google, OpenAI and xAI.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of \"advanced AI capabilities to address critical national security challenges.\" The companies will work to develop AI agents across several mission areas at the agency.\"The adoption of AI is transforming the Department's ability to support our warfighters and maintain strategic advantage over our adversaries,\" Doug Matty, the DoD's chief digital and AI officer, said in a release.Elon Musk's xAI also announced Grok for Government on Monday, which is a suite of products that make the company's models available t",
+          "index": 1,
+          "startPos": 333,
+          "endPos": 1333
+        },
+        {
+          "text": "g Matty, the DoD's chief digital and AI officer, said in a release.Elon Musk's xAI also announced Grok for Government on Monday, which is a suite of products that make the company's models available to U.S. government customers. The products are available through the General Services Administration (GSA) schedule, which allows federal government departments, agencies, or offices to purchase them, according to a post on X.Musk's AI startup has launched a new version of Grok and Grok for Government services after the chatbot generated and spread anti-semitic posts and other offensive content, sparking a backlash. OpenAI was previously awarded a year-long 200 million contract from the DoD in 2024, shortly after it said it would collaborate with defense technology startup Anduril to deploy advanced AI systems for \"national security missions.\"In June, the company launched OpenAI for Government for U.S.",
+          "index": 2,
+          "startPos": 1133,
+          "endPos": 2044
+        },
+        {
+          "text": "after it said it would collaborate with defense technology startup Anduril to deploy advanced AI systems for \"national security missions.\"In June, the company launched OpenAI for Government for U.S. federal, state, and local government workers.WATCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 3,
+          "startPos": 1844,
+          "endPos": 2288
+        },
+        {
+          "text": ".WATCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 4,
+          "startPos": 2088,
+          "endPos": 2288
+        },
+        {
+          "text": "WATCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 5,
+          "startPos": 2089,
+          "endPos": 2288
+        },
+        {
+          "text": "ATCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 6,
+          "startPos": 2090,
+          "endPos": 2288
+        },
+        {
+          "text": "TCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 7,
+          "startPos": 2091,
+          "endPos": 2288
+        },
+        {
+          "text": "CH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 8,
+          "startPos": 2092,
+          "endPos": 2288
+        },
+        {
+          "text": "H: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 9,
+          "startPos": 2093,
+          "endPos": 2288
+        },
+        {
+          "text": ": US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 10,
+          "startPos": 2094,
+          "endPos": 2288
+        },
+        {
+          "text": "US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 11,
+          "startPos": 2095,
+          "endPos": 2288
+        },
+        {
+          "text": "US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 12,
+          "startPos": 2096,
+          "endPos": 2288
+        },
+        {
+          "text": "S needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 13,
+          "startPos": 2097,
+          "endPos": 2288
+        },
+        {
+          "text": "needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 14,
+          "startPos": 2098,
+          "endPos": 2288
+        },
+        {
+          "text": "needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 15,
+          "startPos": 2099,
+          "endPos": 2288
+        },
+        {
+          "text": "eeds an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 16,
+          "startPos": 2100,
+          "endPos": 2288
+        },
+        {
+          "text": "eds an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 17,
+          "startPos": 2101,
+          "endPos": 2288
+        },
+        {
+          "text": "ds an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 18,
+          "startPos": 2102,
+          "endPos": 2288
+        },
+        {
+          "text": "s an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 19,
+          "startPos": 2103,
+          "endPos": 2288
+        },
+        {
+          "text": "an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 20,
+          "startPos": 2104,
+          "endPos": 2288
+        },
+        {
+          "text": "an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 21,
+          "startPos": 2105,
+          "endPos": 2288
+        },
+        {
+          "text": "n allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 22,
+          "startPos": 2106,
+          "endPos": 2288
+        },
+        {
+          "text": "allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 23,
+          "startPos": 2107,
+          "endPos": 2288
+        },
+        {
+          "text": "allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 24,
+          "startPos": 2108,
+          "endPos": 2288
+        },
+        {
+          "text": "llied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 25,
+          "startPos": 2109,
+          "endPos": 2288
+        },
+        {
+          "text": "lied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 26,
+          "startPos": 2110,
+          "endPos": 2288
+        },
+        {
+          "text": "ied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 27,
+          "startPos": 2111,
+          "endPos": 2288
+        },
+        {
+          "text": "ed strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 28,
+          "startPos": 2112,
+          "endPos": 2288
+        },
+        {
+          "text": "d strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 29,
+          "startPos": 2113,
+          "endPos": 2288
+        },
+        {
+          "text": "strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 30,
+          "startPos": 2114,
+          "endPos": 2288
+        },
+        {
+          "text": "strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 31,
+          "startPos": 2115,
+          "endPos": 2288
+        },
+        {
+          "text": "trategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 32,
+          "startPos": 2116,
+          "endPos": 2288
+        },
+        {
+          "text": "rategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 33,
+          "startPos": 2117,
+          "endPos": 2288
+        },
+        {
+          "text": "ategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 34,
+          "startPos": 2118,
+          "endPos": 2288
+        },
+        {
+          "text": "tegy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 35,
+          "startPos": 2119,
+          "endPos": 2288
+        },
+        {
+          "text": "egy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 36,
+          "startPos": 2120,
+          "endPos": 2288
+        },
+        {
+          "text": "gy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 37,
+          "startPos": 2121,
+          "endPos": 2288
+        },
+        {
+          "text": "y for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 38,
+          "startPos": 2122,
+          "endPos": 2288
+        },
+        {
+          "text": "for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 39,
+          "startPos": 2123,
+          "endPos": 2288
+        },
+        {
+          "text": "for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 40,
+          "startPos": 2124,
+          "endPos": 2288
+        },
+        {
+          "text": "or AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 41,
+          "startPos": 2125,
+          "endPos": 2288
+        },
+        {
+          "text": "r AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 42,
+          "startPos": 2126,
+          "endPos": 2288
+        },
+        {
+          "text": "AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 43,
+          "startPos": 2127,
+          "endPos": 2288
+        },
+        {
+          "text": "AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 44,
+          "startPos": 2128,
+          "endPos": 2288
+        },
+        {
+          "text": "I investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 45,
+          "startPos": 2129,
+          "endPos": 2288
+        },
+        {
+          "text": "investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 46,
+          "startPos": 2130,
+          "endPos": 2288
+        },
+        {
+          "text": "investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 47,
+          "startPos": 2131,
+          "endPos": 2288
+        },
+        {
+          "text": "nvestment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 48,
+          "startPos": 2132,
+          "endPos": 2288
+        },
+        {
+          "text": "vestment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 49,
+          "startPos": 2133,
+          "endPos": 2288
+        },
+        {
+          "text": "estment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 50,
+          "startPos": 2134,
+          "endPos": 2288
+        },
+        {
+          "text": "stment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 51,
+          "startPos": 2135,
+          "endPos": 2288
+        },
+        {
+          "text": "tment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 52,
+          "startPos": 2136,
+          "endPos": 2288
+        },
+        {
+          "text": "ment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 53,
+          "startPos": 2137,
+          "endPos": 2288
+        },
+        {
+          "text": "ent in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 54,
+          "startPos": 2138,
+          "endPos": 2288
+        },
+        {
+          "text": "nt in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 55,
+          "startPos": 2139,
+          "endPos": 2288
+        },
+        {
+          "text": "t in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 56,
+          "startPos": 2140,
+          "endPos": 2288
+        },
+        {
+          "text": "in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 57,
+          "startPos": 2141,
+          "endPos": 2288
+        },
+        {
+          "text": "in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 58,
+          "startPos": 2142,
+          "endPos": 2288
+        },
+        {
+          "text": "n military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 59,
+          "startPos": 2143,
+          "endPos": 2288
+        },
+        {
+          "text": "military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 60,
+          "startPos": 2144,
+          "endPos": 2288
+        },
+        {
+          "text": "military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 61,
+          "startPos": 2145,
+          "endPos": 2288
+        },
+        {
+          "text": "ilitary and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 62,
+          "startPos": 2146,
+          "endPos": 2288
+        },
+        {
+          "text": "litary and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 63,
+          "startPos": 2147,
+          "endPos": 2288
+        },
+        {
+          "text": "itary and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 64,
+          "startPos": 2148,
+          "endPos": 2288
+        },
+        {
+          "text": "tary and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 65,
+          "startPos": 2149,
+          "endPos": 2288
+        },
+        {
+          "text": "ary and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 66,
+          "startPos": 2150,
+          "endPos": 2288
+        },
+        {
+          "text": "ry and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 67,
+          "startPos": 2151,
+          "endPos": 2288
+        },
+        {
+          "text": "y and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 68,
+          "startPos": 2152,
+          "endPos": 2288
+        },
+        {
+          "text": "and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 69,
+          "startPos": 2153,
+          "endPos": 2288
+        },
+        {
+          "text": "and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 70,
+          "startPos": 2154,
+          "endPos": 2288
+        },
+        {
+          "text": "nd defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 71,
+          "startPos": 2155,
+          "endPos": 2288
+        },
+        {
+          "text": "d defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 72,
+          "startPos": 2156,
+          "endPos": 2288
+        },
+        {
+          "text": "defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 73,
+          "startPos": 2157,
+          "endPos": 2288
+        },
+        {
+          "text": "defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 74,
+          "startPos": 2158,
+          "endPos": 2288
+        },
+        {
+          "text": "efense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 75,
+          "startPos": 2159,
+          "endPos": 2288
+        },
+        {
+          "text": "fense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 76,
+          "startPos": 2160,
+          "endPos": 2288
+        },
+        {
+          "text": "ense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 77,
+          "startPos": 2161,
+          "endPos": 2288
+        },
+        {
+          "text": "nse: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 78,
+          "startPos": 2162,
+          "endPos": 2288
+        },
+        {
+          "text": "se: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 79,
+          "startPos": 2163,
+          "endPos": 2288
+        },
+        {
+          "text": "e: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 80,
+          "startPos": 2164,
+          "endPos": 2288
+        },
+        {
+          "text": ": Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 81,
+          "startPos": 2165,
+          "endPos": 2288
+        },
+        {
+          "text": "Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 82,
+          "startPos": 2166,
+          "endPos": 2288
+        },
+        {
+          "text": "Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 83,
+          "startPos": 2167,
+          "endPos": 2288
+        },
+        {
+          "text": "alantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 84,
+          "startPos": 2168,
+          "endPos": 2288
+        },
+        {
+          "text": "lantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 85,
+          "startPos": 2169,
+          "endPos": 2288
+        },
+        {
+          "text": "antirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 86,
+          "startPos": 2170,
+          "endPos": 2288
+        },
+        {
+          "text": "ntirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 87,
+          "startPos": 2171,
+          "endPos": 2288
+        },
+        {
+          "text": "tirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 88,
+          "startPos": 2172,
+          "endPos": 2288
+        },
+        {
+          "text": "irwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 89,
+          "startPos": 2173,
+          "endPos": 2288
+        },
+        {
+          "text": "rwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 90,
+          "startPos": 2174,
+          "endPos": 2288
+        },
+        {
+          "text": "watch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 91,
+          "startPos": 2175,
+          "endPos": 2288
+        },
+        {
+          "text": "atch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 92,
+          "startPos": 2176,
+          "endPos": 2288
+        },
+        {
+          "text": "tch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 93,
+          "startPos": 2177,
+          "endPos": 2288
+        },
+        {
+          "text": "ch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 94,
+          "startPos": 2178,
+          "endPos": 2288
+        },
+        {
+          "text": "h nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 95,
+          "startPos": 2179,
+          "endPos": 2288
+        },
+        {
+          "text": "nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 96,
+          "startPos": 2180,
+          "endPos": 2288
+        },
+        {
+          "text": "nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 97,
+          "startPos": 2181,
+          "endPos": 2288
+        },
+        {
+          "text": "owVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 98,
+          "startPos": 2182,
+          "endPos": 2288
+        },
+        {
+          "text": "wVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 99,
+          "startPos": 2183,
+          "endPos": 2288
+        },
+        {
+          "text": "VIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 100,
+          "startPos": 2184,
+          "endPos": 2288
+        },
+        {
+          "text": "IDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 101,
+          "startPos": 2185,
+          "endPos": 2288
+        },
+        {
+          "text": "DEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 102,
+          "startPos": 2186,
+          "endPos": 2288
+        },
+        {
+          "text": "EO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 103,
+          "startPos": 2187,
+          "endPos": 2288
+        },
+        {
+          "text": "O03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 104,
+          "startPos": 2188,
+          "endPos": 2288
+        },
+        {
+          "text": "03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 105,
+          "startPos": 2189,
+          "endPos": 2288
+        },
+        {
+          "text": "3:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 106,
+          "startPos": 2190,
+          "endPos": 2288
+        },
+        {
+          "text": ":17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 107,
+          "startPos": 2191,
+          "endPos": 2288
+        },
+        {
+          "text": "17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 108,
+          "startPos": 2192,
+          "endPos": 2288
+        },
+        {
+          "text": "7US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 109,
+          "startPos": 2193,
+          "endPos": 2288
+        },
+        {
+          "text": "US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 110,
+          "startPos": 2194,
+          "endPos": 2288
+        },
+        {
+          "text": "S needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 111,
+          "startPos": 2195,
+          "endPos": 2288
+        },
+        {
+          "text": "needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 112,
+          "startPos": 2196,
+          "endPos": 2288
+        },
+        {
+          "text": "needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 113,
+          "startPos": 2197,
+          "endPos": 2288
+        },
+        {
+          "text": "eeds an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 114,
+          "startPos": 2198,
+          "endPos": 2288
+        },
+        {
+          "text": "eds an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 115,
+          "startPos": 2199,
+          "endPos": 2288
+        },
+        {
+          "text": "ds an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 116,
+          "startPos": 2200,
+          "endPos": 2288
+        },
+        {
+          "text": "s an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 117,
+          "startPos": 2201,
+          "endPos": 2288
+        },
+        {
+          "text": "an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 118,
+          "startPos": 2202,
+          "endPos": 2288
+        },
+        {
+          "text": "an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 119,
+          "startPos": 2203,
+          "endPos": 2288
+        },
+        {
+          "text": "n allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 120,
+          "startPos": 2204,
+          "endPos": 2288
+        },
+        {
+          "text": "allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 121,
+          "startPos": 2205,
+          "endPos": 2288
+        },
+        {
+          "text": "allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 122,
+          "startPos": 2206,
+          "endPos": 2288
+        },
+        {
+          "text": "llied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 123,
+          "startPos": 2207,
+          "endPos": 2288
+        },
+        {
+          "text": "lied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 124,
+          "startPos": 2208,
+          "endPos": 2288
+        },
+        {
+          "text": "ied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 125,
+          "startPos": 2209,
+          "endPos": 2288
+        },
+        {
+          "text": "ed strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 126,
+          "startPos": 2210,
+          "endPos": 2288
+        },
+        {
+          "text": "d strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 127,
+          "startPos": 2211,
+          "endPos": 2288
+        },
+        {
+          "text": "strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 128,
+          "startPos": 2212,
+          "endPos": 2288
+        },
+        {
+          "text": "strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 129,
+          "startPos": 2213,
+          "endPos": 2288
+        },
+        {
+          "text": "trategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 130,
+          "startPos": 2214,
+          "endPos": 2288
+        },
+        {
+          "text": "rategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 131,
+          "startPos": 2215,
+          "endPos": 2288
+        },
+        {
+          "text": "ategy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 132,
+          "startPos": 2216,
+          "endPos": 2288
+        },
+        {
+          "text": "tegy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 133,
+          "startPos": 2217,
+          "endPos": 2288
+        },
+        {
+          "text": "egy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 134,
+          "startPos": 2218,
+          "endPos": 2288
+        },
+        {
+          "text": "gy for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 135,
+          "startPos": 2219,
+          "endPos": 2288
+        },
+        {
+          "text": "y for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 136,
+          "startPos": 2220,
+          "endPos": 2288
+        },
+        {
+          "text": "for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 137,
+          "startPos": 2221,
+          "endPos": 2288
+        },
+        {
+          "text": "for AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 138,
+          "startPos": 2222,
+          "endPos": 2288
+        },
+        {
+          "text": "or AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 139,
+          "startPos": 2223,
+          "endPos": 2288
+        },
+        {
+          "text": "r AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 140,
+          "startPos": 2224,
+          "endPos": 2288
+        },
+        {
+          "text": "AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 141,
+          "startPos": 2225,
+          "endPos": 2288
+        },
+        {
+          "text": "AI investment in military and defense: PalantirSquawk Box Asia",
+          "index": 142,
+          "startPos": 2226,
+          "endPos": 2288
+        },
+        {
+          "text": "I investment in military and defense: PalantirSquawk Box Asia",
+          "index": 143,
+          "startPos": 2227,
+          "endPos": 2288
+        },
+        {
+          "text": "investment in military and defense: PalantirSquawk Box Asia",
+          "index": 144,
+          "startPos": 2228,
+          "endPos": 2288
+        },
+        {
+          "text": "investment in military and defense: PalantirSquawk Box Asia",
+          "index": 145,
+          "startPos": 2229,
+          "endPos": 2288
+        },
+        {
+          "text": "nvestment in military and defense: PalantirSquawk Box Asia",
+          "index": 146,
+          "startPos": 2230,
+          "endPos": 2288
+        },
+        {
+          "text": "vestment in military and defense: PalantirSquawk Box Asia",
+          "index": 147,
+          "startPos": 2231,
+          "endPos": 2288
+        },
+        {
+          "text": "estment in military and defense: PalantirSquawk Box Asia",
+          "index": 148,
+          "startPos": 2232,
+          "endPos": 2288
+        },
+        {
+          "text": "stment in military and defense: PalantirSquawk Box Asia",
+          "index": 149,
+          "startPos": 2233,
+          "endPos": 2288
+        },
+        {
+          "text": "tment in military and defense: PalantirSquawk Box Asia",
+          "index": 150,
+          "startPos": 2234,
+          "endPos": 2288
+        },
+        {
+          "text": "ment in military and defense: PalantirSquawk Box Asia",
+          "index": 151,
+          "startPos": 2235,
+          "endPos": 2288
+        },
+        {
+          "text": "ent in military and defense: PalantirSquawk Box Asia",
+          "index": 152,
+          "startPos": 2236,
+          "endPos": 2288
+        },
+        {
+          "text": "nt in military and defense: PalantirSquawk Box Asia",
+          "index": 153,
+          "startPos": 2237,
+          "endPos": 2288
+        },
+        {
+          "text": "t in military and defense: PalantirSquawk Box Asia",
+          "index": 154,
+          "startPos": 2238,
+          "endPos": 2288
+        },
+        {
+          "text": "in military and defense: PalantirSquawk Box Asia",
+          "index": 155,
+          "startPos": 2239,
+          "endPos": 2288
+        },
+        {
+          "text": "in military and defense: PalantirSquawk Box Asia",
+          "index": 156,
+          "startPos": 2240,
+          "endPos": 2288
+        },
+        {
+          "text": "n military and defense: PalantirSquawk Box Asia",
+          "index": 157,
+          "startPos": 2241,
+          "endPos": 2288
+        },
+        {
+          "text": "military and defense: PalantirSquawk Box Asia",
+          "index": 158,
+          "startPos": 2242,
+          "endPos": 2288
+        },
+        {
+          "text": "military and defense: PalantirSquawk Box Asia",
+          "index": 159,
+          "startPos": 2243,
+          "endPos": 2288
+        },
+        {
+          "text": "ilitary and defense: PalantirSquawk Box Asia",
+          "index": 160,
+          "startPos": 2244,
+          "endPos": 2288
+        },
+        {
+          "text": "litary and defense: PalantirSquawk Box Asia",
+          "index": 161,
+          "startPos": 2245,
+          "endPos": 2288
+        },
+        {
+          "text": "itary and defense: PalantirSquawk Box Asia",
+          "index": 162,
+          "startPos": 2246,
+          "endPos": 2288
+        },
+        {
+          "text": "tary and defense: PalantirSquawk Box Asia",
+          "index": 163,
+          "startPos": 2247,
+          "endPos": 2288
+        },
+        {
+          "text": "ary and defense: PalantirSquawk Box Asia",
+          "index": 164,
+          "startPos": 2248,
+          "endPos": 2288
+        },
+        {
+          "text": "ry and defense: PalantirSquawk Box Asia",
+          "index": 165,
+          "startPos": 2249,
+          "endPos": 2288
+        },
+        {
+          "text": "y and defense: PalantirSquawk Box Asia",
+          "index": 166,
+          "startPos": 2250,
+          "endPos": 2288
+        },
+        {
+          "text": "and defense: PalantirSquawk Box Asia",
+          "index": 167,
+          "startPos": 2251,
+          "endPos": 2288
+        },
+        {
+          "text": "and defense: PalantirSquawk Box Asia",
+          "index": 168,
+          "startPos": 2252,
+          "endPos": 2288
+        },
+        {
+          "text": "nd defense: PalantirSquawk Box Asia",
+          "index": 169,
+          "startPos": 2253,
+          "endPos": 2288
+        },
+        {
+          "text": "d defense: PalantirSquawk Box Asia",
+          "index": 170,
+          "startPos": 2254,
+          "endPos": 2288
+        },
+        {
+          "text": "defense: PalantirSquawk Box Asia",
+          "index": 171,
+          "startPos": 2255,
+          "endPos": 2288
+        },
+        {
+          "text": "defense: PalantirSquawk Box Asia",
+          "index": 172,
+          "startPos": 2256,
+          "endPos": 2288
+        },
+        {
+          "text": "efense: PalantirSquawk Box Asia",
+          "index": 173,
+          "startPos": 2257,
+          "endPos": 2288
+        },
+        {
+          "text": "fense: PalantirSquawk Box Asia",
+          "index": 174,
+          "startPos": 2258,
+          "endPos": 2288
+        },
+        {
+          "text": "ense: PalantirSquawk Box Asia",
+          "index": 175,
+          "startPos": 2259,
+          "endPos": 2288
+        },
+        {
+          "text": "nse: PalantirSquawk Box Asia",
+          "index": 176,
+          "startPos": 2260,
+          "endPos": 2288
+        },
+        {
+          "text": "se: PalantirSquawk Box Asia",
+          "index": 177,
+          "startPos": 2261,
+          "endPos": 2288
+        },
+        {
+          "text": "e: PalantirSquawk Box Asia",
+          "index": 178,
+          "startPos": 2262,
+          "endPos": 2288
+        },
+        {
+          "text": ": PalantirSquawk Box Asia",
+          "index": 179,
+          "startPos": 2263,
+          "endPos": 2288
+        },
+        {
+          "text": "PalantirSquawk Box Asia",
+          "index": 180,
+          "startPos": 2264,
+          "endPos": 2288
+        },
+        {
+          "text": "PalantirSquawk Box Asia",
+          "index": 181,
+          "startPos": 2265,
+          "endPos": 2288
+        },
+        {
+          "text": "alantirSquawk Box Asia",
+          "index": 182,
+          "startPos": 2266,
+          "endPos": 2288
+        },
+        {
+          "text": "lantirSquawk Box Asia",
+          "index": 183,
+          "startPos": 2267,
+          "endPos": 2288
+        },
+        {
+          "text": "antirSquawk Box Asia",
+          "index": 184,
+          "startPos": 2268,
+          "endPos": 2288
+        },
+        {
+          "text": "ntirSquawk Box Asia",
+          "index": 185,
+          "startPos": 2269,
+          "endPos": 2288
+        },
+        {
+          "text": "tirSquawk Box Asia",
+          "index": 186,
+          "startPos": 2270,
+          "endPos": 2288
+        },
+        {
+          "text": "irSquawk Box Asia",
+          "index": 187,
+          "startPos": 2271,
+          "endPos": 2288
+        },
+        {
+          "text": "rSquawk Box Asia",
+          "index": 188,
+          "startPos": 2272,
+          "endPos": 2288
+        },
+        {
+          "text": "Squawk Box Asia",
+          "index": 189,
+          "startPos": 2273,
+          "endPos": 2288
+        },
+        {
+          "text": "quawk Box Asia",
+          "index": 190,
+          "startPos": 2274,
+          "endPos": 2288
+        },
+        {
+          "text": "uawk Box Asia",
+          "index": 191,
+          "startPos": 2275,
+          "endPos": 2288
+        },
+        {
+          "text": "awk Box Asia",
+          "index": 192,
+          "startPos": 2276,
+          "endPos": 2288
+        },
+        {
+          "text": "wk Box Asia",
+          "index": 193,
+          "startPos": 2277,
+          "endPos": 2288
+        },
+        {
+          "text": "k Box Asia",
+          "index": 194,
+          "startPos": 2278,
+          "endPos": 2288
+        },
+        {
+          "text": "Box Asia",
+          "index": 195,
+          "startPos": 2279,
+          "endPos": 2288
+        },
+        {
+          "text": "Box Asia",
+          "index": 196,
+          "startPos": 2280,
+          "endPos": 2288
+        },
+        {
+          "text": "ox Asia",
+          "index": 197,
+          "startPos": 2281,
+          "endPos": 2288
+        },
+        {
+          "text": "x Asia",
+          "index": 198,
+          "startPos": 2282,
+          "endPos": 2288
+        },
+        {
+          "text": "Asia",
+          "index": 199,
+          "startPos": 2283,
+          "endPos": 2288
+        },
+        {
+          "text": "Asia",
+          "index": 200,
+          "startPos": 2284,
+          "endPos": 2288
+        },
+        {
+          "text": "sia",
+          "index": 201,
+          "startPos": 2285,
+          "endPos": 2288
+        },
+        {
+          "text": "ia",
+          "index": 202,
+          "startPos": 2286,
+          "endPos": 2288
+        },
+        {
+          "text": "a",
+          "index": 203,
+          "startPos": 2287,
+          "endPos": 2288
+        }
+      ],
+      "keywords": [
+        {
+          "word": "defense",
+          "count": 6
+        },
+        {
+          "word": "said",
+          "count": 6
+        },
+        {
+          "word": "government",
+          "count": 6
+        },
+        {
+          "word": "awards",
+          "count": 5
+        },
+        {
+          "word": "department",
+          "count": 4
+        },
+        {
+          "word": "contract",
+          "count": 4
+        },
+        {
+          "word": "openai",
+          "count": 4
+        },
+        {
+          "word": "monday",
+          "count": 3
+        },
+        {
+          "word": "million",
+          "count": 3
+        },
+        {
+          "word": "chief",
+          "count": 3
+        }
+      ],
+      "fingerprint": "b5unt6",
+      "metadata": {
+        "url": "https://www.cnbc.com/2025/07/14/anthropic-google-openai-xai-granted-up-to-200-million-from-dod.html",
+        "title": "Anthropic, Google, OpenAI, xAI granted up to $200 million from DoD",
+        "description": "The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of AI solutions.",
+        "content": "The U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million to several AI companies.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of AI solutions.The recipients of the contract awards include Anthropic, Google, OpenAI and xAI.A view of the Pentagon on December 13, 2024, in Washington, DC. Home to the US Defense Department, the Pentagon is one of the world's largest office buildings.Daniel Slim Afp Getty ImagesThe U.S. Department of Defense on Monday said it's granting contract awards of up to 200 million for artificial intelligence development at Anthropic, Google, OpenAI and xAI.The DoD's Chief Digital and Artificial Intelligence Office said the awards will help the agency accelerate its adoption of \"advanced AI capabilities to address critical national security challenges.\" The companies will work to develop AI agents across several mission areas at the agency.\"The adoption of AI is transforming the Department's ability to support our warfighters and maintain strategic advantage over our adversaries,\" Doug Matty, the DoD's chief digital and AI officer, said in a release.Elon Musk's xAI also announced Grok for Government on Monday, which is a suite of products that make the company's models available to U.S. government customers. The products are available through the General Services Administration (GSA) schedule, which allows federal government departments, agencies, or offices to purchase them, according to a post on X.Musk's AI startup has launched a new version of Grok and Grok for Government services after the chatbot generated and spread anti-semitic posts and other offensive content, sparking a backlash. OpenAI was previously awarded a year-long 200 million contract from the DoD in 2024, shortly after it said it would collaborate with defense technology startup Anduril to deploy advanced AI systems for \"national security missions.\"In June, the company launched OpenAI for Government for U.S. federal, state, and local government workers.WATCH: US needs an allied strategy for AI investment in military and defense: Palantirwatch nowVIDEO03:17US needs an allied strategy for AI investment in military and defense: PalantirSquawk Box Asia",
+        "domain": "www.cnbc.com",
+        "author": "Ashley Capoot",
+        "publishDate": "2025-07-14T17:35:49+0000",
+        "keywords": "Social media,Internet,Technology,Breaking News: Technology,Elon Musk,Elon Musk,Alphabet Inc,business news",
+        "contentSource": "[role=\"main\"]",
+        "extractionQuality": "high",
+        "timestamp": "2025-07-15T18:21:08.639Z",
+        "chunkCount": 204
+      },
+      "submissions": [
+        {
+          "timestamp": "2025-07-15T18:21:08.640Z",
+          "source": "content_api",
+          "type": "url",
+          "metadata": {
+            "url": "https://www.cnbc.com/2025/07/14/anthropic-google-openai-xai-granted-up-to-200-million-from-dod.html"
+          }
+        }
+      ],
+      "importanceScore": 1,
+      "submissionPatterns": {
+        "velocity": "low",
+        "trend": "stable",
+        "submissionSources": {
+          "content_api": 1
+        },
+        "totalSubmissions": 1,
+        "timeSpan": {
+          "hours": 0,
+          "days": 0,
+          "earliest": "2025-07-15T18:21:08.640Z",
+          "latest": "2025-07-15T18:21:08.640Z"
+        }
+      },
+      "urgencyAssessment": {
+        "level": "normal",
+        "reasons": [],
+        "shouldPrioritize": false
+      },
+      "contextualTags": [
+        "single_source",
+        "rapid_fire"
+      ],
+      "lastSubmission": "2025-07-15T18:21:08.640Z",
+      "submissionCount": 1
+    }
+  ]
 }
