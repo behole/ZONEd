@@ -1047,8 +1047,8 @@ app.get('/api/debug/content', (req, res) => {
   }
 });
 
-// Dedicated iOS share endpoint - bulletproof and simple
-app.get('/ios-share', async (req, res) => {
+// Dedicated iOS share endpoint - bulletproof and simple (GET and POST)
+app.all('/ios-share', async (req, res) => {
   // Set headers immediately for maximum iOS compatibility
   res.set({
     'Access-Control-Allow-Origin': '*',
@@ -1073,12 +1073,14 @@ app.get('/ios-share', async (req, res) => {
     console.log('- text:', req.query.text);
     console.log('- title:', req.query.title);
     
-    // Extract all possible parameter variations
+    // Extract parameters from both GET (query) and POST (body)
+    const params = req.method === 'POST' ? req.body : req.query;
+    
     const extractedData = {
-      text: req.query.text || req.query.t || req.query.content || '',
-      url: req.query.url || req.query.u || req.query.link || '',
-      title: req.query.title || req.query.name || req.query.subject || '',
-      source: req.query.source || 'ios_shortcut'
+      text: params.text || params.t || params.content || '',
+      url: params.url || params.u || params.link || '',
+      title: params.title || params.name || params.subject || '',
+      source: params.source || 'ios_shortcut'
     };
     
     console.log('📋 Extracted data:', extractedData);
