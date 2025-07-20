@@ -271,8 +271,8 @@ function ContentBrowser() {
             <Badge bg="outline-primary" className="small">
               {getContentTypeIcon(item.type)} {item.type}
             </Badge>
-            <Badge bg={getImportanceColor(item.importanceScore)} className="small">
-              ⭐ {item.importanceScore.toFixed(1)}
+            <Badge bg={getImportanceColor(item.importanceScore || 1)} className="small">
+              ⭐ {(item.importanceScore || 1).toFixed(1)}
             </Badge>
             {item.urgencyAssessment?.level === 'high' && (
               <Badge bg="danger" className="small">🔴</Badge>
@@ -366,8 +366,8 @@ function ContentBrowser() {
           </Col>
           <Col md={4} className="text-end">
             <div className="d-flex gap-1 justify-content-end mb-1">
-              <Badge bg={getImportanceColor(item.importanceScore)}>
-                ⭐ {item.importanceScore.toFixed(1)}
+              <Badge bg={getImportanceColor(item.importanceScore || 1)}>
+                ⭐ {(item.importanceScore || 1).toFixed(1)}
               </Badge>
               {item.submissionCount > 1 && (
                 <Badge bg="info">🔄 {item.submissionCount}</Badge>
@@ -625,8 +625,8 @@ function ContentBrowser() {
               {/* Metadata */}
               <div className="mb-3">
                 <div className="d-flex gap-2 mb-2">
-                  <Badge bg={getImportanceColor(selectedItem.importanceScore)}>
-                    ⭐ Importance: {selectedItem.importanceScore.toFixed(1)}
+                  <Badge bg={getImportanceColor(selectedItem.importanceScore || 1)}>
+                    ⭐ Importance: {(selectedItem.importanceScore || 1).toFixed(1)}
                   </Badge>
                   {selectedItem.urgencyAssessment?.level !== 'low' && (
                     <Badge bg={getUrgencyColor(selectedItem.urgencyAssessment?.level)}>

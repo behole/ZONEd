@@ -388,8 +388,8 @@ function ContentDashboard() {
                           <Badge bg="outline-primary">
                             {getContentTypeIcon(item.type)} {item.type}
                           </Badge>
-                          <Badge bg={getImportanceColor(item.importanceScore)}>
-                            ⭐ {item.importanceScore.toFixed(1)}
+                          <Badge bg={getImportanceColor(item.importanceScore || 1)}>
+                            ⭐ {(item.importanceScore || 1).toFixed(1)}
                           </Badge>
                           {item.urgencyAssessment?.level === 'high' && (
                             <Badge bg="danger">🔴 Urgent</Badge>
