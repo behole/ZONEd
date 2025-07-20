@@ -115,7 +115,7 @@ function ContentDashboard() {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
     const recentItems = content.filter(item => new Date(item.timestamp) > oneDayAgo).length;
-    const highImportanceItems = content.filter(item => item.importanceScore > 5).length;
+    const highImportanceItems = content.filter(item => (item.importanceScore || 1) > 5).length;
     const urgentItems = content.filter(item => item.urgencyAssessment?.level === 'high').length;
 
     const contentBreakdown = content.reduce((acc, item) => {

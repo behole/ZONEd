@@ -134,13 +134,13 @@ function ContentBrowser() {
     if (filters.importance !== 'all') {
       switch (filters.importance) {
         case 'high':
-          filtered = filtered.filter(item => item.importanceScore >= 7);
+          filtered = filtered.filter(item => (item.importanceScore || 1) >= 7);
           break;
         case 'medium':
-          filtered = filtered.filter(item => item.importanceScore >= 4 && item.importanceScore < 7);
+          filtered = filtered.filter(item => (item.importanceScore || 1) >= 4 && (item.importanceScore || 1) < 7);
           break;
         case 'low':
-          filtered = filtered.filter(item => item.importanceScore < 4);
+          filtered = filtered.filter(item => (item.importanceScore || 1) < 4);
           break;
       }
     }
@@ -178,12 +178,12 @@ function ContentBrowser() {
       
       switch (filters.sortBy) {
         case 'importance':
-          aValue = a.importanceScore;
-          bValue = b.importanceScore;
+          aValue = a.importanceScore || 1;
+          bValue = b.importanceScore || 1;
           break;
         case 'submissions':
-          aValue = a.submissionCount;
-          bValue = b.submissionCount;
+          aValue = a.submissionCount || 1;
+          bValue = b.submissionCount || 1;
           break;
         case 'timestamp':
         default:
