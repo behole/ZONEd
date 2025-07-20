@@ -1382,19 +1382,27 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-app.listen(PORT, async () => {
+// Start server with minimal initialization to prevent timeouts
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}/`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📊 Database: ${database.isPostgres ? 'PostgreSQL' : 'JSON file'}`);
   
-  // Wait for embedding model to load, then initialize vector DB
-  setTimeout(() => {
-    initializeVectorDatabase().catch(error => {
-      console.error('❌ Vector database initialization failed:', error);
-      // Don't crash the server if vector DB fails
-    });
-  }, 5000);
-}).on('error', (error) => {
+  // Initialize vector DB in background (non-blocking)
+  setImmediate(() => {
+    console.log(`📊 Database: ${database.isPostgres ? 'PostgreSQL' : 'JSON file'}`);
+    
+    // Delayed vector DB initialization (optional, won't crash server)
+    setTimeout(() => {
+      if (typeof initializeVectorDatabase === 'function') {
+        initializeVectorDatabase().catch(error => {
+          console.warn('⚠️ Vector database initialization failed (non-critical):', error.message);
+        });
+      }
+    }, 10000); // Longer delay to ensure server is stable
+  });
+});
+
+server.on('error', (error) => {
   console.error('❌ Server failed to start:', error);
   process.exit(1);
 });
