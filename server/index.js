@@ -1047,8 +1047,149 @@ app.get('/api/debug/content', (req, res) => {
   }
 });
 
-// Enhanced iOS share handler with better error handling and success rates
+// Dedicated iOS share endpoint - bulletproof and simple
+app.get('/ios-share', async (req, res) => {
+  // Set headers immediately for maximum iOS compatibility
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Content-Type': 'application/json'
+  });
+
+  try {
+    console.log('📱 iOS SHARE REQUEST');
+    console.log('Query params:', req.query);
+    console.log('User-Agent:', req.headers['user-agent']);
+    
+    // Extract all possible parameter variations
+    const extractedData = {
+      text: req.query.text || req.query.t || req.query.content || '',
+      url: req.query.url || req.query.u || req.query.link || '',
+      title: req.query.title || req.query.name || req.query.subject || '',
+      source: req.query.source || 'ios_shortcut'
+    };
+    
+    console.log('📋 Extracted data:', extractedData);
+    
+    // Validate we have some content
+    const hasContent = extractedData.text || extractedData.url || extractedData.title;
+    
+    if (!hasContent) {
+      console.log('❌ No content provided');
+      return res.status(400).json({
+        success: false,
+        error: 'No content provided',
+        message: 'Please provide text, url, or title parameter',
+        receivedParams: Object.keys(req.query),
+        expectedParams: ['text', 'url', 'title', 't', 'u', 'content', 'link', 'name']
+      });
+    }
+    
+    // Determine content type and primary content
+    let contentType = 'text';
+    let primaryContent = extractedData.text || extractedData.title;
+    
+    if (extractedData.url) {
+      contentType = 'url';
+      primaryContent = extractedData.url;
+      
+      // Quick URL validation
+      try {
+        new URL(extractedData.url);
+        console.log('✅ Valid URL detected');
+      } catch {
+        console.log('⚠️ Invalid URL, treating as text');
+        contentType = 'text';
+        primaryContent = [extractedData.title, extractedData.text, extractedData.url].filter(Boolean).join(' ');
+      }
+    }
+    
+    // Create simplified content item
+    const contentItem = {
+      type: contentType,
+      content: primaryContent,
+      metadata: {
+        title: extractedData.title || (contentType === 'url' ? 'Shared URL' : 'Shared Text'),
+        sharedVia: 'ios_shortcut',
+        shareMethod: 'ios_dedicated_endpoint',
+        originalText: extractedData.text,
+        originalUrl: extractedData.url,
+        shareTimestamp: new Date().toISOString(),
+        userAgent: req.headers['user-agent']
+      }
+    };
+    
+    console.log('🔄 Processing content...');
+    
+    // Get existing content for deduplication
+    const existingContent = await database.getAllContent();
+    
+    // Process the content with timeout protection
+    const processed = await Promise.race([
+      processContentItem(contentItem, existingContent),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Processing timeout after 10 seconds')), 10000)
+      )
+    ]);
+    
+    console.log('✅ Content processed');
+    
+    // Save to database with simple retry
+    try {
+      await database.insertContent(processed);
+      console.log('✅ Saved to database');
+    } catch (dbError) {
+      console.error('❌ Database save failed:', dbError.message);
+      // Try once more
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await database.insertContent(processed);
+      console.log('✅ Saved to database (retry)');
+    }
+    
+    // Add to vector database (non-blocking, don't wait)
+    vectorEngine.addContent(processed)
+      .then(() => console.log('✅ Vectorized'))
+      .catch(err => console.warn('⚠️ Vector failed (non-critical):', err.message));
+    
+    // Return immediate success response
+    const response = {
+      success: true,
+      message: 'Content shared successfully to ZONEd!',
+      contentType: contentType,
+      itemsProcessed: 1,
+      timestamp: new Date().toISOString(),
+      id: processed.id
+    };
+    
+    console.log('✅ iOS share complete');
+    return res.json(response);
+    
+  } catch (error) {
+    console.error('❌ iOS share error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Processing failed',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Ultra-reliable iOS share handler - bulletproof version
 app.get('/share', async (req, res) => {
+  // Set headers immediately for iOS compatibility
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  });
   try {
     console.log('=== iOS SHARE REQUEST (GET) ===');
     console.log('Query params:', req.query);
