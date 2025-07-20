@@ -8,6 +8,7 @@ import ContentDashboard from './components/ContentDashboard';
 import ContentBrowser from './components/ContentBrowser';
 import ShareSuccess from './components/ShareSuccess';
 import ShareError from './components/ShareError';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function AppContent() {
   const location = useLocation();
@@ -57,15 +58,45 @@ function AppContent() {
         </Container>
       </Navbar>
       <Container className="mt-4">
-        <Routes>
-          <Route path="/dashboard" element={<ContentDashboard key={`dashboard-${routeKey}`} />} />
-          <Route path="/" element={<NoteForm key={`home-${routeKey}`} />} />
-          <Route path="/browse" element={<ContentBrowser key={`browse-${routeKey}`} />} />
-          <Route path="/query" element={<QueryPage key={`query-${routeKey}`} />} />
-          <Route path="/sources" element={<SourcesPage key={`sources-${routeKey}`} />} />
-          <Route path="/share-success" element={<ShareSuccess key={`share-success-${routeKey}`} />} />
-          <Route path="/share-error" element={<ShareError key={`share-error-${routeKey}`} />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/dashboard" element={
+              <ErrorBoundary>
+                <ContentDashboard key={`dashboard-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/" element={
+              <ErrorBoundary>
+                <NoteForm key={`home-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/browse" element={
+              <ErrorBoundary>
+                <ContentBrowser key={`browse-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/query" element={
+              <ErrorBoundary>
+                <QueryPage key={`query-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/sources" element={
+              <ErrorBoundary>
+                <SourcesPage key={`sources-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/share-success" element={
+              <ErrorBoundary>
+                <ShareSuccess key={`share-success-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/share-error" element={
+              <ErrorBoundary>
+                <ShareError key={`share-error-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+          </Routes>
+        </ErrorBoundary>
       </Container>
     </>
   );

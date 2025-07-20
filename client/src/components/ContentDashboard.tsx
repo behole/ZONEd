@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Row, Col, Badge, Button, Spinner, Alert, ProgressBar } from 'react-bootstrap';
+import SafeNumericDisplay from './SafeNumericDisplay';
 
 interface ContentItem {
   id: string;
@@ -389,7 +390,7 @@ function ContentDashboard() {
                             {getContentTypeIcon(item.type)} {item.type}
                           </Badge>
                           <Badge bg={getImportanceColor(item.importanceScore || 1)}>
-                            ⭐ {(item.importanceScore || 1).toFixed(1)}
+                            ⭐ <SafeNumericDisplay value={item.importanceScore} decimals={1} fallback={1} />
                           </Badge>
                           {item.urgencyAssessment?.level === 'high' && (
                             <Badge bg="danger">🔴 Urgent</Badge>

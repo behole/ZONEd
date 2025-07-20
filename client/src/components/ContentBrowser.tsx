@@ -3,6 +3,7 @@ import {
   Card, Row, Col, Badge, Button, Form, InputGroup, 
   Dropdown, Modal, Alert, Spinner, ButtonGroup 
 } from 'react-bootstrap';
+import SafeNumericDisplay from './SafeNumericDisplay';
 
 interface ContentItem {
   id: string;
@@ -272,7 +273,7 @@ function ContentBrowser() {
               {getContentTypeIcon(item.type)} {item.type}
             </Badge>
             <Badge bg={getImportanceColor(item.importanceScore || 1)} className="small">
-              ⭐ {(item.importanceScore || 1).toFixed(1)}
+              ⭐ <SafeNumericDisplay value={item.importanceScore} decimals={1} fallback={1} />
             </Badge>
             {item.urgencyAssessment?.level === 'high' && (
               <Badge bg="danger" className="small">🔴</Badge>
@@ -367,7 +368,7 @@ function ContentBrowser() {
           <Col md={4} className="text-end">
             <div className="d-flex gap-1 justify-content-end mb-1">
               <Badge bg={getImportanceColor(item.importanceScore || 1)}>
-                ⭐ {(item.importanceScore || 1).toFixed(1)}
+                ⭐ <SafeNumericDisplay value={item.importanceScore} decimals={1} fallback={1} />
               </Badge>
               {item.submissionCount > 1 && (
                 <Badge bg="info">🔄 {item.submissionCount}</Badge>
@@ -626,7 +627,7 @@ function ContentBrowser() {
               <div className="mb-3">
                 <div className="d-flex gap-2 mb-2">
                   <Badge bg={getImportanceColor(selectedItem.importanceScore || 1)}>
-                    ⭐ Importance: {(selectedItem.importanceScore || 1).toFixed(1)}
+                    ⭐ Importance: <SafeNumericDisplay value={selectedItem.importanceScore} decimals={1} fallback={1} />
                   </Badge>
                   {selectedItem.urgencyAssessment?.level !== 'low' && (
                     <Badge bg={getUrgencyColor(selectedItem.urgencyAssessment?.level)}>
