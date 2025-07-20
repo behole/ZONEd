@@ -1063,7 +1063,15 @@ app.get('/ios-share', async (req, res) => {
   try {
     console.log('📱 iOS SHARE REQUEST');
     console.log('Query params:', req.query);
+    console.log('Raw query string:', req.url);
     console.log('User-Agent:', req.headers['user-agent']);
+    
+    // Debug: Log each parameter individually
+    console.log('Individual params:');
+    console.log('- content:', req.query.content);
+    console.log('- url:', req.query.url);
+    console.log('- text:', req.query.text);
+    console.log('- title:', req.query.title);
     
     // Extract all possible parameter variations
     const extractedData = {
