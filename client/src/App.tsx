@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigationType } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import NoteForm from './components/NoteForm';
 import QueryPage from './components/QueryPage';
@@ -11,6 +11,16 @@ import ShareError from './components/ShareError';
 
 function AppContent() {
   const location = useLocation();
+  const navigationType = useNavigationType();
+
+  // Force re-render on navigation changes
+  const routeKey = `${location.pathname}-${location.search}-${Date.now()}`;
+
+  console.log('🧭 Navigation:', {
+    pathname: location.pathname,
+    navigationType,
+    timestamp: new Date().toISOString()
+  });
 
   return (
     <>
@@ -47,14 +57,14 @@ function AppContent() {
         </Container>
       </Navbar>
       <Container className="mt-4">
-        <Routes key={location.pathname}>
-          <Route path="/dashboard" element={<ContentDashboard key="dashboard" />} />
-          <Route path="/" element={<NoteForm key="home" />} />
-          <Route path="/browse" element={<ContentBrowser key="browse" />} />
-          <Route path="/query" element={<QueryPage key="query" />} />
-          <Route path="/sources" element={<SourcesPage key="sources" />} />
-          <Route path="/share-success" element={<ShareSuccess key="share-success" />} />
-          <Route path="/share-error" element={<ShareError key="share-error" />} />
+        <Routes>
+          <Route path="/dashboard" element={<ContentDashboard key={`dashboard-${routeKey}`} />} />
+          <Route path="/" element={<NoteForm key={`home-${routeKey}`} />} />
+          <Route path="/browse" element={<ContentBrowser key={`browse-${routeKey}`} />} />
+          <Route path="/query" element={<QueryPage key={`query-${routeKey}`} />} />
+          <Route path="/sources" element={<SourcesPage key={`sources-${routeKey}`} />} />
+          <Route path="/share-success" element={<ShareSuccess key={`share-success-${routeKey}`} />} />
+          <Route path="/share-error" element={<ShareError key={`share-error-${routeKey}`} />} />
         </Routes>
       </Container>
     </>

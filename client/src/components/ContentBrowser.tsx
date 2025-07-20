@@ -58,25 +58,57 @@ function ContentBrowser() {
   const loadContent = async () => {
     try {
       setIsLoading(true);
+      setError(null); // Clear previous errors
       console.log('🔄 Loading content browser data...');
+      console.log('🌐 Current URL:', window.location.href);
+      console.log('📡 Fetching from:', '/api/content');
       
-      const response = await fetch('/api/content');
+      const response = await fetch('/api/content', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      
       console.log('📡 Content Browser API Response status:', response.status);
+      console.log('📡 Content Browser API Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
-        throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ Content Browser API Error Response:', errorText);
+        throw new Error(`Failed to load content: ${response.status} ${response.statusText} - ${errorText}`);
       }
       
       const data = await response.json();
-      console.log('📊 Content Browser API Data received:', data);
-      console.log('📋 Content items found:', data.content?.length || 0);
+      console.log('📊 Content Browser Raw API Data received:', data);
+      console.log('📊 Content Browser Data structure:', {
+        hasContent: !!data.content,
+        contentType: typeof data.content,
+        contentLength: data.content?.length,
+        hasNotes: !!data.notes,
+        notesLength: data.notes?.length,
+        dataKeys: Object.keys(data)
+      });
       
-      setContent(data.content || []);
+      const allContent = data.content || [];
+      console.log('📋 Content Browser items found:', allContent.length);
+      
+      if (allContent.length > 0) {
+        console.log('📋 Content Browser sample item:', allContent[0]);
+        console.log('📋 Content Browser all IDs:', allContent.map(item => item.id));
+      }
+      
+      setContent(allContent);
+      console.log('✅ Content Browser data loading completed successfully');
+      
     } catch (err) {
       console.error('❌ Content Browser loading error:', err);
+      console.error('❌ Content Browser Error stack:', err instanceof Error ? err.stack : 'No stack trace');
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
+      console.log('🏁 Content Browser loading finished (loading state set to false)');
     }
   };
 

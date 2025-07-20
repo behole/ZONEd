@@ -4,7 +4,7 @@
     {
       "id": 1752603545322,
       "type": "url",
-      "timestamp": "2025-07-15T18:19:04.620Z",
+      "timestamp": "2025-07-15T19:01:09.171Z",
       "processed": true,
       "content": "https://www.nytimes.com/2025/07/08/magazine/fda-collapse-rfk-kennedy.html",
       "extractedContent": "",
@@ -30,6 +30,14 @@
       },
       "submissions": [
         {
+          "timestamp": "2025-07-15T19:01:09.171Z",
+          "source": "content_api",
+          "type": "url",
+          "metadata": {
+            "url": "https://www.404media.co/our-galaxy-may-contain-a-mysterious-force-it-could-change-physics-forever/"
+          }
+        },
+        {
           "timestamp": "2025-07-15T18:19:04.876Z",
           "source": "content_api",
           "type": "url",
@@ -38,19 +46,19 @@
           }
         }
       ],
-      "importanceScore": 1,
+      "importanceScore": 3.166151651918828,
       "submissionPatterns": {
-        "velocity": "low",
+        "velocity": "medium",
         "trend": "stable",
         "submissionSources": {
-          "content_api": 1
+          "content_api": 2
         },
-        "totalSubmissions": 1,
+        "totalSubmissions": 2,
         "timeSpan": {
-          "hours": 0,
-          "days": 0,
+          "hours": 0.7,
+          "days": 0.03,
           "earliest": "2025-07-15T18:19:04.876Z",
-          "latest": "2025-07-15T18:19:04.876Z"
+          "latest": "2025-07-15T19:01:09.171Z"
         }
       },
       "urgencyAssessment": {
@@ -59,11 +67,15 @@
         "shouldPrioritize": false
       },
       "contextualTags": [
+        "notable",
+        "active",
         "single_source",
         "rapid_fire"
       ],
-      "lastSubmission": "2025-07-15T18:19:04.876Z",
-      "submissionCount": 1
+      "lastSubmission": "2025-07-15T19:01:09.171Z",
+      "submissionCount": 2,
+      "isDuplicate": true,
+      "originalId": 1752603545322
     },
     {
       "id": 1752603669041,
@@ -1391,6 +1403,1322 @@
         "rapid_fire"
       ],
       "lastSubmission": "2025-07-15T18:21:08.640Z",
+      "submissionCount": 1
+    },
+    {
+      "id": 1752605449053,
+      "type": "url",
+      "timestamp": "2025-07-15T18:50:48.503Z",
+      "processed": true,
+      "content": "https://nodaysoff.run/",
+      "extractedContent": "I didn't start running until I was in my late twenties, and even so I would end up in a pattern where I'd get motivated and go on a couple of runs, take a few days off, go on another run the following week, and next thing you know it's been a month since I last run. Rinse and repeat. In July 2015, something changed. I headed out on a run on a Tuesday, then did another one the next day, and the day after, and I took the Friday off. When I woke up on July 11, 2015 I remember thinking I could have done 4 days in a row, so I set out to try and do that. 4 days turned into a week, then a month, then two, then six, then a year, and here I am, ten years later. I've had the privilege to run in some amazing places, from the streets of my hometown to the trails of national parks, on all seven continents. I've run solo and I've run with friends, I've run with music and I've run with my own thoughts. I've run through stress fractures, heart procedures, flus and other physical ailments. I've run in frigid sub zero weather and in sweltering heat. Each run has been a new adventure, and I've learned something different from every experience. Running has changed my life, and I hope I'll still keep this going in another decade. I've been extremely lucky to have had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+      "cleanedContent": "I didn't start running until I was in my late twenties, and even so I would end up in a pattern where I'd get motivated and go on a couple of runs, take a few days off, go on another run the following week, and next thing you know it's been a month since I last run. Rinse and repeat. In July 2015, something changed. I headed out on a run on a Tuesday, then did another one the next day, and the day after, and I took the Friday off. When I woke up on July 11, 2015 I remember thinking I could have done 4 days in a row, so I set out to try and do that. 4 days turned into a week, then a month, then two, then six, then a year, and here I am, ten years later. I've had the privilege to run in some amazing places, from the streets of my hometown to the trails of national parks, on all seven continents. I've run solo and I've run with friends, I've run with music and I've run with my own thoughts. I've run through stress fractures, heart procedures, flus and other physical ailments. I've run in frigid sub zero weather and in sweltering heat. Each run has been a new adventure, and I've learned something different from every experience. Running has changed my life, and I hope I'll still keep this going in another decade. I've been extremely lucky to have had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+      "chunks": [
+        {
+          "text": "I didn't start running until I was in my late twenties, and even so I would end up in a pattern where I'd get motivated and go on a couple of runs, take a few days off, go on another run the following week, and next thing you know it's been a month since I last run. Rinse and repeat. In July 2015, something changed. I headed out on a run on a Tuesday, then did another one the next day, and the day after, and I took the Friday off. When I woke up on July 11, 2015 I remember thinking I could have done 4 days in a row, so I set out to try and do that. 4 days turned into a week, then a month, then two, then six, then a year, and here I am, ten years later. I've had the privilege to run in some amazing places, from the streets of my hometown to the trails of national parks, on all seven continents. I've run solo and I've run with friends, I've run with music and I've run with my own thoughts. I've run through stress fractures, heart procedures, flus and other physical ailments.",
+          "index": 0,
+          "startPos": 0,
+          "endPos": 988
+        },
+        {
+          "text": "even continents. I've run solo and I've run with friends, I've run with music and I've run with my own thoughts. I've run through stress fractures, heart procedures, flus and other physical ailments. I've run in frigid sub zero weather and in sweltering heat. Each run has been a new adventure, and I've learned something different from every experience. Running has changed my life, and I hope I'll still keep this going in another decade. I've been extremely lucky to have had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 1,
+          "startPos": 788,
+          "endPos": 1456
+        },
+        {
+          "text": "o have had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 2,
+          "startPos": 1256,
+          "endPos": 1456
+        },
+        {
+          "text": "have had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 3,
+          "startPos": 1257,
+          "endPos": 1456
+        },
+        {
+          "text": "have had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 4,
+          "startPos": 1258,
+          "endPos": 1456
+        },
+        {
+          "text": "ave had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 5,
+          "startPos": 1259,
+          "endPos": 1456
+        },
+        {
+          "text": "ve had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 6,
+          "startPos": 1260,
+          "endPos": 1456
+        },
+        {
+          "text": "e had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 7,
+          "startPos": 1261,
+          "endPos": 1456
+        },
+        {
+          "text": "had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 8,
+          "startPos": 1262,
+          "endPos": 1456
+        },
+        {
+          "text": "had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 9,
+          "startPos": 1263,
+          "endPos": 1456
+        },
+        {
+          "text": "ad the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 10,
+          "startPos": 1264,
+          "endPos": 1456
+        },
+        {
+          "text": "d the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 11,
+          "startPos": 1265,
+          "endPos": 1456
+        },
+        {
+          "text": "the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 12,
+          "startPos": 1266,
+          "endPos": 1456
+        },
+        {
+          "text": "the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 13,
+          "startPos": 1267,
+          "endPos": 1456
+        },
+        {
+          "text": "he support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 14,
+          "startPos": 1268,
+          "endPos": 1456
+        },
+        {
+          "text": "e support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 15,
+          "startPos": 1269,
+          "endPos": 1456
+        },
+        {
+          "text": "support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 16,
+          "startPos": 1270,
+          "endPos": 1456
+        },
+        {
+          "text": "support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 17,
+          "startPos": 1271,
+          "endPos": 1456
+        },
+        {
+          "text": "upport of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 18,
+          "startPos": 1272,
+          "endPos": 1456
+        },
+        {
+          "text": "pport of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 19,
+          "startPos": 1273,
+          "endPos": 1456
+        },
+        {
+          "text": "port of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 20,
+          "startPos": 1274,
+          "endPos": 1456
+        },
+        {
+          "text": "ort of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 21,
+          "startPos": 1275,
+          "endPos": 1456
+        },
+        {
+          "text": "rt of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 22,
+          "startPos": 1276,
+          "endPos": 1456
+        },
+        {
+          "text": "t of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 23,
+          "startPos": 1277,
+          "endPos": 1456
+        },
+        {
+          "text": "of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 24,
+          "startPos": 1278,
+          "endPos": 1456
+        },
+        {
+          "text": "of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 25,
+          "startPos": 1279,
+          "endPos": 1456
+        },
+        {
+          "text": "f my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 26,
+          "startPos": 1280,
+          "endPos": 1456
+        },
+        {
+          "text": "my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 27,
+          "startPos": 1281,
+          "endPos": 1456
+        },
+        {
+          "text": "my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 28,
+          "startPos": 1282,
+          "endPos": 1456
+        },
+        {
+          "text": "y wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 29,
+          "startPos": 1283,
+          "endPos": 1456
+        },
+        {
+          "text": "wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 30,
+          "startPos": 1284,
+          "endPos": 1456
+        },
+        {
+          "text": "wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 31,
+          "startPos": 1285,
+          "endPos": 1456
+        },
+        {
+          "text": "onderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 32,
+          "startPos": 1286,
+          "endPos": 1456
+        },
+        {
+          "text": "nderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 33,
+          "startPos": 1287,
+          "endPos": 1456
+        },
+        {
+          "text": "derful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 34,
+          "startPos": 1288,
+          "endPos": 1456
+        },
+        {
+          "text": "erful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 35,
+          "startPos": 1289,
+          "endPos": 1456
+        },
+        {
+          "text": "rful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 36,
+          "startPos": 1290,
+          "endPos": 1456
+        },
+        {
+          "text": "ful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 37,
+          "startPos": 1291,
+          "endPos": 1456
+        },
+        {
+          "text": "ul wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 38,
+          "startPos": 1292,
+          "endPos": 1456
+        },
+        {
+          "text": "l wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 39,
+          "startPos": 1293,
+          "endPos": 1456
+        },
+        {
+          "text": "wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 40,
+          "startPos": 1294,
+          "endPos": 1456
+        },
+        {
+          "text": "wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 41,
+          "startPos": 1295,
+          "endPos": 1456
+        },
+        {
+          "text": "ife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 42,
+          "startPos": 1296,
+          "endPos": 1456
+        },
+        {
+          "text": "fe Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 43,
+          "startPos": 1297,
+          "endPos": 1456
+        },
+        {
+          "text": "e Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 44,
+          "startPos": 1298,
+          "endPos": 1456
+        },
+        {
+          "text": "Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 45,
+          "startPos": 1299,
+          "endPos": 1456
+        },
+        {
+          "text": "Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 46,
+          "startPos": 1300,
+          "endPos": 1456
+        },
+        {
+          "text": "olly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 47,
+          "startPos": 1301,
+          "endPos": 1456
+        },
+        {
+          "text": "lly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 48,
+          "startPos": 1302,
+          "endPos": 1456
+        },
+        {
+          "text": "ly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 49,
+          "startPos": 1303,
+          "endPos": 1456
+        },
+        {
+          "text": "y throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 50,
+          "startPos": 1304,
+          "endPos": 1456
+        },
+        {
+          "text": "throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 51,
+          "startPos": 1305,
+          "endPos": 1456
+        },
+        {
+          "text": "throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 52,
+          "startPos": 1306,
+          "endPos": 1456
+        },
+        {
+          "text": "hroughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 53,
+          "startPos": 1307,
+          "endPos": 1456
+        },
+        {
+          "text": "roughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 54,
+          "startPos": 1308,
+          "endPos": 1456
+        },
+        {
+          "text": "oughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 55,
+          "startPos": 1309,
+          "endPos": 1456
+        },
+        {
+          "text": "ughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 56,
+          "startPos": 1310,
+          "endPos": 1456
+        },
+        {
+          "text": "ghout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 57,
+          "startPos": 1311,
+          "endPos": 1456
+        },
+        {
+          "text": "hout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 58,
+          "startPos": 1312,
+          "endPos": 1456
+        },
+        {
+          "text": "out this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 59,
+          "startPos": 1313,
+          "endPos": 1456
+        },
+        {
+          "text": "ut this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 60,
+          "startPos": 1314,
+          "endPos": 1456
+        },
+        {
+          "text": "t this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 61,
+          "startPos": 1315,
+          "endPos": 1456
+        },
+        {
+          "text": "this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 62,
+          "startPos": 1316,
+          "endPos": 1456
+        },
+        {
+          "text": "this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 63,
+          "startPos": 1317,
+          "endPos": 1456
+        },
+        {
+          "text": "his journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 64,
+          "startPos": 1318,
+          "endPos": 1456
+        },
+        {
+          "text": "is journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 65,
+          "startPos": 1319,
+          "endPos": 1456
+        },
+        {
+          "text": "s journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 66,
+          "startPos": 1320,
+          "endPos": 1456
+        },
+        {
+          "text": "journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 67,
+          "startPos": 1321,
+          "endPos": 1456
+        },
+        {
+          "text": "journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 68,
+          "startPos": 1322,
+          "endPos": 1456
+        },
+        {
+          "text": "ourney, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 69,
+          "startPos": 1323,
+          "endPos": 1456
+        },
+        {
+          "text": "urney, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 70,
+          "startPos": 1324,
+          "endPos": 1456
+        },
+        {
+          "text": "rney, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 71,
+          "startPos": 1325,
+          "endPos": 1456
+        },
+        {
+          "text": "ney, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 72,
+          "startPos": 1326,
+          "endPos": 1456
+        },
+        {
+          "text": "ey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 73,
+          "startPos": 1327,
+          "endPos": 1456
+        },
+        {
+          "text": "y, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 74,
+          "startPos": 1328,
+          "endPos": 1456
+        },
+        {
+          "text": ", and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 75,
+          "startPos": 1329,
+          "endPos": 1456
+        },
+        {
+          "text": "and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 76,
+          "startPos": 1330,
+          "endPos": 1456
+        },
+        {
+          "text": "and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 77,
+          "startPos": 1331,
+          "endPos": 1456
+        },
+        {
+          "text": "nd I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 78,
+          "startPos": 1332,
+          "endPos": 1456
+        },
+        {
+          "text": "d I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 79,
+          "startPos": 1333,
+          "endPos": 1456
+        },
+        {
+          "text": "I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 80,
+          "startPos": 1334,
+          "endPos": 1456
+        },
+        {
+          "text": "I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 81,
+          "startPos": 1335,
+          "endPos": 1456
+        },
+        {
+          "text": "couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 82,
+          "startPos": 1336,
+          "endPos": 1456
+        },
+        {
+          "text": "couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 83,
+          "startPos": 1337,
+          "endPos": 1456
+        },
+        {
+          "text": "ouldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 84,
+          "startPos": 1338,
+          "endPos": 1456
+        },
+        {
+          "text": "uldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 85,
+          "startPos": 1339,
+          "endPos": 1456
+        },
+        {
+          "text": "ldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 86,
+          "startPos": 1340,
+          "endPos": 1456
+        },
+        {
+          "text": "dn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 87,
+          "startPos": 1341,
+          "endPos": 1456
+        },
+        {
+          "text": "n't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 88,
+          "startPos": 1342,
+          "endPos": 1456
+        },
+        {
+          "text": "'t have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 89,
+          "startPos": 1343,
+          "endPos": 1456
+        },
+        {
+          "text": "t have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 90,
+          "startPos": 1344,
+          "endPos": 1456
+        },
+        {
+          "text": "have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 91,
+          "startPos": 1345,
+          "endPos": 1456
+        },
+        {
+          "text": "have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 92,
+          "startPos": 1346,
+          "endPos": 1456
+        },
+        {
+          "text": "ave done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 93,
+          "startPos": 1347,
+          "endPos": 1456
+        },
+        {
+          "text": "ve done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 94,
+          "startPos": 1348,
+          "endPos": 1456
+        },
+        {
+          "text": "e done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 95,
+          "startPos": 1349,
+          "endPos": 1456
+        },
+        {
+          "text": "done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 96,
+          "startPos": 1350,
+          "endPos": 1456
+        },
+        {
+          "text": "done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 97,
+          "startPos": 1351,
+          "endPos": 1456
+        },
+        {
+          "text": "one it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 98,
+          "startPos": 1352,
+          "endPos": 1456
+        },
+        {
+          "text": "ne it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 99,
+          "startPos": 1353,
+          "endPos": 1456
+        },
+        {
+          "text": "e it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 100,
+          "startPos": 1354,
+          "endPos": 1456
+        },
+        {
+          "text": "it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 101,
+          "startPos": 1355,
+          "endPos": 1456
+        },
+        {
+          "text": "it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 102,
+          "startPos": 1356,
+          "endPos": 1456
+        },
+        {
+          "text": "t without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 103,
+          "startPos": 1357,
+          "endPos": 1456
+        },
+        {
+          "text": "without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 104,
+          "startPos": 1358,
+          "endPos": 1456
+        },
+        {
+          "text": "without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 105,
+          "startPos": 1359,
+          "endPos": 1456
+        },
+        {
+          "text": "ithout her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 106,
+          "startPos": 1360,
+          "endPos": 1456
+        },
+        {
+          "text": "thout her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 107,
+          "startPos": 1361,
+          "endPos": 1456
+        },
+        {
+          "text": "hout her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 108,
+          "startPos": 1362,
+          "endPos": 1456
+        },
+        {
+          "text": "out her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 109,
+          "startPos": 1363,
+          "endPos": 1456
+        },
+        {
+          "text": "ut her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 110,
+          "startPos": 1364,
+          "endPos": 1456
+        },
+        {
+          "text": "t her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 111,
+          "startPos": 1365,
+          "endPos": 1456
+        },
+        {
+          "text": "her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 112,
+          "startPos": 1366,
+          "endPos": 1456
+        },
+        {
+          "text": "her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 113,
+          "startPos": 1367,
+          "endPos": 1456
+        },
+        {
+          "text": "er patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 114,
+          "startPos": 1368,
+          "endPos": 1456
+        },
+        {
+          "text": "r patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 115,
+          "startPos": 1369,
+          "endPos": 1456
+        },
+        {
+          "text": "patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 116,
+          "startPos": 1370,
+          "endPos": 1456
+        },
+        {
+          "text": "patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 117,
+          "startPos": 1371,
+          "endPos": 1456
+        },
+        {
+          "text": "atience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 118,
+          "startPos": 1372,
+          "endPos": 1456
+        },
+        {
+          "text": "tience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 119,
+          "startPos": 1373,
+          "endPos": 1456
+        },
+        {
+          "text": "ience, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 120,
+          "startPos": 1374,
+          "endPos": 1456
+        },
+        {
+          "text": "ence, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 121,
+          "startPos": 1375,
+          "endPos": 1456
+        },
+        {
+          "text": "nce, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 122,
+          "startPos": 1376,
+          "endPos": 1456
+        },
+        {
+          "text": "ce, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 123,
+          "startPos": 1377,
+          "endPos": 1456
+        },
+        {
+          "text": "e, how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 124,
+          "startPos": 1378,
+          "endPos": 1456
+        },
+        {
+          "text": ", how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 125,
+          "startPos": 1379,
+          "endPos": 1456
+        },
+        {
+          "text": "how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 126,
+          "startPos": 1380,
+          "endPos": 1456
+        },
+        {
+          "text": "how many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 127,
+          "startPos": 1381,
+          "endPos": 1456
+        },
+        {
+          "text": "ow many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 128,
+          "startPos": 1382,
+          "endPos": 1456
+        },
+        {
+          "text": "w many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 129,
+          "startPos": 1383,
+          "endPos": 1456
+        },
+        {
+          "text": "many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 130,
+          "startPos": 1384,
+          "endPos": 1456
+        },
+        {
+          "text": "many times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 131,
+          "startPos": 1385,
+          "endPos": 1456
+        },
+        {
+          "text": "any times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 132,
+          "startPos": 1386,
+          "endPos": 1456
+        },
+        {
+          "text": "ny times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 133,
+          "startPos": 1387,
+          "endPos": 1456
+        },
+        {
+          "text": "y times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 134,
+          "startPos": 1388,
+          "endPos": 1456
+        },
+        {
+          "text": "times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 135,
+          "startPos": 1389,
+          "endPos": 1456
+        },
+        {
+          "text": "times has she heard me say I'll be back in a few! in the mornings.",
+          "index": 136,
+          "startPos": 1390,
+          "endPos": 1456
+        },
+        {
+          "text": "imes has she heard me say I'll be back in a few! in the mornings.",
+          "index": 137,
+          "startPos": 1391,
+          "endPos": 1456
+        },
+        {
+          "text": "mes has she heard me say I'll be back in a few! in the mornings.",
+          "index": 138,
+          "startPos": 1392,
+          "endPos": 1456
+        },
+        {
+          "text": "es has she heard me say I'll be back in a few! in the mornings.",
+          "index": 139,
+          "startPos": 1393,
+          "endPos": 1456
+        },
+        {
+          "text": "s has she heard me say I'll be back in a few! in the mornings.",
+          "index": 140,
+          "startPos": 1394,
+          "endPos": 1456
+        },
+        {
+          "text": "has she heard me say I'll be back in a few! in the mornings.",
+          "index": 141,
+          "startPos": 1395,
+          "endPos": 1456
+        },
+        {
+          "text": "has she heard me say I'll be back in a few! in the mornings.",
+          "index": 142,
+          "startPos": 1396,
+          "endPos": 1456
+        },
+        {
+          "text": "as she heard me say I'll be back in a few! in the mornings.",
+          "index": 143,
+          "startPos": 1397,
+          "endPos": 1456
+        },
+        {
+          "text": "s she heard me say I'll be back in a few! in the mornings.",
+          "index": 144,
+          "startPos": 1398,
+          "endPos": 1456
+        },
+        {
+          "text": "she heard me say I'll be back in a few! in the mornings.",
+          "index": 145,
+          "startPos": 1399,
+          "endPos": 1456
+        },
+        {
+          "text": "she heard me say I'll be back in a few! in the mornings.",
+          "index": 146,
+          "startPos": 1400,
+          "endPos": 1456
+        },
+        {
+          "text": "he heard me say I'll be back in a few! in the mornings.",
+          "index": 147,
+          "startPos": 1401,
+          "endPos": 1456
+        },
+        {
+          "text": "e heard me say I'll be back in a few! in the mornings.",
+          "index": 148,
+          "startPos": 1402,
+          "endPos": 1456
+        },
+        {
+          "text": "heard me say I'll be back in a few! in the mornings.",
+          "index": 149,
+          "startPos": 1403,
+          "endPos": 1456
+        },
+        {
+          "text": "heard me say I'll be back in a few! in the mornings.",
+          "index": 150,
+          "startPos": 1404,
+          "endPos": 1456
+        },
+        {
+          "text": "eard me say I'll be back in a few! in the mornings.",
+          "index": 151,
+          "startPos": 1405,
+          "endPos": 1456
+        },
+        {
+          "text": "ard me say I'll be back in a few! in the mornings.",
+          "index": 152,
+          "startPos": 1406,
+          "endPos": 1456
+        },
+        {
+          "text": "rd me say I'll be back in a few! in the mornings.",
+          "index": 153,
+          "startPos": 1407,
+          "endPos": 1456
+        },
+        {
+          "text": "d me say I'll be back in a few! in the mornings.",
+          "index": 154,
+          "startPos": 1408,
+          "endPos": 1456
+        },
+        {
+          "text": "me say I'll be back in a few! in the mornings.",
+          "index": 155,
+          "startPos": 1409,
+          "endPos": 1456
+        },
+        {
+          "text": "me say I'll be back in a few! in the mornings.",
+          "index": 156,
+          "startPos": 1410,
+          "endPos": 1456
+        },
+        {
+          "text": "e say I'll be back in a few! in the mornings.",
+          "index": 157,
+          "startPos": 1411,
+          "endPos": 1456
+        },
+        {
+          "text": "say I'll be back in a few! in the mornings.",
+          "index": 158,
+          "startPos": 1412,
+          "endPos": 1456
+        },
+        {
+          "text": "say I'll be back in a few! in the mornings.",
+          "index": 159,
+          "startPos": 1413,
+          "endPos": 1456
+        },
+        {
+          "text": "ay I'll be back in a few! in the mornings.",
+          "index": 160,
+          "startPos": 1414,
+          "endPos": 1456
+        },
+        {
+          "text": "y I'll be back in a few! in the mornings.",
+          "index": 161,
+          "startPos": 1415,
+          "endPos": 1456
+        },
+        {
+          "text": "I'll be back in a few! in the mornings.",
+          "index": 162,
+          "startPos": 1416,
+          "endPos": 1456
+        },
+        {
+          "text": "I'll be back in a few! in the mornings.",
+          "index": 163,
+          "startPos": 1417,
+          "endPos": 1456
+        },
+        {
+          "text": "'ll be back in a few! in the mornings.",
+          "index": 164,
+          "startPos": 1418,
+          "endPos": 1456
+        },
+        {
+          "text": "ll be back in a few! in the mornings.",
+          "index": 165,
+          "startPos": 1419,
+          "endPos": 1456
+        },
+        {
+          "text": "l be back in a few! in the mornings.",
+          "index": 166,
+          "startPos": 1420,
+          "endPos": 1456
+        },
+        {
+          "text": "be back in a few! in the mornings.",
+          "index": 167,
+          "startPos": 1421,
+          "endPos": 1456
+        },
+        {
+          "text": "be back in a few! in the mornings.",
+          "index": 168,
+          "startPos": 1422,
+          "endPos": 1456
+        },
+        {
+          "text": "e back in a few! in the mornings.",
+          "index": 169,
+          "startPos": 1423,
+          "endPos": 1456
+        },
+        {
+          "text": "back in a few! in the mornings.",
+          "index": 170,
+          "startPos": 1424,
+          "endPos": 1456
+        },
+        {
+          "text": "back in a few! in the mornings.",
+          "index": 171,
+          "startPos": 1425,
+          "endPos": 1456
+        },
+        {
+          "text": "ack in a few! in the mornings.",
+          "index": 172,
+          "startPos": 1426,
+          "endPos": 1456
+        },
+        {
+          "text": "ck in a few! in the mornings.",
+          "index": 173,
+          "startPos": 1427,
+          "endPos": 1456
+        },
+        {
+          "text": "k in a few! in the mornings.",
+          "index": 174,
+          "startPos": 1428,
+          "endPos": 1456
+        },
+        {
+          "text": "in a few! in the mornings.",
+          "index": 175,
+          "startPos": 1429,
+          "endPos": 1456
+        },
+        {
+          "text": "in a few! in the mornings.",
+          "index": 176,
+          "startPos": 1430,
+          "endPos": 1456
+        },
+        {
+          "text": "n a few! in the mornings.",
+          "index": 177,
+          "startPos": 1431,
+          "endPos": 1456
+        },
+        {
+          "text": "a few! in the mornings.",
+          "index": 178,
+          "startPos": 1432,
+          "endPos": 1456
+        },
+        {
+          "text": "a few! in the mornings.",
+          "index": 179,
+          "startPos": 1433,
+          "endPos": 1456
+        },
+        {
+          "text": "few! in the mornings.",
+          "index": 180,
+          "startPos": 1434,
+          "endPos": 1456
+        },
+        {
+          "text": "few! in the mornings.",
+          "index": 181,
+          "startPos": 1435,
+          "endPos": 1456
+        },
+        {
+          "text": "ew! in the mornings.",
+          "index": 182,
+          "startPos": 1436,
+          "endPos": 1456
+        },
+        {
+          "text": "w! in the mornings.",
+          "index": 183,
+          "startPos": 1437,
+          "endPos": 1456
+        },
+        {
+          "text": "! in the mornings.",
+          "index": 184,
+          "startPos": 1438,
+          "endPos": 1456
+        },
+        {
+          "text": "in the mornings.",
+          "index": 185,
+          "startPos": 1439,
+          "endPos": 1456
+        },
+        {
+          "text": "in the mornings.",
+          "index": 186,
+          "startPos": 1440,
+          "endPos": 1456
+        },
+        {
+          "text": "n the mornings.",
+          "index": 187,
+          "startPos": 1441,
+          "endPos": 1456
+        },
+        {
+          "text": "the mornings.",
+          "index": 188,
+          "startPos": 1442,
+          "endPos": 1456
+        },
+        {
+          "text": "the mornings.",
+          "index": 189,
+          "startPos": 1443,
+          "endPos": 1456
+        },
+        {
+          "text": "he mornings.",
+          "index": 190,
+          "startPos": 1444,
+          "endPos": 1456
+        },
+        {
+          "text": "e mornings.",
+          "index": 191,
+          "startPos": 1445,
+          "endPos": 1456
+        },
+        {
+          "text": "mornings.",
+          "index": 192,
+          "startPos": 1446,
+          "endPos": 1456
+        },
+        {
+          "text": "mornings.",
+          "index": 193,
+          "startPos": 1447,
+          "endPos": 1456
+        },
+        {
+          "text": "ornings.",
+          "index": 194,
+          "startPos": 1448,
+          "endPos": 1456
+        },
+        {
+          "text": "rnings.",
+          "index": 195,
+          "startPos": 1449,
+          "endPos": 1456
+        },
+        {
+          "text": "nings.",
+          "index": 196,
+          "startPos": 1450,
+          "endPos": 1456
+        },
+        {
+          "text": "ings.",
+          "index": 197,
+          "startPos": 1451,
+          "endPos": 1456
+        },
+        {
+          "text": "ngs.",
+          "index": 198,
+          "startPos": 1452,
+          "endPos": 1456
+        },
+        {
+          "text": "gs.",
+          "index": 199,
+          "startPos": 1453,
+          "endPos": 1456
+        },
+        {
+          "text": "s.",
+          "index": 200,
+          "startPos": 1454,
+          "endPos": 1456
+        },
+        {
+          "text": ".",
+          "index": 201,
+          "startPos": 1455,
+          "endPos": 1456
+        }
+      ],
+      "keywords": [
+        {
+          "word": "then",
+          "count": 5
+        },
+        {
+          "word": "days",
+          "count": 3
+        },
+        {
+          "word": "another",
+          "count": 3
+        },
+        {
+          "word": "2015",
+          "count": 2
+        },
+        {
+          "word": "running",
+          "count": 2
+        },
+        {
+          "word": "week",
+          "count": 2
+        },
+        {
+          "word": "next",
+          "count": 2
+        },
+        {
+          "word": "month",
+          "count": 2
+        },
+        {
+          "word": "july",
+          "count": 2
+        },
+        {
+          "word": "something",
+          "count": 2
+        }
+      ],
+      "fingerprint": "72ps1o",
+      "metadata": {
+        "url": "https://nodaysoff.run/",
+        "title": "no days off",
+        "description": "A celebration of consistency, discipline, and the pursuit of movement",
+        "content": "I didn't start running until I was in my late twenties, and even so I would end up in a pattern where I'd get motivated and go on a couple of runs, take a few days off, go on another run the following week, and next thing you know it's been a month since I last run. Rinse and repeat. In July 2015, something changed. I headed out on a run on a Tuesday, then did another one the next day, and the day after, and I took the Friday off. When I woke up on July 11, 2015 I remember thinking I could have done 4 days in a row, so I set out to try and do that. 4 days turned into a week, then a month, then two, then six, then a year, and here I am, ten years later. I've had the privilege to run in some amazing places, from the streets of my hometown to the trails of national parks, on all seven continents. I've run solo and I've run with friends, I've run with music and I've run with my own thoughts. I've run through stress fractures, heart procedures, flus and other physical ailments. I've run in frigid sub zero weather and in sweltering heat. Each run has been a new adventure, and I've learned something different from every experience. Running has changed my life, and I hope I'll still keep this going in another decade. I've been extremely lucky to have had the support of my wonderful wife Molly throughout this journey, and I couldn't have done it without her patience, how many times has she heard me say I'll be back in a few! in the mornings.",
+        "domain": "nodaysoff.run",
+        "author": "no days off",
+        "publishDate": "",
+        "keywords": "running,fitness,consistency,discipline,movement,tracking,motivation,daily exercise,run streak,fitness journey",
+        "contentSource": "paragraph extraction",
+        "extractionQuality": "high",
+        "timestamp": "2025-07-15T18:50:50.260Z",
+        "chunkCount": 202
+      },
+      "submissions": [
+        {
+          "timestamp": "2025-07-15T18:50:50.261Z",
+          "source": "content_api",
+          "type": "url",
+          "metadata": {
+            "url": "https://nodaysoff.run/"
+          }
+        }
+      ],
+      "importanceScore": 1,
+      "submissionPatterns": {
+        "velocity": "low",
+        "trend": "stable",
+        "submissionSources": {
+          "content_api": 1
+        },
+        "totalSubmissions": 1,
+        "timeSpan": {
+          "hours": 0,
+          "days": 0,
+          "earliest": "2025-07-15T18:50:50.261Z",
+          "latest": "2025-07-15T18:50:50.261Z"
+        }
+      },
+      "urgencyAssessment": {
+        "level": "normal",
+        "reasons": [],
+        "shouldPrioritize": false
+      },
+      "contextualTags": [
+        "single_source",
+        "rapid_fire"
+      ],
+      "lastSubmission": "2025-07-15T18:50:50.261Z",
       "submissionCount": 1
     }
   ]

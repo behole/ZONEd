@@ -44,54 +44,85 @@ function ContentDashboard() {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
+      setError(null); // Clear previous errors
       console.log('🔄 Loading dashboard data...');
-      
-      const response = await fetch('/api/content');
+      console.log('🌐 Current URL:', window.location.href);
+      console.log('📡 Fetching from:', '/api/content');
+
+      const response = await fetch('/api/content', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+
       console.log('📡 API Response status:', response.status);
-      
+      console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`Failed to load content: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('❌ API Error Response:', errorText);
+        throw new Error(`Failed to load content: ${response.status} ${response.statusText} - ${errorText}`);
       }
-      
+
       const data = await response.json();
-      console.log('📊 API Data received:', data);
-      
+      console.log('📊 Raw API Data received:', data);
+      console.log('📊 Data structure:', {
+        hasContent: !!data.content,
+        contentType: typeof data.content,
+        contentLength: data.content?.length,
+        hasNotes: !!data.notes,
+        notesLength: data.notes?.length,
+        dataKeys: Object.keys(data)
+      });
+
       const allContent = data.content || [];
       console.log('📋 Content items found:', allContent.length);
-      
+
+      if (allContent.length > 0) {
+        console.log('📋 Sample content item:', allContent[0]);
+        console.log('📋 All content IDs:', allContent.map(item => item.id));
+      }
+
       // Calculate dashboard statistics
       const dashboardStats = calculateStats(allContent);
-      console.log('📈 Dashboard stats:', dashboardStats);
+      console.log('📈 Dashboard stats calculated:', dashboardStats);
       setStats(dashboardStats);
-      
+
       // Get recent content (last 10 items)
       const recent = allContent
         .sort((a: ContentItem, b: ContentItem) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         .slice(0, 10);
       console.log('⏰ Recent content:', recent.length);
+      console.log('⏰ Recent content items:', recent.map(item => ({ id: item.id, type: item.type, timestamp: item.timestamp })));
       setRecentContent(recent);
-      
+
+      console.log('✅ Dashboard data loading completed successfully');
+
     } catch (err) {
       console.error('❌ Dashboard loading error:', err);
+      console.error('❌ Error stack:', err instanceof Error ? err.stack : 'No stack trace');
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
+      console.log('🏁 Dashboard loading finished (loading state set to false)');
     }
   };
 
   const calculateStats = (content: ContentItem[]): DashboardStats => {
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
+
     const recentItems = content.filter(item => new Date(item.timestamp) > oneDayAgo).length;
     const highImportanceItems = content.filter(item => item.importanceScore > 5).length;
     const urgentItems = content.filter(item => item.urgencyAssessment?.level === 'high').length;
-    
+
     const contentBreakdown = content.reduce((acc, item) => {
       acc[item.type] = (acc[item.type] || 0) + 1;
       return acc;
     }, { text: 0, url: 0, file: 0 });
-    
+
     // Extract trending topics from contextual tags
     const topicCounts: { [key: string]: number } = {};
     content.forEach(item => {
@@ -101,12 +132,12 @@ function ContentDashboard() {
         });
       }
     });
-    
+
     const trendingTopics = Object.entries(topicCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 8)
       .map(([topic, count]) => ({ topic, count }));
-    
+
     return {
       totalItems: content.length,
       recentItems,
@@ -123,7 +154,7 @@ function ContentDashboard() {
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
-    
+
     if (diffHours < 1) return 'Just now';
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays === 1) return 'Yesterday';
@@ -186,9 +217,9 @@ function ContentDashboard() {
             <Button variant="outline-primary" size="sm" onClick={loadDashboardData}>
               🔄 Refresh
             </Button>
-            <Button 
-              variant="outline-secondary" 
-              size="sm" 
+            <Button
+              variant="outline-secondary"
+              size="sm"
               onClick={() => {
                 console.log('🔍 Debug: Opening browser console...');
                 console.log('Current stats:', stats);
@@ -278,33 +309,33 @@ function ContentDashboard() {
                   <span>📝 Text Notes</span>
                   <Badge bg="primary">{stats.contentBreakdown.text}</Badge>
                 </div>
-                <ProgressBar 
-                  now={(stats.contentBreakdown.text / stats.totalItems) * 100} 
-                  variant="primary" 
+                <ProgressBar
+                  now={(stats.contentBreakdown.text / stats.totalItems) * 100}
+                  variant="primary"
                   className="mb-2"
                 />
               </div>
-              
+
               <div className="mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <span>🔗 URLs & Links</span>
                   <Badge bg="info">{stats.contentBreakdown.url}</Badge>
                 </div>
-                <ProgressBar 
-                  now={(stats.contentBreakdown.url / stats.totalItems) * 100} 
-                  variant="info" 
+                <ProgressBar
+                  now={(stats.contentBreakdown.url / stats.totalItems) * 100}
+                  variant="info"
                   className="mb-2"
                 />
               </div>
-              
+
               <div className="mb-3">
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <span>📄 Files & Documents</span>
                   <Badge bg="success">{stats.contentBreakdown.file}</Badge>
                 </div>
-                <ProgressBar 
-                  now={(stats.contentBreakdown.file / stats.totalItems) * 100} 
-                  variant="success" 
+                <ProgressBar
+                  now={(stats.contentBreakdown.file / stats.totalItems) * 100}
+                  variant="success"
                   className="mb-2"
                 />
               </div>
@@ -322,8 +353,8 @@ function ContentDashboard() {
               {stats.trendingTopics.length > 0 ? (
                 <div className="d-flex flex-wrap gap-2">
                   {stats.trendingTopics.map((topic, index) => (
-                    <Badge 
-                      key={topic.topic} 
+                    <Badge
+                      key={topic.topic}
                       bg={index < 3 ? 'primary' : 'secondary'}
                       className="d-flex align-items-center gap-1"
                     >
@@ -368,18 +399,18 @@ function ContentDashboard() {
                           {formatRelativeTime(item.timestamp)}
                         </small>
                       </div>
-                      
+
                       <p className="mb-2 text-truncate" style={{ maxHeight: '3em', overflow: 'hidden' }}>
                         {item.content.substring(0, 120)}
                         {item.content.length > 120 && '...'}
                       </p>
-                      
+
                       {item.submissionCount > 1 && (
                         <small className="text-info">
                           🔄 Revisited {item.submissionCount} times
                         </small>
                       )}
-                      
+
                       {item.contextualTags && item.contextualTags.length > 0 && (
                         <div className="mt-2">
                           {item.contextualTags.slice(0, 3).map(tag => (
