@@ -6,6 +6,7 @@ import QueryPage from './components/QueryPage';
 import SourcesPage from './components/SourcesPage';
 import ContentDashboard from './components/ContentDashboard';
 import ContentBrowser from './components/ContentBrowser';
+import DatabaseCleanup from './components/DatabaseCleanup';
 import ShareSuccess from './components/ShareSuccess';
 import ShareError from './components/ShareError';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -48,6 +49,9 @@ function AppContent() {
               <Nav.Link as={Link} to="/sources" active={location.pathname === '/sources'}>
                 🔗 Sources
               </Nav.Link>
+              <Nav.Link as={Link} to="/cleanup" active={location.pathname === '/cleanup'}>
+                🧹 Cleanup
+              </Nav.Link>
             </Nav>
             <Nav>
               <span className="navbar-text text-light small">
@@ -83,6 +87,11 @@ function AppContent() {
             <Route path="/sources" element={
               <ErrorBoundary>
                 <SourcesPage key={`sources-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/cleanup" element={
+              <ErrorBoundary>
+                <DatabaseCleanup key={`cleanup-${routeKey}`} />
               </ErrorBoundary>
             } />
             <Route path="/share-success" element={

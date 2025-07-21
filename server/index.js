@@ -1021,28 +1021,110 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
 });
 
 // Debug endpoint to check what's in the database
-app.get('/api/debug/content', (req, res) => {
+app.get('/api/debug/content', async (req, res) => {
   try {
-    const db = readDB();
-    console.log('Debug endpoint - DB content length:', db.content?.length);
+    const allContent = await database.getAllContent();
+    const allNotes = await database.getAllNotes();
     
     const response = {
-      totalContent: db.content?.length || 0,
-      totalNotes: db.notes?.length || 0,
-      recentContent: (db.content || []).slice(-5).map(item => ({
+      totalContent: allContent.length,
+      totalNotes: allNotes.length,
+      recentContent: allContent.slice(-5).map(item => ({
         id: item.id,
         type: item.type,
         content: item.content?.substring(0, 100) || 'No content',
         timestamp: item.timestamp,
         metadata: item.metadata
       })),
-      allContentIds: (db.content || []).map(item => item.id)
+      allContentIds: allContent.map(item => item.id)
     };
     
     console.log('Debug response:', JSON.stringify(response, null, 2));
     res.json(response);
   } catch (error) {
     console.error('Debug endpoint error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Database cleanup endpoints
+app.get('/api/cleanup/preview', async (req, res) => {
+  try {
+    const DatabaseCleanup = require('./cleanup-database');
+    const cleanup = new DatabaseCleanup();
+    
+    const categories = await cleanup.analyzeContent();
+    
+    const summary = {
+      total: categories.valuable.length + categories.test.length + categories.trash.length + categories.questionable.length,
+      valuable: categories.valuable.length,
+      test: categories.test.length,
+      trash: categories.trash.length,
+      questionable: categories.questionable.length,
+      toDelete: categories.test.length + categories.trash.length,
+      categories: {
+        valuable: categories.valuable.map(item => ({
+          id: item.id,
+          type: item.type,
+          content: item.content?.substring(0, 100) || 'No content',
+          timestamp: item.timestamp,
+          importanceScore: item.importanceScore
+        })),
+        test: categories.test.map(item => ({
+          id: item.id,
+          type: item.type,
+          content: item.content?.substring(0, 100) || 'No content',
+          reason: 'Test content detected'
+        })),
+        trash: categories.trash.map(item => ({
+          id: item.id,
+          type: item.type,
+          content: item.content?.substring(0, 100) || 'No content',
+          reason: 'Trash content detected'
+        })),
+        questionable: categories.questionable.map(item => ({
+          id: item.id,
+          type: item.type,
+          content: item.content?.substring(0, 100) || 'No content',
+          reason: 'Questionable content - needs review'
+        }))
+      }
+    };
+    
+    await cleanup.close();
+    res.json(summary);
+  } catch (error) {
+    console.error('Cleanup preview error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/cleanup/execute', async (req, res) => {
+  try {
+    const { deleteTest = true, deleteTrash = true, deleteQuestionable = false } = req.body;
+    
+    const DatabaseCleanup = require('./cleanup-database');
+    const cleanup = new DatabaseCleanup();
+    
+    const categories = await cleanup.analyzeContent();
+    const deletedCount = await cleanup.performCleanup(categories, {
+      deleteTest,
+      deleteTrash,
+      deleteQuestionable
+    });
+    
+    const finalContent = await database.getAllContent();
+    
+    await cleanup.close();
+    
+    res.json({
+      success: true,
+      deletedCount,
+      remainingCount: finalContent.length,
+      summary: `Deleted ${deletedCount} items. ${finalContent.length} items remaining.`
+    });
+  } catch (error) {
+    console.error('Cleanup execution error:', error);
     res.status(500).json({ error: error.message });
   }
 });
