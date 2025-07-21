@@ -695,6 +695,54 @@ app.get('/api/content', async (req, res) => {
   }
 });
 
+// Delete content item endpoint
+app.delete('/api/content/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ error: 'Content ID is required' });
+    }
+    
+    console.log(`🗑️ Deleting content item: ${id}`);
+    
+    // Delete from database
+    if (database.isPostgres) {
+      const result = await database.pool.query('DELETE FROM content WHERE id = $1', [id]);
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'Content item not found' });
+      }
+    } else {
+      // JSON file fallback
+      const db = database.readJSONDB();
+      const originalLength = db.content.length;
+      db.content = db.content.filter(item => item.id !== id);
+      
+      if (db.content.length === originalLength) {
+        return res.status(404).json({ error: 'Content item not found' });
+      }
+      
+      database.writeJSONDB(db);
+    }
+    
+    // Also remove from vector database if it exists
+    try {
+      await vectorEngine.removeFromCollection(id);
+      console.log(`✅ Removed item ${id} from vector database`);
+    } catch (vectorError) {
+      console.warn(`⚠️ Could not remove item ${id} from vector database:`, vectorError.message);
+      // Don't fail the whole operation if vector removal fails
+    }
+    
+    console.log(`✅ Successfully deleted content item: ${id}`);
+    res.json({ success: true, message: 'Content item deleted successfully' });
+    
+  } catch (error) {
+    console.error('❌ Error deleting content:', error);
+    res.status(500).json({ error: 'Failed to delete content item' });
+  }
+});
+
 // RAG Query endpoint - the main intelligent search
 app.post('/api/rag/query', async (req, res) => {
   try {

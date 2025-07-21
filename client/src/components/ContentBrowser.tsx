@@ -38,6 +38,7 @@ function ContentBrowser() {
   const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [deletingItems, setDeletingItems] = useState<Set<string>>(new Set());
   
   const [filters, setFilters] = useState<FilterOptions>({
     type: 'all',
@@ -220,6 +221,51 @@ function ContentBrowser() {
     setShowPreview(true);
   };
 
+  const deleteItem = async (itemId: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.stopPropagation(); // Prevent opening preview when clicking delete
+    }
+
+    if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingItems(prev => new Set(prev).add(itemId));
+
+    try {
+      const response = await fetch(`/api/content/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete item: ${response.status} ${response.statusText}`);
+      }
+
+      // Remove item from local state
+      setContent(prev => prev.filter(item => item.id !== itemId));
+      
+      // Close preview if this item was being previewed
+      if (selectedItem?.id === itemId) {
+        setShowPreview(false);
+        setSelectedItem(null);
+      }
+
+      console.log(`✅ Successfully deleted item ${itemId}`);
+    } catch (error) {
+      console.error('❌ Delete error:', error);
+      alert(`Failed to delete item: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setDeletingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }
+  };
+
   const formatRelativeTime = (timestamp: string) => {
     const now = new Date();
     const date = new Date(timestamp);
@@ -282,9 +328,22 @@ function ContentBrowser() {
               <Badge bg="info" className="small">🔄 {item.submissionCount}</Badge>
             )}
           </div>
-          <small className="text-muted">
-            {formatRelativeTime(item.timestamp)}
-          </small>
+          <div className="d-flex align-items-center gap-2">
+            <small className="text-muted">
+              {formatRelativeTime(item.timestamp)}
+            </small>
+            <Button
+              variant="outline-danger"
+              size="sm"
+              className="p-1"
+              style={{ fontSize: '0.7rem', lineHeight: 1 }}
+              onClick={(e) => deleteItem(item.id, e)}
+              disabled={deletingItems.has(item.id)}
+              title="Delete this item"
+            >
+              {deletingItems.has(item.id) ? '⏳' : '🗑️'}
+            </Button>
+          </div>
         </div>
         
         {/* Content preview */}
@@ -373,6 +432,17 @@ function ContentBrowser() {
               {item.submissionCount > 1 && (
                 <Badge bg="info">🔄 {item.submissionCount}</Badge>
               )}
+              <Button
+                variant="outline-danger"
+                size="sm"
+                className="p-1 ms-2"
+                style={{ fontSize: '0.7rem', lineHeight: 1 }}
+                onClick={(e) => deleteItem(item.id, e)}
+                disabled={deletingItems.has(item.id)}
+                title="Delete this item"
+              >
+                {deletingItems.has(item.id) ? '⏳' : '🗑️'}
+              </Button>
             </div>
             <small className="text-muted">
               {formatRelativeTime(item.timestamp)}
@@ -704,6 +774,15 @@ function ContentBrowser() {
           <Button variant="secondary" onClick={() => setShowPreview(false)}>
             Close
           </Button>
+          {selectedItem && (
+            <Button 
+              variant="danger" 
+              onClick={() => deleteItem(selectedItem.id)}
+              disabled={deletingItems.has(selectedItem.id)}
+            >
+              {deletingItems.has(selectedItem.id) ? '⏳ Deleting...' : '🗑️ Delete Item'}
+            </Button>
+          )}
         </Modal.Footer>
       </Modal>
     </div>
