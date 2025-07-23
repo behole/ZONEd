@@ -4,12 +4,14 @@ import {
   Dropdown, Modal, Alert, Spinner, ButtonGroup 
 } from 'react-bootstrap';
 import SafeNumericDisplay from './SafeNumericDisplay';
+import VisualContentCard from './VisualContentCard';
 
 interface ContentItem {
   id: string;
   type: 'text' | 'url' | 'file';
   content: string;
   extractedContent?: string;
+  summary?: string;
   timestamp: string;
   importanceScore: number;
   submissionCount: number;
@@ -351,14 +353,32 @@ function ContentBrowser() {
           {item.metadata?.title && (
             <h6 className="card-title text-truncate mb-1">{item.metadata.title}</h6>
           )}
-          <p className="card-text small text-muted" style={{ 
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}>
-            {item.extractedContent || item.content}
-          </p>
+          
+          {/* AI Summary - prioritize this over raw content */}
+          {item.summary ? (
+            <div className="mb-2">
+              <p className="card-text small" style={{ 
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                fontStyle: 'italic',
+                color: '#495057'
+              }}>
+                💡 {item.summary}
+              </p>
+              <small className="text-muted">AI Summary</small>
+            </div>
+          ) : (
+            <p className="card-text small text-muted" style={{ 
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden'
+            }}>
+              {item.extractedContent || item.content}
+            </p>
+          )}
         </div>
         
         {/* Visual indicators for special content */}
@@ -719,40 +739,34 @@ function ContentBrowser() {
                 </p>
               </div>
 
-              {/* Content */}
+              {/* AI Summary */}
+              {selectedItem.summary && (
+                <div className="mb-3">
+                  <h6>💡 AI Generated Summary:</h6>
+                  <div className="p-3 bg-primary bg-opacity-10 rounded border-start border-primary border-3">
+                    <p className="mb-0" style={{ fontStyle: 'italic' }}>
+                      {selectedItem.summary}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Content Preview */}
               <div className="mb-3">
-                <h6>Content:</h6>
+                <h6>Content Preview:</h6>
                 <div className="p-3 bg-light rounded">
-                  <p style={{ whiteSpace: 'pre-wrap' }}>
-                    {selectedItem.extractedContent || selectedItem.content}
+                  <p style={{ whiteSpace: 'pre-wrap', maxHeight: '100px', overflow: 'hidden' }}>
+                    {(selectedItem.summary || selectedItem.extractedContent || selectedItem.content).substring(0, 300)}
+                    {((selectedItem.summary || selectedItem.extractedContent || selectedItem.content).length > 300) && '...'}
                   </p>
                 </div>
               </div>
 
-              {/* Visual Content Info */}
-              {selectedItem.metadata?.imageType && (
-                <div className="mb-3">
-                  <h6>Visual Analysis:</h6>
-                  <div className="p-3 bg-light rounded">
-                    {selectedItem.metadata.visualElements && (
-                      <p><strong>Elements:</strong> {selectedItem.metadata.visualElements.join(', ')}</p>
-                    )}
-                    {selectedItem.metadata.colorPalette && (
-                      <p><strong>Colors:</strong> {selectedItem.metadata.colorPalette.join(', ')}</p>
-                    )}
-                    {selectedItem.metadata.designInsights && (
-                      <div>
-                        <strong>Design Insights:</strong>
-                        <ul>
-                          {selectedItem.metadata.designInsights.map((insight: string, index: number) => (
-                            <li key={index}>{insight}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Visual Content Analysis */}
+              <VisualContentCard 
+                metadata={selectedItem.metadata} 
+                title={selectedItem.metadata?.title}
+              />
 
               {/* Tags */}
               {selectedItem.contextualTags && selectedItem.contextualTags.length > 0 && (
