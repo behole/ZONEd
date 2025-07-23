@@ -343,12 +343,12 @@ Please provide a sophisticated, creative intelligence response that:
 RESPONSE TONE: Be intellectually stimulating, creatively insightful, and personally relevant. Help them see their own thinking patterns and creative potential. This is about amplifying their intelligence, not just organizing their data.`;
 
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 800,
+        max_tokens: 1200,
         temperature: 0.7
       });
 
@@ -358,7 +358,7 @@ RESPONSE TONE: Be intellectually stimulating, creatively insightful, and persona
         items: searchResults.slice(0, 5),
         insights: insights,
         metadata: {
-          model: 'gpt-4o-mini',
+          model: 'gpt-4o',
           tokensUsed: completion.usage?.total_tokens || 0
         }
       };

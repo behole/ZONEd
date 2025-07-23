@@ -106,9 +106,15 @@ async function writeDB(data) {
 async function extractUrlMetadata(url) {
   try {
     const response = await axios.get(url, {
-      timeout: 15000,
+      timeout: 20000,
+      maxRedirects: 5,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
       }
     });
     
@@ -132,26 +138,39 @@ async function extractUrlMetadata(url) {
     
     // Enhanced content selectors with priority order
     const contentSelectors = [
-      // Semantic HTML first
+      // Semantic HTML first (highest priority)
       'article[role="main"]',
       'main article',
       'article',
       'main',
       '[role="main"]',
       
-      // Common content containers
+      // JSON-LD structured data extraction
+      'script[type="application/ld+json"]',
+      
+      // Modern content containers
       '.post-content, .entry-content, .article-content',
       '.content-body, .article-body, .post-body',
       '.story-body, .story-content',
       '.text-content, .main-content',
+      '.article__content, .post__content',
       
-      // Platform-specific selectors
+      // Platform-specific selectors (updated for 2025)
       '.notion-page-content',
       '.medium-content, .postArticle-content',
       '.wp-content, .entry',
       '.markdown-body',
       '.rst-content',
       '.doc-content',
+      '.substack-post-content',
+      '.ghost-content',
+      '.cms-content',
+      
+      // Modern framework selectors
+      '[data-content="main"]',
+      '[data-role="content"]',
+      '.prose, .prose-lg',
+      '.rich-text, .formatted-text',
       
       // Generic fallbacks
       '#content, .content',
@@ -160,24 +179,43 @@ async function extractUrlMetadata(url) {
       '.page-content'
     ];
     
-    // Try each selector group
-    for (const selector of contentSelectors) {
-      const elements = $(selector);
-      if (elements.length > 0) {
-        // Get text from all matching elements
-        let candidateText = '';
-        elements.each((i, el) => {
-          const text = $(el).text().trim();
-          if (text.length > candidateText.length) {
-            candidateText = text;
-          }
-        });
+    // Try JSON-LD structured data first
+    $('script[type="application/ld+json"]').each((i, el) => {
+      try {
+        const jsonData = JSON.parse($(el).html());
+        if (jsonData['@type'] === 'Article' && jsonData.articleBody) {
+          mainContent = jsonData.articleBody;
+          contentSource = 'JSON-LD structured data';
+          console.log(`📄 Extracted content from JSON-LD (${mainContent.length} chars)`);
+          return false; // Break out of each loop
+        }
+      } catch (e) {
+        // Invalid JSON, continue
+      }
+    });
+    
+    // If no JSON-LD content, try CSS selectors
+    if (!mainContent) {
+      for (const selector of contentSelectors) {
+        if (selector.includes('json')) continue; // Skip JSON selector in CSS loop
         
-        if (candidateText.length > 300) { // Require substantial content
-          mainContent = candidateText;
-          contentSource = selector;
-          console.log(`📄 Extracted content using selector: ${selector} (${candidateText.length} chars)`);
-          break;
+        const elements = $(selector);
+        if (elements.length > 0) {
+          // Get text from all matching elements
+          let candidateText = '';
+          elements.each((i, el) => {
+            const text = $(el).text().trim();
+            if (text.length > candidateText.length) {
+              candidateText = text;
+            }
+          });
+          
+          if (candidateText.length > 300) { // Require substantial content
+            mainContent = candidateText;
+            contentSource = selector;
+            console.log(`📄 Extracted content using selector: ${selector} (${candidateText.length} chars)`);
+            break;
+          }
         }
       }
     }
@@ -231,28 +269,53 @@ async function extractUrlMetadata(url) {
     
     mainContent = contentLines.join('\n').trim();
     
-    // Extract enhanced metadata
+    // Extract enhanced metadata with modern standards
     const title = $('title').text().trim() || 
                  $('meta[property="og:title"]').attr('content') || 
+                 $('meta[name="twitter:title"]').attr('content') ||
+                 $('meta[property="article:title"]').attr('content') ||
                  $('h1').first().text().trim() || 
                  'No title';
                  
     const description = $('meta[name="description"]').attr('content') || 
                        $('meta[property="og:description"]').attr('content') || 
-                       $('meta[name="twitter:description"]').attr('content') || 
+                       $('meta[name="twitter:description"]').attr('content') ||
+                       $('meta[property="article:description"]').attr('content') ||
+                       $('.excerpt, .summary').first().text().trim().substring(0, 200) ||
                        '';
     
     const author = $('meta[name="author"]').attr('content') || 
+                  $('meta[property="article:author"]').attr('content') ||
+                  $('meta[name="twitter:creator"]').attr('content') ||
                   $('[rel="author"]').text().trim() || 
-                  $('.author').first().text().trim() || 
+                  $('.author, .byline, .writer').first().text().trim() || 
                   '';
     
     const publishDate = $('meta[property="article:published_time"]').attr('content') || 
+                       $('meta[property="article:modified_time"]').attr('content') ||
+                       $('meta[name="publish_date"]').attr('content') ||
                        $('time[datetime]').attr('datetime') || 
-                       $('.date').first().text().trim() || 
+                       $('time[pubdate]').attr('pubdate') ||
+                       $('.date, .published, .timestamp').first().text().trim() || 
                        '';
     
-    const keywords = $('meta[name="keywords"]').attr('content') || '';
+    const keywords = $('meta[name="keywords"]').attr('content') || 
+                    $('meta[property="article:tag"]').attr('content') ||
+                    $('.tags, .categories').text().trim() ||
+                    '';
+    
+    // Extract additional modern metadata
+    const siteName = $('meta[property="og:site_name"]').attr('content') || 
+                    $('meta[name="application-name"]').attr('content') ||
+                    new URL(url).hostname;
+    
+    const imageUrl = $('meta[property="og:image"]').attr('content') ||
+                    $('meta[name="twitter:image"]').attr('content') ||
+                    $('link[rel="apple-touch-icon"]').attr('href') ||
+                    '';
+    
+    const contentType = $('meta[property="og:type"]').attr('content') || 'article';
+    const locale = $('meta[property="og:locale"]').attr('content') || 'en_US';
     
     console.log(`📊 Content extraction summary:
     - Source: ${contentSource}
@@ -267,11 +330,20 @@ async function extractUrlMetadata(url) {
       content: mainContent,
       url: url,
       domain: new URL(url).hostname,
-      author: author,
+      author: author.substring(0, 100),
       publishDate: publishDate,
-      keywords: keywords,
+      keywords: keywords.substring(0, 300),
       contentSource: contentSource,
       extractionQuality: mainContent.length > 500 ? 'high' : mainContent.length > 200 ? 'medium' : 'low',
+      
+      // Enhanced metadata
+      siteName: siteName,
+      imageUrl: imageUrl,
+      contentType: contentType,
+      locale: locale,
+      wordCount: mainContent.split(/\s+/).filter(w => w.length > 0).length,
+      readingTimeMinutes: Math.ceil(mainContent.split(/\s+/).filter(w => w.length > 0).length / 250),
+      
       timestamp: new Date().toISOString()
     };
   } catch (error) {
@@ -1177,8 +1249,8 @@ app.post('/api/cleanup/execute', async (req, res) => {
   }
 });
 
-// Dedicated iOS share endpoint - bulletproof and simple (GET and POST)
-app.all('/ios-share', async (req, res) => {
+// Consolidated iOS share endpoint - handles all sharing scenarios
+app.all(['/ios-share', '/share'], upload.array('files'), async (req, res) => {
   // Set headers immediately for maximum iOS compatibility
   res.set({
     'Access-Control-Allow-Origin': '*',
@@ -1203,337 +1275,106 @@ app.all('/ios-share', async (req, res) => {
     console.log('- text:', req.query.text);
     console.log('- title:', req.query.title);
     
-    // Extract parameters from both GET (query) and POST (body)
-    const params = req.method === 'POST' ? req.body : req.query;
+    // Enhanced parameter extraction - handle GET query, POST body, and files
+    const queryParams = req.query || {};
+    const bodyParams = req.body || {};
+    const files = req.files || [];
     
+    console.log('📄 Files received:', files.length);
+    
+    // Comprehensive parameter extraction with multiple fallbacks
     const extractedData = {
-      text: params.text || params.t || params.content || '',
-      url: params.url || params.u || params.link || '',
-      title: params.title || params.name || params.subject || '',
-      source: params.source || 'ios_shortcut'
+      text: queryParams.text || bodyParams.text || queryParams.t || bodyParams.t || 
+            queryParams.content || bodyParams.content || '',
+      url: queryParams.url || bodyParams.url || queryParams.u || bodyParams.u || 
+           queryParams.link || bodyParams.link || '',
+      title: queryParams.title || bodyParams.title || queryParams.name || bodyParams.name || 
+             queryParams.subject || bodyParams.subject || '',
+      source: queryParams.source || bodyParams.source || 'ios_consolidated'
     };
     
     console.log('📋 Extracted data:', extractedData);
     
-    // Validate we have some content
-    const hasContent = extractedData.text || extractedData.url || extractedData.title;
+    // Validate we have some content (text, URL, title, or files)
+    const hasTextContent = extractedData.text || extractedData.url || extractedData.title;
+    const hasFiles = files && files.length > 0;
     
-    if (!hasContent) {
+    if (!hasTextContent && !hasFiles) {
       console.log('❌ No content provided');
+      const allParams = { ...queryParams, ...bodyParams };
       return res.status(400).json({
         success: false,
         error: 'No content provided',
-        message: 'Please provide text, url, or title parameter',
-        receivedParams: Object.keys(req.query),
+        message: 'Please provide text, url, title parameter, or files',
+        receivedParams: Object.keys(allParams),
+        receivedFiles: files.length,
         expectedParams: ['text', 'url', 'title', 't', 'u', 'content', 'link', 'name']
       });
     }
     
-    // Determine content type and primary content
-    let contentType = 'text';
-    let primaryContent = extractedData.text || extractedData.title;
-    
-    if (extractedData.url) {
-      contentType = 'url';
-      primaryContent = extractedData.url;
-      
-      // Quick URL validation
-      try {
-        new URL(extractedData.url);
-        console.log('✅ Valid URL detected');
-      } catch {
-        console.log('⚠️ Invalid URL, treating as text');
-        contentType = 'text';
-        primaryContent = [extractedData.title, extractedData.text, extractedData.url].filter(Boolean).join(' ');
-      }
-    }
-    
-    // Create simplified content item
-    const contentItem = {
-      type: contentType,
-      content: primaryContent,
-      metadata: {
-        title: extractedData.title || (contentType === 'url' ? 'Shared URL' : 'Shared Text'),
-        sharedVia: 'ios_shortcut',
-        shareMethod: 'ios_dedicated_endpoint',
-        originalText: extractedData.text,
-        originalUrl: extractedData.url,
-        shareTimestamp: new Date().toISOString(),
-        userAgent: req.headers['user-agent']
-      }
-    };
-    
-    console.log('🔄 Processing content...');
-    
-    // Get existing content for deduplication
     const existingContent = await database.getAllContent();
+    const processedItems = [];
     
-    // Process the content with timeout protection
-    const processed = await Promise.race([
-      processContentItem(contentItem, existingContent),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Processing timeout after 10 seconds')), 10000)
-      )
-    ]);
-    
-    console.log('✅ Content processed');
-    
-    // Save to database with simple retry
-    try {
-      await database.insertContent(processed);
-      console.log('✅ Saved to database');
-    } catch (dbError) {
-      console.error('❌ Database save failed:', dbError.message);
-      // Try once more
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await database.insertContent(processed);
-      console.log('✅ Saved to database (retry)');
-    }
-    
-    // Add to vector database (non-blocking, don't wait)
-    vectorEngine.addContent(processed)
-      .then(() => console.log('✅ Vectorized'))
-      .catch(err => console.warn('⚠️ Vector failed (non-critical):', err.message));
-    
-    // Return immediate success response
-    const response = {
-      success: true,
-      message: 'Content shared successfully to ZONEd!',
-      contentType: contentType,
-      itemsProcessed: 1,
-      timestamp: new Date().toISOString(),
-      id: processed.id
-    };
-    
-    console.log('✅ iOS share complete');
-    return res.json(response);
-    
-  } catch (error) {
-    console.error('❌ iOS share error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Processing failed',
-      message: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
-
-// Ultra-reliable iOS share handler - bulletproof version
-app.get('/share', async (req, res) => {
-  // Set headers immediately for iOS compatibility
-  res.set({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0'
-  });
-  try {
-    console.log('=== iOS SHARE REQUEST (GET) ===');
-    console.log('Query params:', req.query);
-    console.log('Headers:', JSON.stringify(req.headers, null, 2));
-    console.log('User-Agent:', req.headers['user-agent']);
-    
-    const { text, url, title, source } = req.query;
-    
-    // Enhanced parameter extraction - handle various iOS shortcut formats
-    const extractedData = {
-      text: text || req.query.t || req.query.content,
-      url: url || req.query.u || req.query.link,
-      title: title || req.query.title || req.query.name,
-      source: source || 'ios_shortcut'
-    };
-    
-    console.log('Extracted share data:', extractedData);
-    
-    if (extractedData.text || extractedData.url || extractedData.title) {
-      console.log('✅ Valid share content found');
-      
-      // Determine content type more intelligently
+    // Process text/URL content if present
+    if (hasTextContent) {
       let contentType = 'text';
-      let primaryContent = extractedData.text || extractedData.title || '';
+      let primaryContent = extractedData.text || extractedData.title;
       
       if (extractedData.url) {
         contentType = 'url';
         primaryContent = extractedData.url;
         
-        // Validate URL format
+        // Quick URL validation
         try {
           new URL(extractedData.url);
-          console.log('✅ Valid URL format detected');
-        } catch (urlError) {
-          console.log('⚠️ Invalid URL format, treating as text');
+          console.log('✅ Valid URL detected');
+        } catch {
+          console.log('⚠️ Invalid URL, treating as text');
           contentType = 'text';
-          primaryContent = [extractedData.title, extractedData.text, extractedData.url].filter(Boolean).join('\n');
+          primaryContent = [extractedData.title, extractedData.text, extractedData.url].filter(Boolean).join(' ');
         }
       }
-      
-      const existingContent = await database.getAllContent();
-      console.log('📊 Current DB content count:', existingContent.length);
-      
-      // Create content item with enhanced metadata
+    
+      // Create content item for text/URL
       const contentItem = {
         type: contentType,
         content: primaryContent,
         metadata: {
           title: extractedData.title || (contentType === 'url' ? 'Shared URL' : 'Shared Text'),
           sharedVia: extractedData.source,
-          shareMethod: 'ios_get_request',
+          shareMethod: 'ios_consolidated_endpoint',
           originalText: extractedData.text,
           originalUrl: extractedData.url,
           shareTimestamp: new Date().toISOString(),
-          userAgent: req.headers['user-agent'],
-          // Enhanced context for better processing
-          shareContext: {
-            hasText: !!extractedData.text,
-            hasUrl: !!extractedData.url,
-            hasTitle: !!extractedData.title,
-            contentLength: primaryContent.length
-          }
+          userAgent: req.headers['user-agent']
         }
       };
+    
+      console.log('🔄 Processing text content...');
       
-      console.log('🔄 Processing shared item...');
-      
-      // Use enhanced processing with timeout protection
+      // Process the content with timeout protection
       const processed = await Promise.race([
         processContentItem(contentItem, existingContent),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Processing timeout')), 15000)
+          setTimeout(() => reject(new Error('Processing timeout after 15 seconds')), 15000)
         )
       ]);
       
-      console.log('✅ Content processed successfully');
+      console.log('✅ Text content processed');
       
-      // Save to database with retry logic
-      let saveAttempts = 0;
-      const maxSaveAttempts = 3;
-      
-      while (saveAttempts < maxSaveAttempts) {
-        try {
-          await database.insertContent(processed);
-          console.log('✅ Shared item saved to database');
-          break;
-        } catch (saveError) {
-          saveAttempts++;
-          console.warn(`⚠️ Database save attempt ${saveAttempts} failed:`, saveError.message);
-          if (saveAttempts >= maxSaveAttempts) {
-            throw saveError;
-          }
-          // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-      
-      // Add to vector database (non-blocking)
-      vectorEngine.addContent(processed)
-        .then(() => console.log('✅ Shared content vectorized successfully'))
-        .catch(vectorError => console.warn('⚠️ Vector processing failed (non-critical):', vectorError.message));
-      
-      console.log('=== SHARE SUCCESS ===');
-      
-      // Enhanced success response with better iOS compatibility
-      const successUrl = `/share-success?items=1&type=${contentType}&source=${extractedData.source}`;
-      
-      // For iOS shortcuts, provide both redirect and JSON response
-      if (req.headers['user-agent']?.includes('Shortcuts') || req.query.format === 'json') {
-        res.json({
-          success: true,
-          message: 'Content shared successfully',
-          contentType: contentType,
-          itemsProcessed: 1,
-          redirectUrl: successUrl
-        });
-      } else {
-        res.redirect(successUrl);
-      }
-      
-    } else {
-      console.log('❌ No valid share content provided');
-      console.log('Available query params:', Object.keys(req.query));
-      
-      // Provide helpful error information
-      const errorUrl = `/share-error?reason=no_content&params=${encodeURIComponent(JSON.stringify(Object.keys(req.query)))}`;
-      
-      if (req.headers['user-agent']?.includes('Shortcuts') || req.query.format === 'json') {
-        res.status(400).json({
-          success: false,
-          error: 'No valid content provided',
-          availableParams: Object.keys(req.query),
-          expectedParams: ['text', 'url', 'title', 't', 'u', 'content', 'link'],
-          redirectUrl: errorUrl
-        });
-      } else {
-        res.redirect(errorUrl);
-      }
-    }
-  } catch (error) {
-    console.error('❌ Share processing error:', error);
-    console.error('Error stack:', error.stack);
-    
-    const errorUrl = `/share-error?reason=processing_error&message=${encodeURIComponent(error.message)}`;
-    
-    if (req.headers['user-agent']?.includes('Shortcuts') || req.query.format === 'json') {
-      res.status(500).json({
-        success: false,
-        error: 'Processing failed',
-        details: error.message,
-        redirectUrl: errorUrl
-      });
-    } else {
-      res.redirect(errorUrl);
-    }
-  }
-});
-
-// Share handler endpoint for PWA Web Share Target API
-app.post('/share', upload.array('files'), async (req, res) => {
-  try {
-    console.log('Received share request:', req.body);
-    console.log('Shared files:', req.files);
-    
-    const { title, text, url } = req.body;
-    const sharedFiles = req.files || [];
-    
-    const existingContent = await database.getAllContent();
-    const processedItems = [];
-    
-    // Process shared text/URL content
-    if (text || url || title) {
-      const contentText = [title, text, url].filter(Boolean).join('\n');
-      const contentItem = {
-        type: url ? 'url' : 'text',
-        content: url || contentText
-      };
-      
-      // Process the content item
-      const processed = await processContentItem(contentItem, existingContent);
-      
-      // Add share-specific metadata after processing
-      processed.metadata = {
-        ...processed.metadata,
-        title: title || 'Shared content',
-        sharedVia: 'ios_share_sheet',
-        originalText: text,
-        originalUrl: url
-      };
-      
+      // Save to database with retry
       await database.insertContent(processed);
       processedItems.push(processed);
       
-      // Add to vector database
-      try {
-        await vectorEngine.addContent(processed);
-      } catch (vectorError) {
-        console.warn('Failed to vectorize shared content:', vectorError);
-      }
+      // Add to vector database (non-blocking)
+      vectorEngine.addContent(processed)
+        .then(() => console.log('✅ Text content vectorized'))
+        .catch(err => console.warn('⚠️ Vector failed (non-critical):', err.message));
     }
     
-    // Process shared files
-    for (const file of sharedFiles) {
-      console.log(`Processing shared file: ${file.originalname}`);
+    // Process files if present
+    for (const file of files) {
+      console.log(`📄 Processing file: ${file.originalname}`);
       
       const extractionResult = await contentProcessor.processFile(
         file.path, 
@@ -1546,41 +1387,67 @@ app.post('/share', upload.array('files'), async (req, res) => {
         content: extractionResult.extractedText || file.originalname,
         metadata: {
           ...extractionResult.metadata,
-          sharedVia: 'ios_share_sheet',
+          sharedVia: extractedData.source,
+          shareMethod: 'ios_consolidated_endpoint',
           uploadPath: file.path,
           filename: file.filename,
           originalName: file.originalname,
           size: file.size,
           mimetype: file.mimetype,
           processingSuccess: extractionResult.success,
-          processingError: extractionResult.error
+          processingError: extractionResult.error,
+          shareTimestamp: new Date().toISOString(),
+          userAgent: req.headers['user-agent']
         }
       };
       
-      // Process the file item using the same function as other content
-      const processed = await processContentItem(fileItem, existingContent);
-      await database.insertContent(processed);
-      processedItems.push(processed);
+      const processedFile = await processContentItem(fileItem, existingContent);
+      await database.insertContent(processedFile);
+      processedItems.push(processedFile);
       
       // Add to vector database if text extraction succeeded
       if (extractionResult.success && extractionResult.extractedText) {
-        try {
-          await vectorEngine.addContent(processed);
-        } catch (vectorError) {
-          console.warn('Failed to vectorize shared file:', vectorError);
-        }
+        vectorEngine.addContent(processedFile)
+          .then(() => console.log(`✅ File ${file.originalname} vectorized`))
+          .catch(err => console.warn(`⚠️ File vectorization failed: ${err.message}`));
       }
     }
     
-    // Redirect to share success page
-    res.redirect(`/share-success?items=${processedItems.length}`);
+    // Return success response
+    const response = {
+      success: true,
+      message: 'Content shared successfully to ZONEd!',
+      itemsProcessed: processedItems.length,
+      timestamp: new Date().toISOString(),
+      items: processedItems.map(item => ({
+        id: item.id,
+        type: item.type,
+        title: item.metadata?.title || 'Untitled'
+      }))
+    };
+    
+    console.log(`✅ iOS share complete - ${processedItems.length} items processed`);
+    
+    // Handle different response formats
+    if (req.headers['user-agent']?.includes('Shortcuts') || req.query.format === 'json') {
+      return res.json(response);
+    } else {
+      const successUrl = `/share-success?items=${processedItems.length}`;
+      return res.redirect(successUrl);
+    }
     
   } catch (error) {
-    console.error('POST Share processing error:', error);
-    console.error('Error stack:', error.stack);
-    res.redirect('/share-error');
+    console.error('❌ iOS share error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Processing failed',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
+
+// Note: Duplicate iOS sharing endpoints removed - now handled by consolidated endpoint above
 
 // Auto-load existing content on startup
 async function initializeVectorDatabase() {
