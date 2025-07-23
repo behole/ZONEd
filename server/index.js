@@ -438,19 +438,22 @@ async function processContentItem(item, existingContent = []) {
       const cleanedText = contentProcessor.cleanContent(item.content);
       const chunks = contentProcessor.chunkContent(cleanedText);
       const keywords = contentProcessor.extractKeywords(cleanedText);
+      const summary = await contentProcessor.generateSummary(cleanedText, 'text', item.metadata?.title || '');
       fingerprint = contentProcessor.generateFingerprint(cleanedText);
       
       processedContent = {
         ...baseItem,
         content: item.content,
         cleanedContent: cleanedText,
+        summary: summary,
         chunks: chunks,
         keywords: keywords,
         fingerprint: fingerprint,
         metadata: {
           wordCount: cleanedText.split(/\s+/).filter(w => w.length > 0).length,
           charCount: cleanedText.length,
-          chunkCount: chunks.length
+          chunkCount: chunks.length,
+          hasSummary: true
         }
       };
       break;
@@ -460,6 +463,7 @@ async function processContentItem(item, existingContent = []) {
       const urlCleanedContent = contentProcessor.cleanContent(urlMetadata.content);
       const urlChunks = contentProcessor.chunkContent(urlCleanedContent);
       const urlKeywords = contentProcessor.extractKeywords(urlCleanedContent);
+      const urlSummary = await contentProcessor.generateSummary(urlCleanedContent, 'article', urlMetadata.title || '');
       fingerprint = contentProcessor.generateFingerprint(urlCleanedContent);
       
       processedContent = {
@@ -467,13 +471,15 @@ async function processContentItem(item, existingContent = []) {
         content: item.content,
         extractedContent: urlMetadata.content,
         cleanedContent: urlCleanedContent,
+        summary: urlSummary,
         chunks: urlChunks,
         keywords: urlKeywords,
         fingerprint: fingerprint,
         metadata: {
           ...item.metadata,
           ...urlMetadata,
-          chunkCount: urlChunks.length
+          chunkCount: urlChunks.length,
+          hasSummary: urlCleanedContent.length > 0
         }
       };
       break;

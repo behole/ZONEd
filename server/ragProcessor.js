@@ -204,9 +204,9 @@ class RAGProcessor {
       options.limit = Math.max(options.limit || 10, 20);
     }
     
-    // Set importance threshold for trending queries
+    // Set importance threshold for trending queries (more inclusive)
     if (queryAnalysis.intents.trend || queryAnalysis.primaryIntent === 'trend') {
-      options.importanceThreshold = 2.0;
+      options.importanceThreshold = 0.5; // Much more inclusive
     }
     
     // Filter by urgency
@@ -219,18 +219,18 @@ class RAGProcessor {
       options.typeFilter = queryAnalysis.contentTypes[0];
     }
     
-    // Set time filter
+    // Set time filter (more generous for small datasets)
     if (queryAnalysis.timeContext) {
       switch (queryAnalysis.timeContext) {
         case 'today':
-          options.timeFilter = 'today';
+          options.timeFilter = 'week'; // Expand to week for more results
           break;
         case 'thisWeek':
         case 'recently':
-          options.timeFilter = 'week';
+          options.timeFilter = 'month'; // Expand to month for more results
           break;
         case 'thisMonth':
-          options.timeFilter = 'month';
+          options.timeFilter = 'year'; // Even more generous
           break;
       }
     }

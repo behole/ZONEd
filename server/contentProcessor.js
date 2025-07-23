@@ -19,6 +19,13 @@ class ContentProcessor {
       'image/webp': this.extractFromImage
     };
     this.importanceEngine = new ImportanceEngine();
+    
+    // Initialize OpenAI if available
+    this.useOpenAI = process.env.USE_OPENAI === 'true' && process.env.OPENAI_API_KEY;
+    if (this.useOpenAI) {
+      const { OpenAI } = require('openai');
+      this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    }
   }
 
   async processFile(filePath, mimeType, originalName) {
@@ -326,9 +333,10 @@ class ContentProcessor {
   // Content chunking for vector storage
   chunkContent(text, options = {}) {
     const {
-      maxChunkSize = 1000,
-      overlap = 200,
-      preserveParagraphs = true
+      maxChunkSize = 1500,  // Larger chunks for better context
+      overlap = 150,        // Smaller overlap to reduce duplication
+      preserveParagraphs = true,
+      maxChunks = 10        // Limit total chunks to prevent explosion
     } = options;
 
     if (!text || text.length <= maxChunkSize) {
@@ -338,7 +346,7 @@ class ContentProcessor {
     const chunks = [];
     let currentPosition = 0;
 
-    while (currentPosition < text.length) {
+    while (currentPosition < text.length && chunks.length < maxChunks) {
       let chunkEnd = Math.min(currentPosition + maxChunkSize, text.length);
       
       // Try to break at sentence or paragraph boundaries
@@ -346,15 +354,15 @@ class ContentProcessor {
         const nearbyNewline = text.lastIndexOf('\n\n', chunkEnd);
         const nearbySentence = text.lastIndexOf('. ', chunkEnd);
         
-        if (nearbyNewline > currentPosition + maxChunkSize * 0.5) {
+        if (nearbyNewline > currentPosition + maxChunkSize * 0.6) {
           chunkEnd = nearbyNewline + 2;
-        } else if (nearbySentence > currentPosition + maxChunkSize * 0.5) {
+        } else if (nearbySentence > currentPosition + maxChunkSize * 0.6) {
           chunkEnd = nearbySentence + 2;
         }
       }
 
       const chunk = text.slice(currentPosition, chunkEnd).trim();
-      if (chunk.length > 0) {
+      if (chunk.length > 50) {  // Only add substantial chunks
         chunks.push({
           text: chunk,
           index: chunks.length,
@@ -363,8 +371,23 @@ class ContentProcessor {
         });
       }
 
-      // Move position forward with overlap
-      currentPosition = Math.max(chunkEnd - overlap, currentPosition + 1);
+      // Ensure meaningful advancement to prevent chunk explosion
+      const minAdvancement = Math.max(maxChunkSize * 0.5, 500);
+      currentPosition = Math.max(chunkEnd - overlap, currentPosition + minAdvancement);
+      
+      // If we're near the end, just take the rest as the final chunk
+      if (text.length - currentPosition < maxChunkSize * 0.3) {
+        const finalChunk = text.slice(currentPosition).trim();
+        if (finalChunk.length > 50 && chunks.length < maxChunks) {
+          chunks.push({
+            text: finalChunk,
+            index: chunks.length,
+            startPos: currentPosition,
+            endPos: text.length
+          });
+        }
+        break;
+      }
     }
 
     return chunks;
@@ -387,6 +410,47 @@ class ContentProcessor {
       .replace(/!{2,}/g, '!')
       .replace(/\?{2,}/g, '?')
       .trim();
+  }
+
+  // Generate AI summary for content
+  async generateSummary(text, contentType = 'text', title = '') {
+    if (!this.useOpenAI || !text || text.length < 100) {
+      return this.generateFallbackSummary(text, title);
+    }
+
+    try {
+      const prompt = `Create a concise, insightful summary of this ${contentType} content. Focus on key ideas, main themes, and actionable insights. Make it useful for a creative designer who wants to quickly understand the essence and relevance of this content.
+
+${title ? `Title: ${title}\n\n` : ''}Content: ${text.substring(0, 3000)}`;
+
+      const completion = await this.openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 200,
+        temperature: 0.3
+      });
+
+      return completion.choices[0].message.content.trim();
+    } catch (error) {
+      console.warn('AI summary generation failed:', error.message);
+      return this.generateFallbackSummary(text, title);
+    }
+  }
+
+  // Fallback summary generation without AI
+  generateFallbackSummary(text, title = '') {
+    if (!text) return 'No content available for summary.';
+    
+    // Extract first meaningful sentences
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+    const firstSentences = sentences.slice(0, 2).join('. ').trim();
+    
+    if (firstSentences.length > 10) {
+      return firstSentences + (firstSentences.endsWith('.') ? '' : '.');
+    }
+    
+    // Fallback to truncated text
+    return text.substring(0, 200).trim() + (text.length > 200 ? '...' : '');
   }
 
   // Generate content fingerprint for deduplication

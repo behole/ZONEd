@@ -74,18 +74,26 @@ class NewsletterGenerator {
 
   async generateOpenAINewsletter(data, options) {
     try {
-      const systemPrompt = `You are a personal AI assistant creating a friendly, insightful weekly summary for someone based on their captured content (notes, URLs, files, thoughts).
+      const systemPrompt = `You are a sophisticated personal intelligence system for a creative designer and intellectual. Your role is to provide genuinely insightful, nuanced recommendations based on their captured content.
 
-Your goal is to create a warm, engaging digest that:
-1. Makes them feel accomplished about their work and interests
-2. Helps them see patterns and connections in their thinking
-3. Provides gentle insights and actionable next steps
-4. Feels like a conversation with a thoughtful friend
+Your goal is to create a digest that:
+1. Identifies sophisticated patterns and connections in their interests
+2. Provides specific, actionable recommendations that go beyond the obvious
+3. Makes intelligent cross-references between different concepts
+4. Suggests next-level explorations based on their demonstrated interests
 
-Style: Warm, personal, conversational, encouraging
-Format: Easy-to-read with clear sections and friendly headings
-Tone: Supportive friend who pays attention to details and celebrates progress
-Use emojis and friendly language. Avoid technical jargon or complex scores.`;
+For recommendations, AVOID generic suggestions like:
+❌ \"Watch more of this show\"
+❌ \"Read more about this topic\"
+❌ \"Follow this person\"
+
+Instead, provide sophisticated connections like:
+✅ \"If you're interested in X, you should explore Y because Z\"
+✅ \"This connects to your interest in A through the shared theme of B\"
+✅ \"Based on your fascination with C, you might find value in D, which approaches similar ideas from E perspective\"
+
+Style: Intellectually curious, sophisticated, specific
+Tone: Thoughtful curator who understands creative and intellectual pursuits`;
 
       const userPrompt = `Create a personalized weekly newsletter based on this data:
 
@@ -111,20 +119,26 @@ PATTERNS & TRENDS:
 ${data.trends.map(trend => `- ${trend.topic}: ${trend.description}`).join('\n')}
 
 Please create a comprehensive newsletter with these sections:
-1. **Executive Summary** - Key highlights of the week
-2. **What You've Been Thinking About** - Main themes and topics
-3. **Trending in Your Mind** - Topics gaining importance/frequency
-4. **Action Items** - Things that need follow-up
-5. **Insights & Patterns** - Interesting observations about your digital behavior
-6. **Recommendations** - Suggested next steps or areas to explore
+1. **Executive Summary** - Key intellectual highlights and patterns
+2. **What You've Been Thinking About** - Main themes and conceptual threads
+3. **Trending in Your Mind** - Topics gaining momentum and importance
+4. **Creative Connections** - Unexpected links between your interests
+5. **Insights & Patterns** - Sophisticated observations about your thinking
+6. **Curated Recommendations** - Specific, intelligent next explorations
 
-Create a warm, encouraging weekly summary that:
-- Celebrates what they accomplished this week
-- Points out interesting patterns in their interests
-- Suggests 2-3 gentle next steps
-- Uses friendly language and emojis
-- Avoids technical terms or numerical scores
-- Feels like a supportive friend checking in`;
+For the **Curated Recommendations** section specifically:
+- Analyze the content deeply to understand underlying themes
+- Make sophisticated connections between different interests
+- Suggest specific works, creators, concepts, or experiences
+- Explain WHY each recommendation connects to their interests
+- Go beyond surface-level suggestions to find meaningful parallels
+- Consider creative, intellectual, and design-focused perspectives
+- Format as: \"Since you're exploring [X], you might find [Y] valuable because [specific reasoning]\"
+
+Example format for recommendations:
+\"Given your interest in Peep Show's uncomfortable social dynamics, you might appreciate Charlie Brooker's early writing for PC Zone magazine, which shares that same incisive, cringe-aware perspective on modern life but applied to technology culture.\"
+
+Create an intellectually stimulating summary that treats the user as a sophisticated thinker.`;
 
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o',

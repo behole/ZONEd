@@ -8,6 +8,7 @@ class ImportanceEngine {
 
   /**
    * Calculate importance score based on submission frequency and recency
+   * Emphasizes what's "on your mind" through repeated submissions
    * @param {Array} submissions - Array of submission objects with timestamps
    * @returns {number} Importance score (1.0 to 10.0)
    */
@@ -31,13 +32,32 @@ class ImportanceEngine {
       totalScore += submissionScore;
     });
 
-    // Frequency bonus: more submissions = higher base importance
-    const frequencyMultiplier = 1 + Math.log(submissions.length) * 0.5;
+    // Enhanced frequency multiplier: aggressive scaling for resubmissions
+    // This better reflects what's "on your mind"
+    const submissionCount = submissions.length;
+    let frequencyMultiplier;
+    
+    if (submissionCount === 1) {
+      frequencyMultiplier = 1.0; // Baseline
+    } else if (submissionCount === 2) {
+      frequencyMultiplier = 2.0; // Strong boost for first resubmission
+    } else if (submissionCount === 3) {
+      frequencyMultiplier = 3.2; // Clear pattern emerging
+    } else if (submissionCount <= 5) {
+      frequencyMultiplier = 1.5 + (submissionCount * 0.8); // Strong scaling
+    } else {
+      frequencyMultiplier = 6.0 + Math.log(submissionCount - 4) * 0.5; // Diminishing returns after 5
+    }
+    
     totalScore *= frequencyMultiplier;
 
-    // Velocity bonus: recent clustering of submissions
+    // Velocity bonus: recent clustering shows active interest
     const velocityBonus = this.calculateVelocityBonus(submissions);
     totalScore += velocityBonus;
+
+    // Recency boost: recent resubmissions show current interest
+    const recencyBoost = this.calculateRecencyBoost(submissions);
+    totalScore += recencyBoost;
 
     // Cap at maximum importance
     return Math.min(totalScore, this.MAX_IMPORTANCE_SCORE);
@@ -60,8 +80,28 @@ class ImportanceEngine {
     if (recentSubmissions.length < 2) return 0;
 
     // More submissions in recent period = higher velocity bonus
-    const velocityScore = (recentSubmissions.length - 1) * 0.5;
-    return Math.min(velocityScore, 2.0); // Cap velocity bonus at 2.0
+    const velocityScore = (recentSubmissions.length - 1) * 0.8; // Increased from 0.5
+    return Math.min(velocityScore, 3.0); // Increased cap from 2.0
+  }
+
+  /**
+   * Calculate recency boost for recent resubmissions
+   * @param {Array} submissions 
+   * @returns {number} Recency boost score
+   */
+  calculateRecencyBoost(submissions) {
+    if (submissions.length < 2) return 0;
+
+    const now = new Date();
+    const mostRecent = new Date(submissions[0].timestamp);
+    const hoursAgo = (now - mostRecent) / (1000 * 60 * 60);
+    
+    // Strong boost for very recent resubmissions
+    if (hoursAgo <= 1) return 1.5; // Within last hour
+    if (hoursAgo <= 6) return 1.0; // Within last 6 hours  
+    if (hoursAgo <= 24) return 0.5; // Within last day
+    
+    return 0;
   }
 
   /**
@@ -206,28 +246,32 @@ class ImportanceEngine {
   generateContextualTags(patterns, importanceScore) {
     const tags = [];
 
-    // Importance-based tags
-    if (importanceScore >= 7.0) tags.push('critical');
-    else if (importanceScore >= 4.0) tags.push('important');
-    else if (importanceScore >= 2.0) tags.push('notable');
+    // Meaningful importance tags
+    if (importanceScore >= 7.0) tags.push('must read');
+    else if (importanceScore >= 4.0) tags.push('worth revisiting');
+    else if (importanceScore >= 2.0) tags.push('caught my eye');
 
-    // Velocity-based tags
-    if (patterns.velocity === 'high') tags.push('trending', 'urgent');
-    else if (patterns.velocity === 'medium') tags.push('active');
+    // Natural engagement patterns
+    if (patterns.velocity === 'high') tags.push('hot topic', 'needs attention');
+    else if (patterns.velocity === 'medium') tags.push('ongoing interest');
 
-    // Trend-based tags
-    if (patterns.trend === 'increasing') tags.push('growing_interest');
-    else if (patterns.trend === 'decreasing') tags.push('declining_interest');
+    // Interest evolution
+    if (patterns.trend === 'increasing') tags.push('growing fascination');
+    else if (patterns.trend === 'decreasing') tags.push('moving on from this');
 
-    // Source diversity tags
+    // Research depth indicators
     const sourceCount = Object.keys(patterns.submissionSources).length;
-    if (sourceCount >= 3) tags.push('multi_source');
-    else if (sourceCount === 1) tags.push('single_source');
+    if (sourceCount >= 3) tags.push('deep dive', 'cross-referenced');
+    else if (sourceCount === 1) tags.push('first encounter');
 
-    // Temporal tags
-    if (patterns.timeSpan.hours <= 1) tags.push('rapid_fire');
-    else if (patterns.timeSpan.days <= 1) tags.push('same_day');
-    else if (patterns.timeSpan.days <= 7) tags.push('this_week');
+    // Timing patterns that matter
+    if (patterns.timeSpan.hours <= 1) tags.push('quick exploration');
+    else if (patterns.timeSpan.days <= 1) tags.push('same day research');
+    else if (patterns.timeSpan.days <= 7) tags.push('weekly theme');
+
+    // Add submission count context
+    if (patterns.totalSubmissions >= 5) tags.push('recurring theme');
+    else if (patterns.totalSubmissions >= 3) tags.push('building interest');
 
     return tags;
   }
