@@ -1,5 +1,5 @@
 [build]
-cmd = "npm run build"
+cmd = "./build.sh"
 
 [start]
 cmd = "npm run start:production"
