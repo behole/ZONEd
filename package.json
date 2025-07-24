@@ -13,6 +13,10 @@
   "keywords": ["pwa", "dropzone", "personal-data"],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20.18.1",
+    "npm": ">=10.0.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
