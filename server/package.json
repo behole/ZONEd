@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "build": "echo \"Server build: Express ready for deployment\"",
-    "postinstall": "npm rebuild sharp --platform=linux --arch=x64 || npm install sharp || echo 'Sharp rebuild failed, continuing'"
+    "postinstall": "echo 'Sharp rebuild skipped for Railway compatibility'"
   },
   "keywords": [],
   "author": "",
