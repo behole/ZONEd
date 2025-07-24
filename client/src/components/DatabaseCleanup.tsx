@@ -231,7 +231,7 @@ const DatabaseCleanup: React.FC = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         .database-cleanup {
           padding: 20px;
           max-width: 1200px;
