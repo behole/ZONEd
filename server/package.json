@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
+    "build": "echo \"Server build: Express ready for deployment\"",
     "postinstall": "npm rebuild sharp --platform=linux --arch=x64 || npm install --platform=linux --arch=x64 sharp"
   },
   "keywords": [],
