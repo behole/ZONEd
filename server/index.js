@@ -1187,11 +1187,46 @@ app.post('/api/content/:id/regenerate-summary', authenticate, async (req, res) =
 
     // Extract text content for summary generation
     let textContent = content.extractedContent || content.cleanedContent || content.content;
-    console.log('📝 Text content length:', textContent ? textContent.length : 0);
+    console.log('📝 Content analysis:');
+    console.log('  - extractedContent length:', content.extractedContent ? content.extractedContent.length : 0);
+    console.log('  - cleanedContent length:', content.cleanedContent ? content.cleanedContent.length : 0);
+    console.log('  - content length:', content.content ? content.content.length : 0);
+    console.log('  - selected textContent preview:', textContent ? textContent.substring(0, 100) + '...' : 'none');
     
     if (!textContent || textContent.trim().length < 10) {
       console.log('❌ Insufficient text content');
       return res.status(400).json({ error: 'No text content available for summary generation' });
+    }
+
+    // For URL content, if we only have the URL, try to re-extract content
+    if (content.type === 'url' && textContent === content.content) {
+      console.log('🔄 URL content appears to be just the URL, attempting re-extraction...');
+      try {
+        const urlMetadata = await extractUrlMetadata(content.content);
+        if (urlMetadata.content && urlMetadata.content.length > 100) {
+          textContent = contentProcessor.cleanContent(urlMetadata.content);
+          console.log('✅ Re-extracted content length:', textContent.length);
+          
+          // Update the database with the extracted content for future use
+          const updatedContent = {
+            ...content,
+            extractedContent: urlMetadata.content,
+            cleanedContent: textContent,
+            metadata: {
+              ...content.metadata,
+              ...urlMetadata,
+              contentReExtracted: new Date().toISOString()
+            }
+          };
+          await database.updateContent(contentId, updatedContent);
+          console.log('💾 Updated content with re-extracted data');
+        } else {
+          console.log('❌ Re-extraction failed or returned insufficient content');
+        }
+      } catch (extractError) {
+        console.log('❌ Re-extraction error:', extractError.message);
+        // Continue with original content
+      }
     }
 
     console.log('🤖 Generating summary with OpenAI...');
