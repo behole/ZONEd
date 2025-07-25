@@ -6,6 +6,7 @@ import QueryPage from './components/QueryPage';
 import SourcesPage from './components/SourcesPage';
 import ContentDashboard from './components/ContentDashboard';
 import ContentBrowser from './components/ContentBrowser';
+import DesignInsightsDashboard from './components/DesignInsightsDashboard';
 import DatabaseCleanup from './components/DatabaseCleanup';
 import ShareSuccess from './components/ShareSuccess';
 import ShareError from './components/ShareError';
@@ -43,6 +44,9 @@ function AppContent() {
               <Nav.Link as={Link} to="/browse" active={location.pathname === '/browse'}>
                 📚 Browse
               </Nav.Link>
+              <Nav.Link as={Link} to="/design" active={location.pathname === '/design'}>
+                🎨 Design
+              </Nav.Link>
               <Nav.Link as={Link} to="/query" active={location.pathname === '/query'}>
                 🔍 Query
               </Nav.Link>
@@ -77,6 +81,11 @@ function AppContent() {
             <Route path="/browse" element={
               <ErrorBoundary>
                 <ContentBrowser key={`browse-${routeKey}`} />
+              </ErrorBoundary>
+            } />
+            <Route path="/design" element={
+              <ErrorBoundary>
+                <DesignInsightsDashboard key={`design-${routeKey}`} />
               </ErrorBoundary>
             } />
             <Route path="/query" element={

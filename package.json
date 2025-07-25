@@ -3,12 +3,8 @@
   "version": "1.0.0",
   "description": "Personal Data PWA - Universal Content Dropzone",
   "scripts": {
-    "install:all": "cd client && npm install && cd ../server && npm install",
-    "prebuild": "npm run install:all",
-    "build": "cd client && npm run build",
-    "postbuild": "echo 'Build complete - client built, server ready'",
-    "start": "cd server && npm start",
-    "start:production": "cd server && npm start",
+    "build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "start": "cd server && node index.js",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm start",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""

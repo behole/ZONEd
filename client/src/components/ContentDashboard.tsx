@@ -6,6 +6,7 @@ interface ContentItem {
   id: string;
   type: 'text' | 'url' | 'file';
   content: string;
+  summary?: string;
   timestamp: string;
   importanceScore: number;
   submissionCount: number;
@@ -401,10 +402,22 @@ function ContentDashboard() {
                         </small>
                       </div>
 
-                      <p className="mb-2 text-truncate" style={{ maxHeight: '3em', overflow: 'hidden' }}>
-                        {item.content.substring(0, 120)}
-                        {item.content.length > 120 && '...'}
-                      </p>
+                      {/* Show AI summary if available, otherwise show content */}
+                      {item.summary ? (
+                        <p className="mb-2" style={{ 
+                          maxHeight: '3em', 
+                          overflow: 'hidden',
+                          fontStyle: 'italic',
+                          color: '#495057'
+                        }}>
+                          💡 {item.summary}
+                        </p>
+                      ) : (
+                        <p className="mb-2 text-truncate" style={{ maxHeight: '3em', overflow: 'hidden' }}>
+                          {item.content.substring(0, 120)}
+                          {item.content.length > 120 && '...'}
+                        </p>
+                      )}
 
                       {item.submissionCount > 1 && (
                         <small className="text-info">
