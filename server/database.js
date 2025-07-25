@@ -472,9 +472,9 @@ class Database {
         const values = [];
         let paramIndex = 1;
 
-        // Build dynamic update query
+        // Build dynamic update query, excluding id and updated_at
         for (const [key, value] of Object.entries(updatedItem)) {
-          if (key !== 'id') {
+          if (key !== 'id' && key !== 'updated_at') {
             updateFields.push(`${key} = $${paramIndex}`);
             values.push(typeof value === 'object' ? JSON.stringify(value) : value);
             paramIndex++;
