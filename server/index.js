@@ -68,6 +68,28 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Middleware for API authentication
+const authenticate = (req, res, next) => {
+  const token = process.env.ZONED_API_TOKEN;
+  if (!token) {
+    // No token set, allow all requests
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: Missing or invalid token' });
+  }
+
+  const providedToken = authHeader.split(' ')[1];
+  if (providedToken !== token) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+  }
+
+  next();
+};
+
+
 // Serve static files from client build in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
@@ -534,7 +556,7 @@ async function processContentItem(item, existingContent = []) {
 }
 
 // Legacy notes endpoint
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', authenticate, (req, res) => {
   try {
     const { content } = req.body;
     const db = readDB();
@@ -552,7 +574,7 @@ app.post('/api/notes', (req, res) => {
 });
 
 // New content processing endpoint with enhanced deduplication
-app.post('/api/content', async (req, res) => {
+app.post('/api/content', authenticate, async (req, res) => {
   try {
     console.log('Processing content request:', req.body);
     const { items } = req.body;
@@ -634,7 +656,7 @@ app.post('/api/content', async (req, res) => {
 });
 
 // File upload endpoint with content processing
-app.post('/api/upload', upload.array('files'), async (req, res) => {
+app.post('/api/upload', authenticate, upload.array('files'), async (req, res) => {
   try {
     const processedFiles = [];
     
@@ -774,7 +796,7 @@ app.get('/api/content', async (req, res) => {
 });
 
 // Delete content item endpoint
-app.delete('/api/content/:id', async (req, res) => {
+app.delete('/api/content/:id', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -822,7 +844,7 @@ app.delete('/api/content/:id', async (req, res) => {
 });
 
 // RAG Query endpoint - the main intelligent search
-app.post('/api/rag/query', async (req, res) => {
+app.post('/api/rag/query', authenticate, async (req, res) => {
   try {
     const { query, options = {} } = req.body;
     
@@ -847,7 +869,7 @@ app.post('/api/rag/query', async (req, res) => {
 });
 
 // Semantic search endpoint (lower-level access)
-app.post('/api/vector/search', async (req, res) => {
+app.post('/api/vector/search', authenticate, async (req, res) => {
   try {
     const { query, options = {} } = req.body;
     
@@ -884,7 +906,7 @@ app.get('/api/vector/stats', async (req, res) => {
 });
 
 // Sync existing content to vector database
-app.post('/api/vector/sync', async (req, res) => {
+app.post('/api/vector/sync', authenticate, async (req, res) => {
   try {
     const db = readDB();
     const allContent = [...(db.content || []), ...(db.notes || [])];
@@ -935,7 +957,7 @@ app.post('/api/vector/sync', async (req, res) => {
 });
 
 // Newsletter generation endpoints
-app.post('/api/newsletter/generate', async (req, res) => {
+app.post('/api/newsletter/generate', authenticate, async (req, res) => {
   try {
     const { 
       timeframe = 'week',
@@ -1071,7 +1093,7 @@ app.get('/api/sources/:sourceType/instructions', (req, res) => {
   }
 });
 
-app.post('/api/sources/:sourceType/import', async (req, res) => {
+app.post('/api/sources/:sourceType/import', authenticate, async (req, res) => {
   try {
     const { sourceType } = req.params;
     const options = req.body;
@@ -1147,7 +1169,7 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
 });
 
 // Regenerate summary for a specific content item
-app.post('/api/content/:id/regenerate-summary', async (req, res) => {
+app.post('/api/content/:id/regenerate-summary', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🔄 Regenerating summary for content ID: ${id}`);
@@ -1293,7 +1315,7 @@ app.get('/api/cleanup/preview', async (req, res) => {
   }
 });
 
-app.post('/api/cleanup/execute', async (req, res) => {
+app.post('/api/cleanup/execute', authenticate, async (req, res) => {
   try {
     const { deleteTest = true, deleteTrash = true, deleteQuestionable = false } = req.body;
     
