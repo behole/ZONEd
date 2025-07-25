@@ -110,6 +110,7 @@ class Database {
           content TEXT,
           extracted_content TEXT,
           cleaned_content TEXT,
+          summary TEXT,
           chunks JSONB,
           keywords JSONB,
           fingerprint VARCHAR(50),
@@ -145,6 +146,7 @@ class Database {
       const requiredColumns = {
         'extracted_content': 'TEXT',
         'cleaned_content': 'TEXT', 
+        'summary': 'TEXT',
         'chunks': 'JSONB',
         'keywords': 'JSONB',
         'fingerprint': 'VARCHAR(50)',
