@@ -26,7 +26,9 @@
         "timestamp": "2025-07-15T18:19:04.875Z",
         "error": "Request failed with status code 403",
         "extractionQuality": "failed",
-        "chunkCount": 1
+        "chunkCount": 1,
+        "hasSummary": true,
+        "summaryRegeneratedAt": "2025-07-25T01:48:08.244Z"
       },
       "submissions": [
         {
@@ -75,7 +77,8 @@
       "lastSubmission": "2025-07-15T19:01:09.171Z",
       "submissionCount": 2,
       "isDuplicate": true,
-      "originalId": 1752603545322
+      "originalId": 1752603545322,
+      "summary": "com/2025/07/08/magazine/fda-collapse-rfk-kennedy."
     },
     {
       "id": 1752603669041,

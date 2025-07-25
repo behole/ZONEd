@@ -270,9 +270,12 @@ function ContentBrowser() {
   };
 
   const regenerateSummary = async (itemId: string) => {
+    console.log('🔄 Starting regenerate summary for ID:', itemId, typeof itemId);
     setRegeneratingIds(prev => new Set(prev).add(itemId));
 
     try {
+      console.log('📡 Making POST request to:', `/api/content/${itemId}/regenerate-summary`);
+      
       const response = await fetch(`/api/content/${itemId}/regenerate-summary`, {
         method: 'POST',
         headers: {
@@ -280,12 +283,24 @@ function ContentBrowser() {
         },
       });
 
+      console.log('📥 Response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorText = await response.text();
+        console.log('❌ Error response:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText };
+        }
+        
         throw new Error(errorData.error || `Failed to regenerate summary: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('✅ Success response:', result);
       
       // Update the content item with new summary
       setContent(prev => prev.map(item => 
