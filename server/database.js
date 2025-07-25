@@ -445,6 +445,100 @@ class Database {
     }
   }
 
+  async getContentById(id) {
+    if (this.isPostgres) {
+      try {
+        const result = await this.pool.query('SELECT * FROM content WHERE id = $1', [id]);
+        return result.rows[0] || null;
+      } catch (error) {
+        console.error('Error getting content by ID from PostgreSQL:', error.message);
+        throw error;
+      }
+    } else {
+      // JSON fallback
+      const data = this.readJSONDB();
+      // Convert id to number for JSON storage compatibility
+      const numId = parseInt(id);
+      return data.content.find(item => item.id === id || item.id === numId) || null;
+    }
+  }
+
+  async updateContent(id, updatedItem) {
+    if (this.isPostgres) {
+      try {
+        const updateFields = [];
+        const values = [];
+        let paramIndex = 1;
+
+        // Build dynamic update query
+        for (const [key, value] of Object.entries(updatedItem)) {
+          if (key !== 'id') {
+            updateFields.push(`${key} = $${paramIndex}`);
+            values.push(typeof value === 'object' ? JSON.stringify(value) : value);
+            paramIndex++;
+          }
+        }
+        
+        values.push(id); // Add id as last parameter
+
+        const query = `
+          UPDATE content 
+          SET ${updateFields.join(', ')}, updated_at = NOW()
+          WHERE id = $${paramIndex}
+          RETURNING *
+        `;
+
+        const result = await this.pool.query(query, values);
+        return result.rows[0] || null;
+      } catch (error) {
+        console.error('Error updating content in PostgreSQL:', error.message);
+        throw error;
+      }
+    } else {
+      // JSON fallback
+      const data = this.readJSONDB();
+      // Convert id to number for JSON storage compatibility
+      const numId = parseInt(id);
+      const index = data.content.findIndex(item => item.id === id || item.id === numId);
+      
+      if (index !== -1) {
+        // Preserve the original ID type from the database
+        const originalId = data.content[index].id;
+        data.content[index] = { ...data.content[index], ...updatedItem, id: originalId };
+        this.writeJSONDB(data);
+        return data.content[index];
+      }
+      
+      return null;
+    }
+  }
+
+  async deleteContentById(id) {
+    if (this.isPostgres) {
+      try {
+        const result = await this.pool.query('DELETE FROM content WHERE id = $1 RETURNING *', [id]);
+        return result.rows[0] || null;
+      } catch (error) {
+        console.error('Error deleting content from PostgreSQL:', error.message);
+        throw error;
+      }
+    } else {
+      // JSON fallback
+      const data = this.readJSONDB();
+      // Convert id to number for JSON storage compatibility
+      const numId = parseInt(id);
+      const index = data.content.findIndex(item => item.id === id || item.id === numId);
+      
+      if (index !== -1) {
+        const deletedItem = data.content.splice(index, 1)[0];
+        this.writeJSONDB(data);
+        return deletedItem;
+      }
+      
+      return null;
+    }
+  }
+
   async close() {
     if (this.pool) {
       await this.pool.end();

@@ -1150,24 +1150,38 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
 app.post('/api/content/:id/regenerate-summary', async (req, res) => {
   try {
     const { id } = req.params;
-    const content = await database.getContentById(id);
+    console.log(`🔄 Regenerating summary for content ID: ${id}`);
+    
+    // Convert ID to appropriate type (string for JSON, number for some DBs)
+    const contentId = database.isPostgres ? id : id.toString();
+    
+    const content = await database.getContentById(contentId);
+    console.log('📄 Found content:', content ? 'Yes' : 'No');
     
     if (!content) {
+      console.log('❌ Content not found for ID:', contentId);
       return res.status(404).json({ error: 'Content not found' });
     }
 
     // Extract text content for summary generation
-    let textContent = content.extractedContent || content.content;
+    let textContent = content.extractedContent || content.cleanedContent || content.content;
+    console.log('📝 Text content length:', textContent ? textContent.length : 0);
+    
     if (!textContent || textContent.trim().length < 10) {
+      console.log('❌ Insufficient text content');
       return res.status(400).json({ error: 'No text content available for summary generation' });
     }
 
+    console.log('🤖 Generating summary with OpenAI...');
+    
     // Generate new summary
     const summary = await contentProcessor.generateSummary(
       textContent, 
       content.type, 
       content.metadata?.title || ''
     );
+    
+    console.log('✅ Summary generated:', summary ? summary.substring(0, 50) + '...' : 'null');
 
     // Update the content with new summary
     const updatedContent = {
@@ -1180,19 +1194,22 @@ app.post('/api/content/:id/regenerate-summary', async (req, res) => {
       }
     };
 
-    await database.updateContent(id, updatedContent);
+    console.log('💾 Updating content in database...');
+    await database.updateContent(contentId, updatedContent);
+    console.log('✅ Content updated successfully');
 
     res.json({
       success: true,
-      id: id,
+      id: contentId,
       summary: summary,
       regeneratedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error regenerating summary:', error);
+    console.error('❌ Error regenerating summary:', error);
     res.status(500).json({ 
       error: 'Failed to regenerate summary',
-      details: error.message 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
