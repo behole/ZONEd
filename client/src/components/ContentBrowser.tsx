@@ -41,6 +41,7 @@ function ContentBrowser() {
   const [showPreview, setShowPreview] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [deletingItems, setDeletingItems] = useState<Set<string>>(new Set());
+  const [regeneratingIds, setRegeneratingIds] = useState<Set<string>>(new Set());
   
   const [filters, setFilters] = useState<FilterOptions>({
     type: 'all',
@@ -268,6 +269,49 @@ function ContentBrowser() {
     }
   };
 
+  const regenerateSummary = async (itemId: string) => {
+    setRegeneratingIds(prev => new Set(prev).add(itemId));
+
+    try {
+      const response = await fetch(`/api/content/${itemId}/regenerate-summary`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to regenerate summary: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Update the content item with new summary
+      setContent(prev => prev.map(item => 
+        item.id === itemId 
+          ? { ...item, summary: result.summary }
+          : item
+      ));
+
+      // Update selected item if it's the one we regenerated
+      if (selectedItem?.id === itemId) {
+        setSelectedItem(prev => prev ? { ...prev, summary: result.summary } : null);
+      }
+
+      console.log('✅ Summary regenerated successfully');
+    } catch (error) {
+      console.error('❌ Regenerate summary error:', error);
+      alert(`Failed to regenerate summary: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setRegeneratingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itemId);
+        return newSet;
+      });
+    }
+  };
+
   const formatRelativeTime = (timestamp: string) => {
     const now = new Date();
     const date = new Date(timestamp);
@@ -354,31 +398,40 @@ function ContentBrowser() {
             <h6 className="card-title text-truncate mb-1">{item.metadata.title}</h6>
           )}
           
-          {/* AI Summary - prioritize this over raw content */}
-          {item.summary ? (
-            <div className="mb-2">
-              <p className="card-text small" style={{ 
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                fontStyle: 'italic',
-                color: '#495057'
-              }}>
-                💡 {item.summary}
-              </p>
-              <small className="text-muted">AI Summary</small>
-            </div>
-          ) : (
-            <p className="card-text small text-muted" style={{ 
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
-            }}>
-              {item.extractedContent || item.content}
-            </p>
-          )}
+          {/* AI Summary */}
+          <div className="mb-2">
+            {item.summary ? (
+              <>
+                <p className="card-text" style={{ 
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  fontStyle: 'italic',
+                  color: '#495057',
+                  fontSize: '0.9rem',
+                  lineHeight: '1.4'
+                }}>
+                  💡 {item.summary}
+                </p>
+                <small className="text-muted">AI Generated Summary</small>
+              </>
+            ) : (
+              <>
+                <p className="card-text text-muted" style={{ 
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  fontSize: '0.85rem',
+                  fontStyle: 'italic'
+                }}>
+                  📝 Summary not yet generated...
+                </p>
+                <small className="text-muted">Processing</small>
+              </>
+            )}
+          </div>
         </div>
         
         {/* Visual indicators for special content */}
@@ -740,24 +793,52 @@ function ContentBrowser() {
               </div>
 
               {/* AI Summary */}
-              {selectedItem.summary && (
+              {selectedItem.summary ? (
                 <div className="mb-3">
-                  <h6>💡 AI Generated Summary:</h6>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h6 className="mb-0">💡 AI Generated Summary:</h6>
+                    <Button 
+                      size="sm" 
+                      variant="outline-primary"
+                      onClick={() => regenerateSummary(selectedItem.id)}
+                      disabled={regeneratingIds.has(selectedItem.id)}
+                    >
+                      {regeneratingIds.has(selectedItem.id) ? '⏳ Generating...' : '🔄 Regenerate'}
+                    </Button>
+                  </div>
                   <div className="p-3 bg-primary bg-opacity-10 rounded border-start border-primary border-3">
-                    <p className="mb-0" style={{ fontStyle: 'italic' }}>
+                    <p className="mb-0" style={{ fontStyle: 'italic', fontSize: '1.05rem', lineHeight: '1.5' }}>
                       {selectedItem.summary}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h6 className="mb-0">📝 Summary:</h6>
+                    <Button 
+                      size="sm" 
+                      variant="primary"
+                      onClick={() => regenerateSummary(selectedItem.id)}
+                      disabled={regeneratingIds.has(selectedItem.id)}
+                    >
+                      {regeneratingIds.has(selectedItem.id) ? '⏳ Generating...' : '✨ Generate Summary'}
+                    </Button>
+                  </div>
+                  <div className="p-3 bg-warning bg-opacity-10 rounded border-start border-warning border-3">
+                    <p className="mb-0 text-muted" style={{ fontStyle: 'italic' }}>
+                      AI summary not yet generated for this content.
                     </p>
                   </div>
                 </div>
               )}
 
-              {/* Content Preview */}
+              {/* Original Content */}
               <div className="mb-3">
-                <h6>Content Preview:</h6>
-                <div className="p-3 bg-light rounded">
-                  <p style={{ whiteSpace: 'pre-wrap', maxHeight: '100px', overflow: 'hidden' }}>
-                    {(selectedItem.summary || selectedItem.extractedContent || selectedItem.content).substring(0, 300)}
-                    {((selectedItem.summary || selectedItem.extractedContent || selectedItem.content).length > 300) && '...'}
+                <h6>Original Content:</h6>
+                <div className="p-3 bg-light rounded" style={{ maxHeight: '200px', overflow: 'auto' }}>
+                  <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem' }}>
+                    {selectedItem.extractedContent || selectedItem.content}
                   </p>
                 </div>
               </div>

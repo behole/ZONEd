@@ -1146,6 +1146,57 @@ app.post('/api/sources/:sourceType/import', async (req, res) => {
   }
 });
 
+// Regenerate summary for a specific content item
+app.post('/api/content/:id/regenerate-summary', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const content = await database.getContentById(id);
+    
+    if (!content) {
+      return res.status(404).json({ error: 'Content not found' });
+    }
+
+    // Extract text content for summary generation
+    let textContent = content.extractedContent || content.content;
+    if (!textContent || textContent.trim().length < 10) {
+      return res.status(400).json({ error: 'No text content available for summary generation' });
+    }
+
+    // Generate new summary
+    const summary = await contentProcessor.generateSummary(
+      textContent, 
+      content.type, 
+      content.metadata?.title || ''
+    );
+
+    // Update the content with new summary
+    const updatedContent = {
+      ...content,
+      summary: summary,
+      metadata: {
+        ...content.metadata,
+        hasSummary: true,
+        summaryRegeneratedAt: new Date().toISOString()
+      }
+    };
+
+    await database.updateContent(id, updatedContent);
+
+    res.json({
+      success: true,
+      id: id,
+      summary: summary,
+      regeneratedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error regenerating summary:', error);
+    res.status(500).json({ 
+      error: 'Failed to regenerate summary',
+      details: error.message 
+    });
+  }
+});
+
 // Debug endpoint to check what's in the database
 app.get('/api/debug/content', async (req, res) => {
   try {
