@@ -39,12 +39,13 @@ class Database {
         
         this.pool = new Pool(poolConfig);
 
-        // Test the connection with timeout
+        // Test the connection with timeout (shorter for production)
         console.log('🔗 Testing database connection...');
+        const timeoutMs = process.env.NODE_ENV === 'production' ? 5000 : 10000;
         const client = await Promise.race([
           this.pool.connect(),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Connection timeout after 10s')), 10000)
+            setTimeout(() => reject(new Error(`Connection timeout after ${timeoutMs/1000}s`)), timeoutMs)
           )
         ]);
         

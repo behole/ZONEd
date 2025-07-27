@@ -1674,20 +1674,20 @@ process.on('SIGINT', async () => {
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}/`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📊 Database: ${database.isPostgres ? 'PostgreSQL' : 'JSON file'}`);
   
-  // Initialize vector DB in background (non-blocking)
-  setImmediate(() => {
-    console.log(`📊 Database: ${database.isPostgres ? 'PostgreSQL' : 'JSON file'}`);
-    
-    // Delayed vector DB initialization (optional, won't crash server)
-    setTimeout(() => {
+  // Only initialize vector DB in development
+  if (process.env.NODE_ENV !== 'production') {
+    setImmediate(() => {
       if (typeof initializeVectorDatabase === 'function') {
         initializeVectorDatabase().catch(error => {
           console.warn('⚠️ Vector database initialization failed (non-critical):', error.message);
         });
       }
-    }, 10000); // Longer delay to ensure server is stable
-  });
+    });
+  } else {
+    console.log('⚡ Production mode: Vector database will initialize lazily');
+  }
 });
 
 server.on('error', (error) => {
