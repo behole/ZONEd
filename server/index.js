@@ -1586,6 +1586,12 @@ app.all(['/ios-share', '/share'], upload.array('files'), async (req, res) => {
 // Auto-load existing content on startup
 async function initializeVectorDatabase() {
   try {
+    // Skip vector initialization in production to prevent deployment timeouts
+    if (process.env.NODE_ENV === 'production') {
+      console.log('⚡ Skipping vector initialization in production - will initialize lazily');
+      return;
+    }
+    
     console.log('Initializing vector database with existing content...');
     
     // Add delay to ensure tables are fully created
