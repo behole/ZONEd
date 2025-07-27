@@ -246,34 +246,30 @@ class ImportanceEngine {
   generateContextualTags(patterns, importanceScore) {
     const tags = [];
 
-    // Meaningful importance tags
-    if (importanceScore >= 7.0) tags.push('must read');
-    else if (importanceScore >= 4.0) tags.push('worth revisiting');
-    else if (importanceScore >= 2.0) tags.push('caught my eye');
-
-    // Natural engagement patterns
-    if (patterns.velocity === 'high') tags.push('hot topic', 'needs attention');
-    else if (patterns.velocity === 'medium') tags.push('ongoing interest');
-
-    // Interest evolution
-    if (patterns.trend === 'increasing') tags.push('growing fascination');
-    else if (patterns.trend === 'decreasing') tags.push('moving on from this');
-
     // Research depth indicators
     const sourceCount = Object.keys(patterns.submissionSources).length;
-    if (sourceCount >= 3) tags.push('deep dive', 'cross-referenced');
-    else if (sourceCount === 1) tags.push('first encounter');
+    if (sourceCount >= 3) tags.push('researched thoroughly');
+    else if (sourceCount === 1) tags.push('new discovery');
 
     // Timing patterns that matter
-    if (patterns.timeSpan.hours <= 1) tags.push('quick exploration');
-    else if (patterns.timeSpan.days <= 1) tags.push('same day research');
-    else if (patterns.timeSpan.days <= 7) tags.push('weekly theme');
+    if (patterns.timeSpan.hours <= 1) tags.push('quick find');
+    else if (patterns.timeSpan.days <= 1) tags.push('daily focus');
+    else if (patterns.timeSpan.days <= 7) tags.push('weekly interest');
 
-    // Add submission count context
-    if (patterns.totalSubmissions >= 5) tags.push('recurring theme');
+    // Engagement patterns
+    if (patterns.totalSubmissions >= 5) tags.push('keeps coming back');
     else if (patterns.totalSubmissions >= 3) tags.push('building interest');
+    else if (patterns.totalSubmissions === 1) tags.push('first time');
 
-    return tags;
+    // Interest evolution
+    if (patterns.trend === 'increasing') tags.push('growing interest');
+    else if (patterns.trend === 'decreasing') tags.push('cooling down');
+
+    // Natural engagement patterns
+    if (patterns.velocity === 'high') tags.push('active topic');
+    else if (patterns.velocity === 'medium') tags.push('steady interest');
+
+    return tags.slice(0, 3); // Limit to 3 most relevant tags
   }
 }
 

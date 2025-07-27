@@ -90,6 +90,9 @@ const authenticate = (req, res, next) => {
 };
 
 
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Serve static files from client build in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));

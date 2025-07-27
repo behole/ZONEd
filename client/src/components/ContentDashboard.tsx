@@ -22,6 +22,7 @@ interface DashboardStats {
   recentItems: number;
   highImportanceItems: number;
   urgentItems: number;
+  visualContent: number;
   contentBreakdown: {
     text: number;
     url: number;
@@ -125,6 +126,14 @@ function ContentDashboard() {
       return acc;
     }, { text: 0, url: 0, file: 0 });
 
+    // Count visual content
+    const visualContent = content.filter(item => 
+      item.metadata?.imageType || 
+      item.metadata?.visualElements || 
+      item.metadata?.colorPalette ||
+      (item.mimetype && item.mimetype.startsWith('image/'))
+    ).length;
+
     // Extract trending topics from contextual tags
     const topicCounts: { [key: string]: number } = {};
     content.forEach(item => {
@@ -145,6 +154,7 @@ function ContentDashboard() {
       recentItems,
       highImportanceItems,
       urgentItems,
+      visualContent,
       contentBreakdown,
       trendingTopics
     };
@@ -177,6 +187,44 @@ function ContentDashboard() {
     if (score >= 7) return 'success';
     if (score >= 4) return 'warning';
     return 'secondary';
+  };
+
+  const getImportanceLabel = (score: number) => {
+    if (score >= 8) return '🔥 Must Read';
+    if (score >= 6) return '✨ Important';
+    if (score >= 4) return '👀 Worth Noting';
+    if (score >= 2) return '📌 Flagged';
+    return '📋 Captured';
+  };
+
+  const generateSmartSummary = (item: ContentItem) => {
+    // For URLs, show title and brief description
+    if (item.type === 'url' && item.title) {
+      const domain = item.url ? new URL(item.url).hostname.replace('www.', '') : '';
+      return `${item.title}${domain ? ` (from ${domain})` : ''}`;
+    }
+    
+    // For files, show filename and type info
+    if (item.type === 'file' && item.originalName) {
+      const description = item.content ? 
+        item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '') :
+        'File uploaded for analysis';
+      return `${item.originalName} - ${description}`;
+    }
+    
+    // For text content, extract key sentences
+    if (item.content) {
+      const sentences = item.content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+      if (sentences.length >= 2) {
+        return sentences.slice(0, 2).join('. ').trim() + '.';
+      } else if (sentences.length === 1) {
+        return sentences[0].trim() + '.';
+      } else {
+        return item.content.substring(0, 150) + (item.content.length > 150 ? '...' : '');
+      }
+    }
+    
+    return 'Content captured for analysis';
   };
 
   const getUrgencyColor = (level?: string) => {
@@ -260,7 +308,7 @@ function ContentDashboard() {
 
       {/* Key Metrics */}
       <Row className="mb-4">
-        <Col md={3}>
+        <Col lg={3} md={6}>
           <Card className="text-center h-100">
             <Card.Body>
               <h3 className="text-primary">{stats.totalItems}</h3>
@@ -269,7 +317,7 @@ function ContentDashboard() {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
+        <Col lg={3} md={6}>
           <Card className="text-center h-100">
             <Card.Body>
               <h3 className="text-success">{stats.recentItems}</h3>
@@ -278,21 +326,21 @@ function ContentDashboard() {
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
+        <Col lg={3} md={6}>
+          <Card className="text-center h-100">
+            <Card.Body>
+              <h3 className="text-info">{stats.visualContent}</h3>
+              <p className="mb-0">Visual Content</p>
+              <small className="text-muted">Images & designs</small>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={3} md={6}>
           <Card className="text-center h-100">
             <Card.Body>
               <h3 className="text-warning">{stats.highImportanceItems}</h3>
               <p className="mb-0">High Priority</p>
               <small className="text-muted">Important content</small>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card className="text-center h-100">
-            <Card.Body>
-              <h3 className="text-danger">{stats.urgentItems}</h3>
-              <p className="mb-0">Urgent Items</p>
-              <small className="text-muted">Need attention</small>
             </Card.Body>
           </Card>
         </Col>
@@ -391,7 +439,7 @@ function ContentDashboard() {
                             {getContentTypeIcon(item.type)} {item.type}
                           </Badge>
                           <Badge bg={getImportanceColor(item.importanceScore || 1)}>
-                            ⭐ <SafeNumericDisplay value={item.importanceScore} decimals={1} fallback={1} />
+                            {getImportanceLabel(item.importanceScore || 1)}
                           </Badge>
                           {item.urgencyAssessment?.level === 'high' && (
                             <Badge bg="danger">🔴 Urgent</Badge>
@@ -402,22 +450,24 @@ function ContentDashboard() {
                         </small>
                       </div>
 
-                      {/* Show AI summary if available, otherwise show content */}
-                      {item.summary ? (
-                        <p className="mb-2" style={{ 
-                          maxHeight: '3em', 
-                          overflow: 'hidden',
-                          fontStyle: 'italic',
-                          color: '#495057'
-                        }}>
-                          💡 {item.summary}
-                        </p>
-                      ) : (
-                        <p className="mb-2 text-truncate" style={{ maxHeight: '3em', overflow: 'hidden' }}>
-                          {item.content.substring(0, 120)}
-                          {item.content.length > 120 && '...'}
-                        </p>
-                      )}
+                      {/* Content Summary */}
+                      <div className="mb-3">
+                        {item.summary ? (
+                          <p className="mb-0" style={{ 
+                            lineHeight: '1.4',
+                            color: '#495057'
+                          }}>
+                            {item.summary}
+                          </p>
+                        ) : (
+                          <p className="mb-0" style={{ 
+                            lineHeight: '1.4',
+                            color: '#495057'
+                          }}>
+                            {generateSmartSummary(item)}
+                          </p>
+                        )}
+                      </div>
 
                       {item.submissionCount > 1 && (
                         <small className="text-info">

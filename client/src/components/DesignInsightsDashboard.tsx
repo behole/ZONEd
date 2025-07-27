@@ -3,6 +3,9 @@ import { Card, Row, Col, Badge, Button, Alert, Spinner } from 'react-bootstrap';
 
 interface VisualContent {
   id: string;
+  filename?: string;
+  originalName?: string;
+  mimetype?: string;
   metadata: {
     imageType?: string;
     dimensions?: string;
@@ -10,6 +13,7 @@ interface VisualContent {
     colorPalette?: string[];
     styleCharacteristics?: string[];
     designInsights?: string[];
+    uploadPath?: string;
   };
   timestamp: string;
   importanceScore: number;
@@ -45,11 +49,12 @@ function DesignInsightsDashboard() {
       const data = await response.json();
       const allContent = data.content || [];
       
-      // Filter for visual content only
+      // Filter for visual content only  
       const visualContent = allContent.filter((item: any) => 
         item.metadata?.imageType || 
         item.metadata?.visualElements || 
-        item.metadata?.colorPalette
+        item.metadata?.colorPalette ||
+        (item.mimetype && item.mimetype.startsWith('image/'))
       );
 
       const stats = analyzeDesignContent(visualContent);
@@ -294,52 +299,78 @@ function DesignInsightsDashboard() {
         <Card.Body>
           {designStats.recentVisualContent.length > 0 ? (
             <Row>
-              {designStats.recentVisualContent.map((item) => (
-                <Col key={item.id} md={6} lg={4} className="mb-3">
-                  <Card className="h-100 shadow-sm">
-                    <Card.Body className="p-3">
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <Badge bg="info">🎨 Visual</Badge>
-                        <small className="text-muted">
-                          {formatRelativeTime(item.timestamp)}
-                        </small>
-                      </div>
-
-                      {item.metadata.dimensions && (
-                        <p className="small mb-2">
-                          <strong>Size:</strong> {item.metadata.dimensions}
-                        </p>
-                      )}
-
-                      {item.metadata.visualElements && item.metadata.visualElements.length > 0 && (
-                        <div className="mb-2">
-                          <small className="text-muted">Elements:</small>
-                          <div className="d-flex flex-wrap gap-1 mt-1">
-                            {item.metadata.visualElements.slice(0, 3).map((element, index) => (
-                              <Badge key={index} bg="light" text="dark" className="small">
-                                {element}
-                              </Badge>
-                            ))}
-                          </div>
+              {designStats.recentVisualContent.map((item) => {
+                const isImage = item.mimetype && item.mimetype.startsWith('image/');
+                const imageUrl = isImage && item.filename ? `/uploads/${item.filename}` : null;
+                
+                return (
+                  <Col key={item.id} md={6} lg={4} className="mb-3">
+                    <Card className="h-100 shadow-sm">
+                      {imageUrl && (
+                        <div style={{ height: '150px', overflow: 'hidden' }}>
+                          <img 
+                            src={imageUrl} 
+                            alt={item.originalName || 'Uploaded image'} 
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              objectFit: 'cover',
+                              cursor: 'pointer'
+                            }}
+                            onClick={() => window.open(imageUrl, '_blank')}
+                          />
                         </div>
                       )}
-
-                      {item.metadata.colorPalette && item.metadata.colorPalette.length > 0 && (
-                        <div className="mb-2">
-                          <small className="text-muted">Colors:</small>
-                          <div className="d-flex flex-wrap gap-1 mt-1">
-                            {item.metadata.colorPalette.slice(0, 3).map((color, index) => (
-                              <Badge key={index} bg="secondary" className="small">
-                                {color}
-                              </Badge>
-                            ))}
-                          </div>
+                      <Card.Body className="p-3">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <Badge bg="info">🎨 Visual</Badge>
+                          <small className="text-muted">
+                            {formatRelativeTime(item.timestamp)}
+                          </small>
                         </div>
-                      )}
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
+
+                        {item.originalName && (
+                          <p className="small mb-2 text-truncate">
+                            <strong>File:</strong> {item.originalName}
+                          </p>
+                        )}
+
+                        {item.metadata.dimensions && (
+                          <p className="small mb-2">
+                            <strong>Size:</strong> {item.metadata.dimensions}
+                          </p>
+                        )}
+
+                        {item.metadata.visualElements && item.metadata.visualElements.length > 0 && (
+                          <div className="mb-2">
+                            <small className="text-muted">Elements:</small>
+                            <div className="d-flex flex-wrap gap-1 mt-1">
+                              {item.metadata.visualElements.slice(0, 3).map((element, index) => (
+                                <Badge key={index} bg="light" text="dark" className="small">
+                                  {element}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {item.metadata.colorPalette && item.metadata.colorPalette.length > 0 && (
+                          <div className="mb-2">
+                            <small className="text-muted">Colors:</small>
+                            <div className="d-flex flex-wrap gap-1 mt-1">
+                              {item.metadata.colorPalette.slice(0, 3).map((color, index) => (
+                                <Badge key={index} bg="secondary" className="small">
+                                  {color}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                );
+              })}
             </Row>
           ) : (
             <p className="text-muted mb-0">No recent visual content found</p>
