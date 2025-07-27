@@ -682,9 +682,13 @@ app.post('/api/upload', authenticate, upload.array('files'), async (req, res) =>
         mimetype: file.mimetype,
         path: file.path,
         timestamp: new Date().toISOString(),
+        content: extractionResult.extractedText || `Uploaded file: ${file.originalname}`,
         extractedText: extractionResult.extractedText,
         processingSuccess: extractionResult.success,
         processingError: extractionResult.error,
+        importanceScore: 1, // Default importance
+        submissionCount: 1,
+        contextualTags: [],
         metadata: {
           ...extractionResult.metadata,
           uploadPath: file.path
@@ -715,22 +719,27 @@ app.post('/api/upload', authenticate, upload.array('files'), async (req, res) =>
       processedFiles.push(processedFile);
     }
     
-    const db = readDB();
-    db.content = db.content || [];
-    db.content.push(...processedFiles);
-    writeDB(db);
-    
-    // Add processed files to vector database
+    // Save files to database using modern database system
     const vectorResults = [];
     for (const file of processedFiles) {
-      if (file.processingSuccess && file.extractedText) {
-        try {
-          const vectorResult = await vectorEngine.addContent(file);
-          vectorResults.push(vectorResult);
-        } catch (error) {
-          console.error('Error adding file to vector DB:', error);
-          vectorResults.push({ success: false, error: error.message, id: file.id });
+      try {
+        // Insert into database
+        await database.insertContent(file);
+        console.log(`✓ Saved to database: ${file.originalName}`);
+        
+        // Add to vector database if processing was successful
+        if (file.processingSuccess && file.extractedText) {
+          try {
+            const vectorResult = await vectorEngine.addContent(file);
+            vectorResults.push(vectorResult);
+            console.log(`✓ Vectorized: ${file.originalName}`);
+          } catch (error) {
+            console.error('Error adding file to vector DB:', error);
+            vectorResults.push({ success: false, error: error.message, id: file.id });
+          }
         }
+      } catch (error) {
+        console.error(`Error saving file to database: ${file.originalName}`, error);
       }
     }
     
