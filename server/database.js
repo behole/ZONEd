@@ -39,9 +39,9 @@ class Database {
         
         this.pool = new Pool(poolConfig);
 
-        // Test the connection with timeout (longer for Railway deployment)
+        // Test the connection with timeout (shorter to prevent startup blocking)
         console.log('🔗 Testing database connection...');
-        const timeoutMs = process.env.NODE_ENV === 'production' ? 15000 : 10000;
+        const timeoutMs = process.env.NODE_ENV === 'production' ? 8000 : 10000;
         const client = await Promise.race([
           this.pool.connect(),
           new Promise((_, reject) => 
@@ -74,6 +74,7 @@ class Database {
         console.error('Error code:', error.code);
         console.error('Full error:', error);
         console.log('⚠️ Falling back to JSON file storage...');
+        console.log('⚡ Server will continue with JSON storage (non-blocking)');
         this.isPostgres = false;
         this.pool = null;
       }

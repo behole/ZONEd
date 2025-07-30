@@ -18,7 +18,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const contentProcessor = new ContentProcessor();
 
-// Initialize database with error handling
+// Initialize database asynchronously to prevent startup blocking
+console.log('🚀 Starting server initialization...');
 const database = new Database();
 
 // Handle uncaught exceptions gracefully
@@ -87,6 +88,15 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Health check endpoint - responds immediately without waiting for DB
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
 
 // Middleware for API authentication
 const authenticate = (req, res, next) => {
@@ -1705,12 +1715,16 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-// Start server with minimal initialization to prevent timeouts
+// Start server immediately - all heavy lifting happens asynchronously
+console.log('⚡ Starting Express server...');
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}/`);
+  console.log(`🚀 Server HTTP listener started on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🩺 Health check: http://localhost:${PORT}/health`);
   
-  // Only initialize vector DB in development
+  // All initialization happens asynchronously after server starts
+  console.log('⚡ Background initialization starting...');
+  
   if (process.env.NODE_ENV !== 'production') {
     setImmediate(() => {
       if (typeof initializeVectorDatabase === 'function') {
