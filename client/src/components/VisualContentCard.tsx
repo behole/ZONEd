@@ -14,15 +14,36 @@ interface VisualContentMetadata {
 interface VisualContentCardProps {
   metadata: VisualContentMetadata;
   title?: string;
+  filename?: string;
+  mimetype?: string;
+  originalName?: string;
 }
 
-function VisualContentCard({ metadata, title }: VisualContentCardProps) {
+function VisualContentCard({ metadata, title, filename, mimetype, originalName }: VisualContentCardProps) {
   if (!metadata.imageType) {
     return null; // Not visual content
   }
 
+  const isImage = mimetype && mimetype.startsWith('image/');
+  const imageUrl = isImage && filename ? `/uploads/${filename}` : null;
+
   return (
     <Card className="mb-3 border-info">
+      {imageUrl && (
+        <div style={{ height: '200px', overflow: 'hidden' }}>
+          <img 
+            src={imageUrl} 
+            alt={originalName || title || 'Visual content'} 
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover',
+              cursor: 'pointer'
+            }}
+            onClick={() => window.open(imageUrl, '_blank')}
+          />
+        </div>
+      )}
       <Card.Header className="bg-info bg-opacity-10">
         <div className="d-flex align-items-center gap-2">
           <span>🎨</span>

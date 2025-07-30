@@ -364,16 +364,33 @@ function ContentBrowser() {
     }
   };
 
-  const renderContentCard = (item: ContentItem) => (
-    <Card 
-      key={item.id} 
-      className="h-100 shadow-sm content-card" 
-      style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
-      onClick={() => openPreview(item)}
-      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-    >
-      <Card.Body className="p-3">
+  const renderContentCard = (item: ContentItem) => {
+    const isImage = item.metadata?.mimetype && item.metadata.mimetype.startsWith('image/');
+    const imageUrl = isImage && item.metadata?.filename ? `/uploads/${item.metadata.filename}` : null;
+    
+    return (
+      <Card 
+        key={item.id} 
+        className="h-100 shadow-sm content-card" 
+        style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+        onClick={() => openPreview(item)}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+      >
+        {imageUrl && (
+          <div style={{ height: '120px', overflow: 'hidden' }}>
+            <img 
+              src={imageUrl} 
+              alt={item.metadata?.originalName || 'Content image'} 
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover'
+              }}
+            />
+          </div>
+        )}
+        <Card.Body className="p-3">
         <div className="d-flex justify-content-between align-items-start mb-2">
           <div className="d-flex gap-1 flex-wrap">
             <Badge bg="outline-primary" className="small">
@@ -486,7 +503,8 @@ function ContentBrowser() {
         )}
       </Card.Body>
     </Card>
-  );
+    );
+  };
 
   const renderListItem = (item: ContentItem) => (
     <Card 
@@ -862,6 +880,9 @@ function ContentBrowser() {
               <VisualContentCard 
                 metadata={selectedItem.metadata} 
                 title={selectedItem.metadata?.title}
+                filename={selectedItem.metadata?.filename}
+                mimetype={selectedItem.metadata?.mimetype}
+                originalName={selectedItem.metadata?.originalName}
               />
 
               {/* Tags */}
