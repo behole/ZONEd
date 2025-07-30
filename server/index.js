@@ -18,8 +18,23 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const contentProcessor = new ContentProcessor();
 
-// Initialize database
+// Initialize database with error handling
 const database = new Database();
+
+// Handle uncaught exceptions gracefully
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
+});
 
 // Log database status after a brief delay to allow initialization
 setTimeout(() => {
