@@ -38,12 +38,17 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Log database status after a brief delay to allow initialization
 setTimeout(() => {
-  console.log('📊 Final Database Status:');
-  console.log('- Using PostgreSQL:', database.isPostgres);
-  console.log('- Pool connected:', !!database.pool);
+  console.log('');
+  console.log('🎯 === FINAL DATABASE STATUS ===');
+  console.log(`📊 Database Type: ${database.isPostgres ? '✅ PostgreSQL' : '❌ JSON file'}`);
+  console.log('📡 Pool Connected:', !!database.pool);
   if (!database.isPostgres) {
     console.log('⚠️ WARNING: Using JSON file storage - data will not persist between deployments!');
+  } else {
+    console.log('✅ Production database ready - data will persist');
   }
+  console.log('🎯 ===========================');
+  console.log('');
 }, 2000);
 
 
@@ -1704,7 +1709,6 @@ process.on('SIGINT', async () => {
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}/`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`📊 Database: ${database.isPostgres ? 'PostgreSQL' : 'JSON file'}`);
   
   // Only initialize vector DB in development
   if (process.env.NODE_ENV !== 'production') {
