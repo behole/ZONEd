@@ -54,8 +54,13 @@ function DesignInsightsDashboard() {
         item.metadata?.imageType || 
         item.metadata?.visualElements || 
         item.metadata?.colorPalette ||
-        (item.mimetype && item.mimetype.startsWith('image/'))
+        (item.mimetype && item.mimetype.startsWith('image/')) ||
+        (item.metadata?.mimetype && item.metadata.mimetype.startsWith('image/'))
       );
+      
+      console.log('All content items:', allContent.length);
+      console.log('Visual content items found:', visualContent.length);
+      console.log('Visual content sample:', visualContent.slice(0, 3));
 
       const stats = analyzeDesignContent(visualContent);
       setDesignStats(stats);
@@ -303,6 +308,15 @@ function DesignInsightsDashboard() {
                 const isImage = item.mimetype && item.mimetype.startsWith('image/');
                 const imageUrl = isImage && item.filename ? `/uploads/${item.filename}` : null;
                 
+                // Debug logging
+                console.log('Design Dashboard Item:', {
+                  id: item.id,
+                  mimetype: item.mimetype,
+                  filename: item.filename,
+                  imageUrl,
+                  metadata: item.metadata
+                });
+                
                 return (
                   <Col key={item.id} md={6} lg={4} className="mb-3">
                     <Card className="h-100 shadow-sm">
@@ -318,9 +332,14 @@ function DesignInsightsDashboard() {
                               cursor: 'pointer'
                             }}
                             onClick={() => window.open(imageUrl, '_blank')}
-                          />
-                        </div>
-                      )}
+                              onError={(e) => {
+                                  console.error('Image load error:', imageUrl);
+                                    console.error('Error details:', e);
+                             }}
+                             onLoad={() => console.log('Image loaded successfully:', imageUrl)}
+                           />
+                         </div>
+                       )}
                       <Card.Body className="p-3">
                         <div className="d-flex justify-content-between align-items-start mb-2">
                           <Badge bg="info">🎨 Visual</Badge>

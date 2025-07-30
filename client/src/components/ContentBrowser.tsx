@@ -368,6 +368,18 @@ function ContentBrowser() {
     const isImage = item.metadata?.mimetype && item.metadata.mimetype.startsWith('image/');
     const imageUrl = isImage && item.metadata?.filename ? `/uploads/${item.metadata.filename}` : null;
     
+    // Debug logging for images
+    if (item.metadata?.mimetype?.startsWith('image/')) {
+      console.log('ContentBrowser Image Item:', {
+        id: item.id,
+        type: item.type,
+        mimetype: item.metadata?.mimetype,
+        filename: item.metadata?.filename,
+        imageUrl,
+        metadata: item.metadata
+      });
+    }
+    
     return (
       <Card 
         key={item.id} 
@@ -387,6 +399,11 @@ function ContentBrowser() {
                 height: '100%', 
                 objectFit: 'cover'
               }}
+              onError={(e) => {
+                console.error('ContentBrowser image load error:', imageUrl);
+                console.error('Error details:', e);
+              }}
+              onLoad={() => console.log('ContentBrowser image loaded:', imageUrl)}
             />
           </div>
         )}
