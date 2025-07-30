@@ -1509,10 +1509,13 @@ app.all(['/ios-share', '/share'], upload.array('files'), async (req, res) => {
       await database.insertContent(processed);
       processedItems.push(processed);
       
-      // Add to vector database (non-blocking)
-      vectorEngine.addContent(processed)
-        .then(() => console.log('✅ Text content vectorized'))
-        .catch(err => console.warn('⚠️ Vector failed (non-critical):', err.message));
+      // Add to vector database (blocking to ensure indexing completes)
+      try {
+        await vectorEngine.addContent(processed);
+        console.log('✅ Text content vectorized');
+      } catch (err) {
+        console.warn('⚠️ Vector failed (non-critical):', err.message);
+      }
     }
     
     // Process files if present
@@ -1550,9 +1553,12 @@ app.all(['/ios-share', '/share'], upload.array('files'), async (req, res) => {
       
       // Add to vector database if text extraction succeeded
       if (extractionResult.success && extractionResult.extractedText) {
-        vectorEngine.addContent(processedFile)
-          .then(() => console.log(`✅ File ${file.originalname} vectorized`))
-          .catch(err => console.warn(`⚠️ File vectorization failed: ${err.message}`));
+        try {
+          await vectorEngine.addContent(processedFile);
+          console.log(`✅ File ${file.originalname} vectorized`);
+        } catch (err) {
+          console.warn(`⚠️ File vectorization failed: ${err.message}`);
+        }
       }
     }
     
