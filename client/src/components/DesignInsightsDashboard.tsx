@@ -36,6 +36,13 @@ function DesignInsightsDashboard() {
     loadDesignData();
   }, []);
 
+  // Test if uploads directory is accessible
+  useEffect(() => {
+    fetch('/uploads/')
+      .then(res => console.log('🗂️ UPLOADS DIR accessible:', res.ok))
+      .catch(err => console.log('🗂️ UPLOADS DIR error:', err));
+  }, []);
+
   const loadDesignData = async () => {
     try {
       setIsLoading(true);
@@ -58,9 +65,9 @@ function DesignInsightsDashboard() {
         (item.metadata?.mimetype && item.metadata.mimetype.startsWith('image/'))
       );
       
-      console.log('All content items:', allContent.length);
-      console.log('Visual content items found:', visualContent.length);
-      console.log('Visual content sample:', visualContent.slice(0, 3));
+      console.log('🎨 DESIGN DEBUG: All content items:', allContent.length);
+      console.log('🎨 DESIGN DEBUG: Visual content items found:', visualContent.length);
+      console.log('🎨 DESIGN DEBUG: Visual content sample:', visualContent.slice(0, 3));
 
       const stats = analyzeDesignContent(visualContent);
       setDesignStats(stats);
@@ -309,7 +316,7 @@ function DesignInsightsDashboard() {
                 const imageUrl = isImage && item.filename ? `/uploads/${item.filename}` : null;
                 
                 // Debug logging
-                console.log('Design Dashboard Item:', {
+                console.log('🖼️ DESIGN ITEM:', {
                   id: item.id,
                   mimetype: item.mimetype,
                   filename: item.filename,
