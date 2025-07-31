@@ -30,16 +30,11 @@ export default defineConfig({
         ],
         share_target: {
           action: '/share',
-          method: 'POST',
-          enctype: 'multipart/form-data',
+          method: 'GET',
           params: {
             title: 'title',
             text: 'text',
-            url: 'url',
-            files: [{
-              name: 'files',
-              accept: ['image/*', 'text/*', 'application/pdf']
-            }]
+            url: 'url'
           }
         }
       },

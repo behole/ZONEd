@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "Personal Data PWA - Universal Content Dropzone",
   "scripts": {
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
-    "build": "npm run install:all && cd client && npm run build",
-    "start:production": "cd server && npm start",
+    "build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "start": "cd server && node index.js",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm start",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
@@ -13,6 +12,10 @@
   "keywords": ["pwa", "dropzone", "personal-data"],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }

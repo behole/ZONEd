@@ -199,8 +199,8 @@ function QueryPage() {
     }
   };
 
-  const formatScore = (score: number) => {
-    return Math.round(score * 100);
+  const formatScore = (score: number | undefined) => {
+    return Math.round((score || 0) * 100);
   };
 
   const getUrgencyColor = (level: string) => {

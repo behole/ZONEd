@@ -39,12 +39,13 @@ class Database {
         
         this.pool = new Pool(poolConfig);
 
-        // Test the connection with timeout
+        // Test the connection with timeout (shorter to prevent startup blocking)
         console.log('🔗 Testing database connection...');
+        const timeoutMs = process.env.NODE_ENV === 'production' ? 8000 : 10000;
         const client = await Promise.race([
           this.pool.connect(),
           new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Connection timeout after 10s')), 10000)
+            setTimeout(() => reject(new Error(`Connection timeout after ${timeoutMs/1000}s`)), timeoutMs)
           )
         ]);
         
@@ -73,6 +74,7 @@ class Database {
         console.error('Error code:', error.code);
         console.error('Full error:', error);
         console.log('⚠️ Falling back to JSON file storage...');
+        console.log('⚡ Server will continue with JSON storage (non-blocking)');
         this.isPostgres = false;
         this.pool = null;
       }
@@ -110,6 +112,7 @@ class Database {
           content TEXT,
           extracted_content TEXT,
           cleaned_content TEXT,
+          summary TEXT,
           chunks JSONB,
           keywords JSONB,
           fingerprint VARCHAR(50),
@@ -145,6 +148,7 @@ class Database {
       const requiredColumns = {
         'extracted_content': 'TEXT',
         'cleaned_content': 'TEXT', 
+        'summary': 'TEXT',
         'chunks': 'JSONB',
         'keywords': 'JSONB',
         'fingerprint': 'VARCHAR(50)',
@@ -442,6 +446,100 @@ class Database {
       fs.writeFileSync(this.dbPath, JSON.stringify(data, null, 2));
     } catch (error) {
       console.error('Error writing JSON database:', error.message);
+    }
+  }
+
+  async getContentById(id) {
+    if (this.isPostgres) {
+      try {
+        const result = await this.pool.query('SELECT * FROM content WHERE id = $1', [id]);
+        return result.rows[0] || null;
+      } catch (error) {
+        console.error('Error getting content by ID from PostgreSQL:', error.message);
+        throw error;
+      }
+    } else {
+      // JSON fallback
+      const data = this.readJSONDB();
+      // Convert id to number for JSON storage compatibility
+      const numId = parseInt(id);
+      return data.content.find(item => item.id === id || item.id === numId) || null;
+    }
+  }
+
+  async updateContent(id, updatedItem) {
+    if (this.isPostgres) {
+      try {
+        const updateFields = [];
+        const values = [];
+        let paramIndex = 1;
+
+        // Build dynamic update query, excluding id and updated_at
+        for (const [key, value] of Object.entries(updatedItem)) {
+          if (key !== 'id' && key !== 'updated_at') {
+            updateFields.push(`${key} = $${paramIndex}`);
+            values.push(typeof value === 'object' ? JSON.stringify(value) : value);
+            paramIndex++;
+          }
+        }
+        
+        values.push(id); // Add id as last parameter
+
+        const query = `
+          UPDATE content 
+          SET ${updateFields.join(', ')}, updated_at = NOW()
+          WHERE id = $${paramIndex}
+          RETURNING *
+        `;
+
+        const result = await this.pool.query(query, values);
+        return result.rows[0] || null;
+      } catch (error) {
+        console.error('Error updating content in PostgreSQL:', error.message);
+        throw error;
+      }
+    } else {
+      // JSON fallback
+      const data = this.readJSONDB();
+      // Convert id to number for JSON storage compatibility
+      const numId = parseInt(id);
+      const index = data.content.findIndex(item => item.id === id || item.id === numId);
+      
+      if (index !== -1) {
+        // Preserve the original ID type from the database
+        const originalId = data.content[index].id;
+        data.content[index] = { ...data.content[index], ...updatedItem, id: originalId };
+        this.writeJSONDB(data);
+        return data.content[index];
+      }
+      
+      return null;
+    }
+  }
+
+  async deleteContentById(id) {
+    if (this.isPostgres) {
+      try {
+        const result = await this.pool.query('DELETE FROM content WHERE id = $1 RETURNING *', [id]);
+        return result.rows[0] || null;
+      } catch (error) {
+        console.error('Error deleting content from PostgreSQL:', error.message);
+        throw error;
+      }
+    } else {
+      // JSON fallback
+      const data = this.readJSONDB();
+      // Convert id to number for JSON storage compatibility
+      const numId = parseInt(id);
+      const index = data.content.findIndex(item => item.id === id || item.id === numId);
+      
+      if (index !== -1) {
+        const deletedItem = data.content.splice(index, 1)[0];
+        this.writeJSONDB(data);
+        return deletedItem;
+      }
+      
+      return null;
     }
   }
 

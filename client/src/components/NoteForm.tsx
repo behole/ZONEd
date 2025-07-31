@@ -1,7 +1,8 @@
 
 import { useState, useRef } from 'react';
-import { Form, Button, Card, Alert, Badge } from 'react-bootstrap';
+import { Form, Button, Card, Alert, Badge, Collapse } from 'react-bootstrap';
 import ShareInstructions from './ShareInstructions';
+import IOSSetupGuide from './IOSSetupGuide';
 
 interface ContentItem {
   type: 'text' | 'file' | 'url';
@@ -22,6 +23,7 @@ function NoteForm() {
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -120,6 +122,7 @@ function NoteForm() {
       }
       
       // Process non-file items if any
+      let contentResult = null;
       if (nonFileItems.length > 0) {
         const contentResponse = await fetch('/api/content', {
           method: 'POST',
@@ -132,10 +135,40 @@ function NoteForm() {
         if (!contentResponse.ok) {
           throw new Error('Failed to save content');
         }
+        
+        contentResult = await contentResponse.json();
+        console.log('Content processing result:', contentResult);
       }
       
       setContentItems([]);
-      alert('Content processed successfully!');
+      
+      // Check for any failed extractions and show helpful messages
+      if (contentResult?.items) {
+        const failedExtractions = contentResult.items.filter((item: any) => 
+          item.metadata?.extractionQuality === 'failed_with_fallback'
+        );
+        
+        if (failedExtractions.length > 0) {
+          const failedUrls = failedExtractions.map((item: any) => ({
+            url: item.metadata.url,
+            errorType: item.metadata.errorType,
+            userAction: item.metadata.fallbackData?.userAction
+          }));
+          
+          console.log('Some URLs had extraction issues:', failedUrls);
+          
+          // Show a helpful message instead of just "success"
+          const errorMessages = failedUrls.map((failed: any) => 
+            `• ${failed.userAction || 'Try again later'}`
+          ).join('\n');
+          
+          alert(`✅ Content processed!\n\n⚠️ Note: ${failedExtractions.length} URL${failedExtractions.length > 1 ? 's' : ''} couldn't be fully extracted but ${failedExtractions.length > 1 ? 'were' : 'was'} saved:\n\n${errorMessages}\n\n💡 You can still search for and access these URLs later in your content library.`);
+        } else {
+          alert('✅ Content processed successfully!');
+        }
+      } else {
+        alert('✅ Content processed successfully!');
+      }
     } catch (error) {
       console.error('Error processing content:', error);
       alert('An error occurred while processing content.');
@@ -157,6 +190,23 @@ function NoteForm() {
       <h2>Universal Content Dropzone</h2>
       
       <ShareInstructions />
+      
+      {/* iOS Setup Guide Toggle */}
+      <div className="mb-4">
+        <Button 
+          variant="outline-success" 
+          onClick={() => setShowIOSGuide(!showIOSGuide)}
+          className="mb-2"
+        >
+          📱 {showIOSGuide ? 'Hide' : 'Show'} iOS Share Sheet Setup
+        </Button>
+        
+        <Collapse in={showIOSGuide}>
+          <div>
+            <IOSSetupGuide />
+          </div>
+        </Collapse>
+      </div>
       
       {/* Drag and Drop Zone */}
       <Card 

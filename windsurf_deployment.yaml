@@ -1,0 +1,40 @@
+projectId: ""
+framework: "create-react-app"
+subdomain: "dropzone-app"
+buildCommand: "npm run install:all && npm run build"
+startCommand: "npm run start:production"
+
+# Railway deployment configuration
+build:
+  builder: "NIXPACKS"
+  
+deploy:
+  startCommand: "npm run start:production"
+  restartPolicyType: "ON_FAILURE"
+  restartPolicyMaxRetries: 10
+
+# Environment variables validation
+envFiles:
+  - "/Users/jjoosshhmbpm1/ZONEd-1/server/.env"
+  - "/Users/jjoosshhmbpm1/ZONEd-1/client/.env"
+  
+# Build configuration
+buildConfig:
+  client:
+    command: "npm run build"
+    directory: "client"
+    publish: "client/dist"
+    
+  server:
+    command: "echo 'Server ready for deployment'"
+    directory: "server"
+    
+# Railway-specific settings
+railway:
+  build:
+    command: "npm run install:all && npm run build"
+    cache: true
+    
+  deploy:
+    start: "npm run start:production"
+    healthCheck: "/api/health"

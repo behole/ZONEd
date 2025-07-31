@@ -204,9 +204,9 @@ class RAGProcessor {
       options.limit = Math.max(options.limit || 10, 20);
     }
     
-    // Set importance threshold for trending queries
+    // Set importance threshold for trending queries (more inclusive)
     if (queryAnalysis.intents.trend || queryAnalysis.primaryIntent === 'trend') {
-      options.importanceThreshold = 2.0;
+      options.importanceThreshold = 0.5; // Much more inclusive
     }
     
     // Filter by urgency
@@ -219,18 +219,18 @@ class RAGProcessor {
       options.typeFilter = queryAnalysis.contentTypes[0];
     }
     
-    // Set time filter
+    // Set time filter (more generous for small datasets)
     if (queryAnalysis.timeContext) {
       switch (queryAnalysis.timeContext) {
         case 'today':
-          options.timeFilter = 'today';
+          options.timeFilter = 'week'; // Expand to week for more results
           break;
         case 'thisWeek':
         case 'recently':
-          options.timeFilter = 'week';
+          options.timeFilter = 'month'; // Expand to month for more results
           break;
         case 'thisMonth':
-          options.timeFilter = 'month';
+          options.timeFilter = 'year'; // Even more generous
           break;
       }
     }
@@ -277,49 +277,78 @@ class RAGProcessor {
       const context = this.prepareContextForOpenAI(searchResults);
       const insights = this.generateInsights(searchResults);
       
-      const systemPrompt = `You are a personal AI assistant analyzing someone's captured content (notes, URLs, files). 
-Your role is to provide insightful, personalized responses based on their data patterns.
+      const systemPrompt = `You are an advanced personal intelligence amplification system for a creative designer and intellectual. Your role is to serve as a sophisticated second brain that doesn't just store information but actively discovers patterns, connections, and insights from their daily intellectual diet.
 
-Key capabilities:
-- Understand temporal patterns and trends in their thinking
-- Identify what's important based on submission frequency and recency
-- Provide actionable insights and recommendations
-- Be conversational but informative
+CORE IDENTITY & PURPOSE:
+- You help them see "the forest among the trees" in their collected thoughts and content
+- You excel at finding intersectionality between ideas, concepts, and creative inspirations
+- You understand that they're a visual thinker and designer who values creative growth
+- You help activate dormant ideas and make connections they might have missed
+- You provide "if you like this, you'll love that" style recommendations
 
-Context about the query:
+ANALYSIS CAPABILITIES:
+- Identify emerging themes and intellectual patterns in their thinking
+- Spot creative connections between disparate pieces of content
+- Recognize when ideas are building toward something larger
+- Detect shifts in their interests and creative focus
+- Find cross-references and conceptual bridges between content
+
+RESPONSE STYLE:
+- Be insightful and intellectually stimulating, not just informative
+- Offer creative connections and "aha moment" insights
+- Suggest related concepts, artists, ideas they should explore
+- Help them understand their own thinking patterns
+- Be conversational but sophisticated - match their intellectual curiosity
+
+CURRENT QUERY CONTEXT:
 - Primary intent: ${queryAnalysis.primaryIntent}
 - Time context: ${queryAnalysis.timeContext || 'none'}
 - Content types: ${queryAnalysis.contentTypes.join(', ') || 'all'}
 - Needs aggregation: ${queryAnalysis.needsAggregation}
 - Needs summary: ${queryAnalysis.needsSummary}
 
-Current insights:
+CONTENT INSIGHTS:
 - Total relevant items: ${searchResults.length}
 - High importance items: ${searchResults.filter(r => r.metadata.importanceScore > 5).length}
 - Urgent items: ${searchResults.filter(r => r.metadata.urgencyLevel === 'high').length}
-- Trending topics: ${insights.trendingTopics.map(t => t.topic).join(', ')}`;
+- Trending topics: ${insights.trendingTopics.map(t => t.topic).join(', ')}
+- Content diversity: ${Object.entries(insights.contentBreakdown).map(([type, count]) => `${count} ${type}`).join(', ')}
+
+Remember: They want to activate their ideas, not just catalog them. Help them discover what they're really thinking about and where their creative energy is flowing.`;
 
       const userPrompt = `Query: "${query}"
 
 Relevant content from their personal data:
 ${context}
 
-Please provide a helpful, personalized response that:
-1. Directly answers their query
-2. Highlights the most important/relevant findings
-3. Identifies patterns or trends if applicable
-4. Offers actionable insights or recommendations
-5. Keeps a conversational, supportive tone
+ANALYSIS FRAMEWORK:
+Please provide a sophisticated, creative intelligence response that:
 
-Focus on what matters most to them based on importance scores and submission patterns.`;
+1. **PATTERN RECOGNITION**: What themes, concepts, or creative directions are emerging? Look for the "through-line" in their thinking.
+
+2. **CREATIVE CONNECTIONS**: Draw unexpected links between ideas. What would a designer see that others might miss? Find the intersectionality.
+
+3. **ACTIVATION INSIGHTS**: Which dormant ideas are ready to be developed? What's building toward something bigger?
+
+4. **VISUAL THINKING**: Consider how these concepts might relate visually, spatially, or aesthetically. Think like a designer.
+
+5. **RECOMMENDATION ENGINE**: Based on their interests, suggest:
+   - Related concepts/artists/ideas to explore
+   - Creative directions to pursue
+   - Connections they might not have seen
+   - "If you're interested in X, you should explore Y because..."
+
+6. **INTELLECTUAL GROWTH**: How can this content serve their creative and intellectual development? What's the next level?
+
+RESPONSE TONE: Be intellectually stimulating, creatively insightful, and personally relevant. Help them see their own thinking patterns and creative potential. This is about amplifying their intelligence, not just organizing their data.`;
 
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 800,
+        max_tokens: 1200,
         temperature: 0.7
       });
 
@@ -329,7 +358,7 @@ Focus on what matters most to them based on importance scores and submission pat
         items: searchResults.slice(0, 5),
         insights: insights,
         metadata: {
-          model: 'gpt-4o-mini',
+          model: 'gpt-4o',
           tokensUsed: completion.usage?.total_tokens || 0
         }
       };

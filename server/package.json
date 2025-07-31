@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "postinstall": "npm rebuild sharp --platform=linux --arch=x64 || npm install --platform=linux --arch=x64 sharp"
+    "build": "echo \"Server build: Express ready for deployment\"",
+    "postinstall": "echo 'Sharp rebuild skipped for Railway compatibility'"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +28,7 @@
     "tesseract.js": "^6.0.1"
   },
   "overrides": {
-    "sharp": "^0.34.2"
+    "sharp": "^0.34.2",
+    "undici": "^6.0.0"
   }
 }
