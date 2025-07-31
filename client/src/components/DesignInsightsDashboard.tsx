@@ -3,9 +3,6 @@ import { Card, Row, Col, Badge, Button, Alert, Spinner } from 'react-bootstrap';
 
 interface VisualContent {
   id: string;
-  filename?: string;
-  originalName?: string;
-  mimetype?: string;
   metadata: {
     imageType?: string;
     dimensions?: string;
@@ -14,6 +11,9 @@ interface VisualContent {
     styleCharacteristics?: string[];
     designInsights?: string[];
     uploadPath?: string;
+    filename?: string;
+    originalName?: string;
+    mimetype?: string;
   };
   timestamp: string;
   importanceScore: number;
@@ -312,14 +312,14 @@ function DesignInsightsDashboard() {
           {designStats.recentVisualContent.length > 0 ? (
             <Row>
               {designStats.recentVisualContent.map((item) => {
-                const isImage = item.mimetype && item.mimetype.startsWith('image/');
-                const imageUrl = isImage && item.filename ? `/uploads/${item.filename}` : null;
+                const isImage = item.metadata?.mimetype && item.metadata.mimetype.startsWith('image/');
+                const imageUrl = isImage && item.metadata?.filename ? `/uploads/${item.metadata.filename}` : null;
                 
                 // Debug logging
                 console.log('🖼️ DESIGN ITEM:', {
                   id: item.id,
-                  mimetype: item.mimetype,
-                  filename: item.filename,
+                  mimetype: item.metadata?.mimetype,
+                  filename: item.metadata?.filename,
                   imageUrl,
                   metadata: item.metadata
                 });
@@ -330,8 +330,8 @@ function DesignInsightsDashboard() {
                       {imageUrl && (
                         <div style={{ height: '150px', overflow: 'hidden' }}>
                           <img 
-                            src={imageUrl} 
-                            alt={item.originalName || 'Uploaded image'} 
+                          src={imageUrl} 
+                          alt={item.metadata?.originalName || 'Uploaded image'}
                             style={{ 
                               width: '100%', 
                               height: '100%', 
@@ -355,9 +355,9 @@ function DesignInsightsDashboard() {
                           </small>
                         </div>
 
-                        {item.originalName && (
+                        {item.metadata?.originalName && (
                           <p className="small mb-2 text-truncate">
-                            <strong>File:</strong> {item.originalName}
+                            <strong>File:</strong> {item.metadata.originalName}
                           </p>
                         )}
 
