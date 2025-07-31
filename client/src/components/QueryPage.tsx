@@ -415,6 +415,21 @@ function QueryPage() {
                           </small>
                         </div>
                         
+                        {/* Display image if it's an image file */}
+                        {result.metadata.mimeType && result.metadata.mimeType.startsWith('image/') && result.metadata.uploadPath && (
+                          <div className="mb-3">
+                            <img 
+                              src={`/uploads/${result.metadata.uploadPath.split('/').pop()}`}
+                              alt={result.metadata.originalName || 'Uploaded image'}
+                              className="img-fluid rounded"
+                              style={{maxHeight: '200px', objectFit: 'cover'}}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+                        
                         <p className="mb-2">{result.document.substring(0, 300)}...</p>
                         
                         <div className="row">
