@@ -478,7 +478,12 @@ class Database {
         for (const [key, value] of Object.entries(updatedItem)) {
           if (key !== 'id' && key !== 'updated_at') {
             updateFields.push(`${key} = $${paramIndex}`);
-            values.push(typeof value === 'object' ? JSON.stringify(value) : value);
+            // Handle null values properly for PostgreSQL
+            if (value === null || value === 'null') {
+              values.push(null);
+            } else {
+              values.push(typeof value === 'object' ? JSON.stringify(value) : value);
+            }
             paramIndex++;
           }
         }
