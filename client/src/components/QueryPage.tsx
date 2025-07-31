@@ -419,13 +419,13 @@ function QueryPage() {
                         {result.metadata.mimeType && result.metadata.mimeType.startsWith('image/') && result.metadata.uploadPath && (
                           <div className="mb-3">
                             <img 
-                              src={`/uploads/${result.metadata.uploadPath.split('/').pop()}`}
-                              alt={result.metadata.originalName || 'Uploaded image'}
-                              className="img-fluid rounded"
-                              style={{maxHeight: '200px', objectFit: 'cover'}}
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
+                            src={`/${result.metadata.uploadPath}`}
+                            alt={result.metadata.originalName || 'Uploaded image'}
+                            className="img-fluid rounded"
+                            style={{maxHeight: '200px', objectFit: 'cover'}}
+                            onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            }}
                             />
                           </div>
                         )}
