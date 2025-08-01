@@ -2,6 +2,44 @@
   "notes": [],
   "content": [
     {
+      "id": 1754008675305,
+      "type": "file",
+      "filename": "test-query.png",
+      "originalName": "query.png",
+      "size": 615220,
+      "mimetype": "image/png",
+      "path": "/private/var/folders/1t/jgd723zs7p13lh7smhnh_sc40000gn/T/vibe-kanban/vk-39f2-images-are/server/uploads/test-query.png",
+      "timestamp": "2025-08-01T00:37:55.305Z",
+      "content": "Test image upload",
+      "extractedText": "Test image",
+      "processingSuccess": true,
+      "processingError": null,
+      "importanceScore": 5,
+      "submissionCount": 1,
+      "contextualTags": [
+        "test",
+        "image"
+      ],
+      "metadata": {
+        "imageType": "PNG",
+        "dimensions": "800x600",
+        "uploadPath": "/private/var/folders/1t/jgd723zs7p13lh7smhnh_sc40000gn/T/vibe-kanban/vk-39f2-images-are/server/uploads/test-query.png",
+        "filename": "test-query.png",
+        "originalName": "query.png"
+      },
+      "chunks": [
+        {
+          "text": "Test image",
+          "index": 0
+        }
+      ],
+      "keywords": [
+        "test",
+        "image"
+      ],
+      "fingerprint": "test-image-1754008675306"
+    },
+    {
       "id": 1752603545322,
       "type": "url",
       "timestamp": "2025-07-15T19:01:09.171Z",

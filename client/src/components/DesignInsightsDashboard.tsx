@@ -312,8 +312,8 @@ function DesignInsightsDashboard() {
           {designStats.recentVisualContent.length > 0 ? (
             <Row>
               {designStats.recentVisualContent.map((item) => {
-                const isImage = item.metadata?.mimetype && item.metadata.mimetype.startsWith('image/');
-                const imageUrl = isImage && item.metadata?.filename ? `/uploads/${item.metadata.filename}` : null;
+                const isImage = item.mimetype && item.mimetype.startsWith('image/');
+                const imageUrl = isImage && item.filename ? `/uploads/${item.filename}` : null;
                 
                 // Debug logging
                 console.log('🖼️ DESIGN ITEM:', {
