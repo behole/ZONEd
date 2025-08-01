@@ -365,16 +365,16 @@ function ContentBrowser() {
   };
 
   const renderContentCard = (item: ContentItem) => {
-    const isImage = item.metadata?.mimetype && item.metadata.mimetype.startsWith('image/');
-    const imageUrl = isImage && item.metadata?.filename ? `/uploads/${item.metadata.filename}` : null;
+    const isImage = item.mimetype && item.mimetype.startsWith('image/');
+    const imageUrl = isImage && item.filename ? `/uploads/${item.filename}` : null;
     
     // Debug logging for images
-    if (item.metadata?.mimetype?.startsWith('image/')) {
+    if (item.mimetype?.startsWith('image/')) {
       console.log('ContentBrowser Image Item:', {
         id: item.id,
         type: item.type,
-        mimetype: item.metadata?.mimetype,
-        filename: item.metadata?.filename,
+        mimetype: item.mimetype,
+        filename: item.filename,
         imageUrl,
         metadata: item.metadata
       });
@@ -393,7 +393,7 @@ function ContentBrowser() {
           <div style={{ height: '120px', overflow: 'hidden' }}>
             <img 
               src={imageUrl} 
-              alt={item.metadata?.originalName || 'Content image'} 
+              alt={item.originalName || 'Content image'} 
               style={{ 
                 width: '100%', 
                 height: '100%', 
